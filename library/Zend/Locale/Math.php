@@ -37,14 +37,14 @@ class Zend_Locale_Math
     // support unit testing without using bcmath functions
     public static $_bcmathDisabled = false;
 
-    public static $add   = array('Zend_Locale_Math', 'Add');
-    public static $sub   = array('Zend_Locale_Math', 'Sub');
-    public static $pow   = array('Zend_Locale_Math', 'Pow');
-    public static $mul   = array('Zend_Locale_Math', 'Mul');
-    public static $div   = array('Zend_Locale_Math', 'Div');
-    public static $comp  = array('Zend_Locale_Math', 'Comp');
-    public static $sqrt  = array('Zend_Locale_Math', 'Sqrt');
-    public static $mod   = array('Zend_Locale_Math', 'Mod');
+    public static $add   = ['Zend_Locale_Math', 'Add'];
+    public static $sub   = ['Zend_Locale_Math', 'Sub'];
+    public static $pow   = ['Zend_Locale_Math', 'Pow'];
+    public static $mul   = ['Zend_Locale_Math', 'Mul'];
+    public static $div   = ['Zend_Locale_Math', 'Div'];
+    public static $comp  = ['Zend_Locale_Math', 'Comp'];
+    public static $sqrt  = ['Zend_Locale_Math', 'Sqrt'];
+    public static $mod   = ['Zend_Locale_Math', 'Mod'];
     public static $scale = 'bcscale';
 
     public static function isBcmathDisabled()
@@ -66,12 +66,12 @@ class Zend_Locale_Math
     {
         if (self::$_bcmathDisabled) {
             $op1 = round($op1, $precision);
-            if (strpos((string) $op1, 'E') === false) {
+            if (!str_contains((string) $op1, 'E')) {
                 return self::normalize(round($op1, $precision));
             }
         }
 
-        if (strpos($op1, 'E') !== false) {
+        if (str_contains($op1, 'E')) {
             $op1 = self::floatalize($op1);
         }
 
@@ -144,12 +144,12 @@ class Zend_Locale_Math
     public static function floatalize($value)
     {
         $value = strtoupper($value);
-        if (strpos($value, 'E') === false) {
+        if (!str_contains($value, 'E')) {
             return $value;
         }
 
         $number = substr($value, 0, strpos($value, 'E'));
-        if (strpos($number, '.') !== false) {
+        if (str_contains($number, '.')) {
             $post   = strlen(substr($number, strpos($number, '.') + 1));
             $mantis = substr($value, strpos($value, 'E') + 1);
             if ($mantis < 0) {

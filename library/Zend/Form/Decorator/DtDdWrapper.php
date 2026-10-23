@@ -60,9 +60,7 @@ class Zend_Form_Decorator_DtDdWrapper extends Zend_Form_Decorator_Abstract
         $elementName = $this->getElement()->getName();
 
         $dtLabel = $this->getOption('dtLabel');
-        if( null === $dtLabel ) {
-            $dtLabel = '&#160;';
-        }
+        $dtLabel ??= '&#160;';
 
         return '<dt id="' . $elementName . '-label">' . $dtLabel . '</dt>' .
                '<dd id="' . $elementName . '-element">' . $content . '</dd>';

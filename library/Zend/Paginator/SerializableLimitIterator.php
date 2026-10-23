@@ -62,12 +62,12 @@ class Zend_Paginator_SerializableLimitIterator extends LimitIterator implements 
      */
     public function serialize()
     {
-        return serialize(array(
+        return serialize([
             'it'     => $this->getInnerIterator(),
             'offset' => $this->_offset,
             'count'  => $this->_count,
             'pos'    => $this->getPosition(),
-        ));
+        ]);
     }
 
     /**
@@ -120,7 +120,7 @@ class Zend_Paginator_SerializableLimitIterator extends LimitIterator implements 
                 $current = $this->current();
                 $this->seek($currentOffset);
                 return null !== $current;
-            } catch (OutOfBoundsException $e) {
+            } catch (OutOfBoundsException) {
                 // reset position in case of exception is assigned null
                 $this->rewind();
                 $this->seek($currentOffset);

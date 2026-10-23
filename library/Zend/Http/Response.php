@@ -36,7 +36,7 @@ require_once 'Zend/Http/Header/HeaderValue.php';
  * @copyright  Copyright (c) 2005-2015 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Http_Response
+class Zend_Http_Response implements \Stringable
 {
     /**
      * List of all known HTTP response codes - used by responseCodeAsText() to
@@ -44,7 +44,7 @@ class Zend_Http_Response
      *
      * @var array
      */
-    protected static $messages = array(
+    protected static $messages = [
         // Informational 1xx
         100 => 'Continue',
         101 => 'Switching Protocols',
@@ -96,7 +96,7 @@ class Zend_Http_Response
         504 => 'Gateway Timeout',
         505 => 'HTTP Version Not Supported',
         509 => 'Bandwidth Limit Exceeded'
-    );
+    ];
 
     /**
      * The HTTP version (1.0, 1.1)
@@ -125,14 +125,7 @@ class Zend_Http_Response
      *
      * @var array
      */
-    protected $headers = array();
-
-    /**
-     * The HTTP response body
-     *
-     * @var string
-     */
-    protected $body;
+    protected $headers = [];
 
     /**
      * HTTP response constructor
@@ -153,7 +146,10 @@ class Zend_Http_Response
      * @param string $message Response code as text
      * @throws Zend_Http_Exception
      */
-    public function __construct($code, array $headers, $body = null, $version = '1.1', $message = null)
+    public function __construct($code, array $headers, /**
+     * The HTTP response body
+     */
+    protected $body = null, $version = '1.1', $message = null)
     {
         // Make sure the response code is valid and set it
         if (self::responseCodeAsText($code) === null) {
@@ -177,9 +173,6 @@ class Zend_Http_Response
 
             $this->headers[ucwords(strtolower($name))] = $value;
         }
-
-        // Set the body
-        $this->body = $body;
 
         // Set the HTTP version
         if (! preg_match('|^\d\.\d$|', $version)) {
@@ -260,19 +253,10 @@ class Zend_Http_Response
         $body = '';
 
         // Decode the body if it was transfer-encoded
-        switch (strtolower($this->getHeader('transfer-encoding'))) {
-
-            // Handle chunked body
-            case 'chunked':
-                $body = self::decodeChunkedBody($this->body);
-                break;
-
-            // No transfer encoding, or unknown encoding extension:
-            // return body as is
-            default:
-                $body = $this->body;
-                break;
-        }
+        $body = match (strtolower($this->getHeader('transfer-encoding'))) {
+            'chunked' => self::decodeChunkedBody($this->body),
+            default => $this->body,
+        };
 
         // Decode any content-encoding (gzip or deflate) if needed
         switch (strtolower($this->getHeader('content-encoding'))) {
@@ -409,7 +393,7 @@ class Zend_Http_Response
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->asString();
     }
@@ -499,7 +483,7 @@ class Zend_Http_Response
      */
     public static function extractHeaders($response_str)
     {
-        $headers = array();
+        $headers = [];
 
         // First, split body and headers. Headers are separated from the
         // message at exactly the sequence "\r\n\r\n"
@@ -533,7 +517,7 @@ class Zend_Http_Response
 
                 if (isset($headers[$h_name])) {
                     if (! is_array($headers[$h_name])) {
-                        $headers[$h_name] = array($headers[$h_name]);
+                        $headers[$h_name] = [$headers[$h_name]];
                     }
 
                     $headers[$h_name][] = ltrim($h_value);
@@ -550,8 +534,7 @@ class Zend_Http_Response
             if (preg_match("|^[ \t](.+)$|s", $line, $m) && $last_header !== null) {
                 $h_value = trim($m[1]);
                 if (is_array($headers[$last_header])) {
-                    end($headers[$last_header]);
-                    $last_header_key = key($headers[$last_header]);
+                    $last_header_key = array_key_last($headers[$last_header]);
 
                     $h_value = $headers[$last_header][$last_header_key] . $h_value;
                     Zend_Http_Header_HeaderValue::assertValid($h_value);
@@ -584,10 +567,7 @@ class Zend_Http_Response
     public static function extractBody($response_str)
     {
         $parts = preg_split('|(?:\r\n){2}|m', $response_str, 2);
-        if (isset($parts[1])) {
-            return $parts[1];
-        }
-        return '';
+        return $parts[1] ?? '';
     }
 
     /**
@@ -677,7 +657,7 @@ class Zend_Http_Response
          * @link http://framework.zend.com/issues/browse/ZF-6040
          */
         $zlibHeader = unpack('n', substr($body, 0, 2));
-        if ($zlibHeader[1] % 31 == 0 && ord($body[0]) == 0x78 && in_array(ord($body[1]), array(0x01, 0x5e, 0x9c, 0xda))) {
+        if ($zlibHeader[1] % 31 == 0 && ord($body[0]) == 0x78 && in_array(ord($body[1]), [0x01, 0x5e, 0x9c, 0xda])) {
             return gzuncompress($body);
         } else {
             return gzinflate($body);

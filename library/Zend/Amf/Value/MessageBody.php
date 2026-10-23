@@ -111,9 +111,7 @@ class Zend_Amf_Value_MessageBody
      */
     public function setTargetUri($targetUri)
     {
-        if (null === $targetUri) {
-            $targetUri = '';
-        }
+        $targetUri ??= '';
         $this->_targetUri = (string) $targetUri;
         return $this;
     }
@@ -136,9 +134,7 @@ class Zend_Amf_Value_MessageBody
      */
     public function setResponseUri($responseUri)
     {
-        if (null === $responseUri) {
-            $responseUri = '';
-        }
+        $responseUri ??= '';
         $this->_responseUri = $responseUri;
         return $this;
     }

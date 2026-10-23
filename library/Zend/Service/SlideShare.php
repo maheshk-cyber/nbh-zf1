@@ -152,10 +152,10 @@ class Zend_Service_SlideShare
         if (!($this->_httpclient instanceof Zend_Http_Client)) {
             $client = new Zend_Http_Client();
             $client->setConfig(
-                array(
+                [
                      'maxredirects' => 2,
                      'timeout'      => 5
-                )
+                ]
             );
 
             $this->setHttpClient($client);
@@ -192,11 +192,11 @@ class Zend_Service_SlideShare
             $cache = Zend_Cache::factory(
                 'Core',
                 'File',
-                array(
+                [
                     'lifetime'                => 43200,
                     'automatic_serialization' => true
-                ),
-                array('cache_dir' => '/tmp')
+                ],
+                ['cache_dir' => '/tmp']
             );
 
             $this->setCacheObject($cache);
@@ -333,14 +333,14 @@ class Zend_Service_SlideShare
     {
         $timestamp = time();
 
-        $params = array(
+        $params = [
             'api_key'         => $this->getApiKey(),
             'ts'              => $timestamp,
             'hash'            => sha1($this->getSharedSecret() . $timestamp),
             'username'        => $this->getUserName(),
             'password'        => $this->getPassword(),
             'slideshow_title' => $ss->getTitle()
-        );
+        ];
 
         $description = $ss->getDescription();
         $tags        = $ss->getTags();
@@ -361,7 +361,7 @@ class Zend_Service_SlideShare
         }
 
         if (!empty($tags)) {
-            $tmp = array();
+            $tmp = [];
             foreach ($tags as $tag) {
                 $tmp[] = "\"$tag\"";
             }
@@ -389,7 +389,7 @@ class Zend_Service_SlideShare
 
         if ($sxe->getName() == "SlideShareServiceError") {
             $message = (string)$sxe->Message[0];
-            list($code, $errorStr) = explode(':', $message);
+            [$code, $errorStr] = explode(':', $message);
             require_once 'Zend/Service/SlideShare/Exception.php';
             throw new Zend_Service_SlideShare_Exception(
                 trim($errorStr),
@@ -420,12 +420,12 @@ class Zend_Service_SlideShare
     {
         $timestamp = time();
 
-        $params = array(
+        $params = [
             'api_key'      => $this->getApiKey(),
             'ts'           => $timestamp,
             'hash'         => sha1($this->getSharedSecret() . $timestamp),
             'slideshow_id' => $ssId
-        );
+        ];
 
         $cache    = $this->getCacheObject();
         $cacheKey = md5("__zendslideshare_cache_$ssId");
@@ -450,7 +450,7 @@ class Zend_Service_SlideShare
 
             if ($sxe->getName() == "SlideShareServiceError") {
                 $message = (string)$sxe->Message[0];
-                list($code, $errorStr) = explode(':', $message);
+                [$code, $errorStr] = explode(':', $message);
                 require_once 'Zend/Service/SlideShare/Exception.php';
                 throw new Zend_Service_SlideShare_Exception(
                     trim($errorStr),
@@ -501,7 +501,7 @@ class Zend_Service_SlideShare
     {
 
         if (is_array($tag)) {
-            $tmp = array();
+            $tmp = [];
             foreach ($tag as $t) {
                 $tmp[] = "\"$t\"";
             }
@@ -564,12 +564,12 @@ class Zend_Service_SlideShare
 
         $timestamp = time();
 
-        $params = array(
+        $params = [
             'api_key' => $this->getApiKey(),
             'ts'      => $timestamp,
             'hash'    => sha1($this->getSharedSecret() . $timestamp),
             $key      => $value
-        );
+        ];
 
         if ($offset !== null) {
             $params['offset'] = (int)$offset;
@@ -602,7 +602,7 @@ class Zend_Service_SlideShare
 
             if ($sxe->getName() == "SlideShareServiceError") {
                 $message = (string)$sxe->Message[0];
-                list($code, $errorStr) = explode(':', $message);
+                [$code, $errorStr] = explode(':', $message);
                 require_once 'Zend/Service/SlideShare/Exception.php';
                 throw new Zend_Service_SlideShare_Exception(
                     trim($errorStr), $code
@@ -616,7 +616,7 @@ class Zend_Service_SlideShare
                 );
             }
 
-            $retval = array();
+            $retval = [];
 
             foreach ($sxe->children() as $node) {
                 if ($node->getName() == 'Slideshow') {

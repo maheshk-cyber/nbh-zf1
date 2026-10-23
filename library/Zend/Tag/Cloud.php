@@ -31,7 +31,7 @@ require_once 'Zend/Tag/Item.php';
  * @copyright  Copyright (c) 2005-2015 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Tag_Cloud
+class Zend_Tag_Cloud implements \Stringable
 {
     /**
      * Decorator for the cloud
@@ -66,10 +66,10 @@ class Zend_Tag_Cloud
      *
      * @var array
      */
-    protected $_skipOptions = array(
+    protected $_skipOptions = [
         'options',
         'config',
-    );
+    ];
 
     /**
      * Create a new tag cloud with options
@@ -327,7 +327,7 @@ class Zend_Tag_Cloud
             $pathPrefix = 'Zend/Tag/Cloud/Decorator/';
 
             require_once 'Zend/Loader/PluginLoader.php';
-            $this->_pluginLoader = new Zend_Loader_PluginLoader(array($prefix => $pathPrefix));
+            $this->_pluginLoader = new Zend_Loader_PluginLoader([$prefix => $pathPrefix]);
         }
 
         return $this->_pluginLoader;
@@ -395,7 +395,7 @@ class Zend_Tag_Cloud
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         try {
             $result = $this->render();

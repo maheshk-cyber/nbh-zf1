@@ -42,9 +42,9 @@ class Zend_Validate_File_Exists extends Zend_Validate_Abstract
     /**
      * @var array Error message templates
      */
-    protected $_messageTemplates = array(
+    protected $_messageTemplates = [
         self::DOES_NOT_EXIST => "File '%value%' does not exist",
-    );
+    ];
 
     /**
      * Internal list of directories
@@ -55,9 +55,9 @@ class Zend_Validate_File_Exists extends Zend_Validate_Abstract
     /**
      * @var array Error message template variables
      */
-    protected $_messageVariables = array(
+    protected $_messageVariables = [
         'directory' => '_directory'
-    );
+    ];
 
     /**
      * Sets validator options
@@ -65,7 +65,7 @@ class Zend_Validate_File_Exists extends Zend_Validate_Abstract
      * @param  string|array|Zend_Config $directory
      * @throws Zend_Validate_Exception
      */
-    public function __construct($directory = array())
+    public function __construct($directory = [])
     {
         if ($directory instanceof Zend_Config) {
             $directory = $directory->toArray();
@@ -162,9 +162,7 @@ class Zend_Validate_File_Exists extends Zend_Validate_Abstract
         $directories = $this->getDirectory(true);
         if (($file !== null) and (!empty($file['destination']))) {
             $directories[] = $file['destination'];
-        } else if (!isset($file['name'])) {
-            $file['name'] = $value;
-        }
+        } else $file['name'] ??= $value;
 
         $check = false;
         foreach ($directories as $directory) {

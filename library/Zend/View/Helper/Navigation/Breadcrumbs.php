@@ -182,9 +182,7 @@ class Zend_View_Helper_Navigation_Breadcrumbs
      */
     public function renderStraight(Zend_Navigation_Container $container = null)
     {
-        if (null === $container) {
-            $container = $this->getContainer();
-        }
+        $container ??= $this->getContainer();
 
         // find deepest active
         if (!$active = $this->findActive($container)) {
@@ -250,13 +248,9 @@ class Zend_View_Helper_Navigation_Breadcrumbs
     public function renderPartial(Zend_Navigation_Container $container = null,
                                   $partial = null)
     {
-        if (null === $container) {
-            $container = $this->getContainer();
-        }
+        $container ??= $this->getContainer();
 
-        if (null === $partial) {
-            $partial = $this->getPartial();
-        }
+        $partial ??= $this->getPartial();
 
         if (empty($partial)) {
             require_once 'Zend/View/Exception.php';
@@ -268,7 +262,7 @@ class Zend_View_Helper_Navigation_Breadcrumbs
         }
 
         // put breadcrumb pages in model
-        $model = array('pages' => array());
+        $model = ['pages' => []];
         if ($active = $this->findActive($container)) {
             $active = $active['page'];
             $model['pages'][] = $active;

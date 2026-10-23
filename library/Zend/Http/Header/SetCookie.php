@@ -49,7 +49,7 @@ require_once "Zend/Http/Header/HeaderValue.php";
  * @copyright  Copyright (c) 2005-2015 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Http_Header_SetCookie
+class Zend_Http_Header_SetCookie implements \Stringable
 {
 
     /**
@@ -125,7 +125,7 @@ class Zend_Http_Header_SetCookie
      */
     public static function fromString($headerLine, $bypassHeaderFieldName = false)
     {
-        list($name, $value) = explode(': ', $headerLine, 2);
+        [$name, $value] = explode(': ', $headerLine, 2);
 
         // check to ensure proper header type for this factory
         if (strtolower($name) !== 'set-cookie') {
@@ -133,13 +133,13 @@ class Zend_Http_Header_SetCookie
         }
 
         $multipleHeaders = preg_split('#(?<!Sun|Mon|Tue|Wed|Thu|Fri|Sat),\s*#', $value);
-        $headers = array();
+        $headers = [];
         foreach ($multipleHeaders as $headerLine) {
             $header = new self();
             $keyValuePairs = preg_split('#;\s*#', $headerLine);
             foreach ($keyValuePairs as $keyValue) {
                 if (strpos($keyValue, '=')) {
-                    list($headerKey, $headerValue) = preg_split('#=\s*#', $keyValue, 2);
+                    [$headerKey, $headerValue] = preg_split('#=\s*#', $keyValue, 2);
                 } else {
                     $headerKey = $keyValue;
                     $headerValue = null;
@@ -153,7 +153,7 @@ class Zend_Http_Header_SetCookie
                 }
 
                 // Process the remanining elements
-                switch (str_replace(array('-', '_'), '', strtolower($headerKey))) {
+                switch (str_replace(['-', '_'], '', strtolower($headerKey))) {
                     case 'expires' : $header->setExpires($headerValue); break;
                     case 'domain'  : $header->setDomain($headerValue); break;
                     case 'path'    : $header->setPath($headerValue); break;
@@ -246,7 +246,7 @@ class Zend_Http_Header_SetCookie
         }
 
         $value = $this->getValue();
-        if (strpos($value,'"')!==false) {
+        if (str_contains($value,'"')) {
             $value = '"'.urlencode(str_replace('"', '', $value)).'"';
         } else {
             $value = urlencode($value);
@@ -486,9 +486,7 @@ class Zend_Http_Header_SetCookie
      */
     public function isExpired($now = null)
     {
-        if ($now === null) {
-            $now = time();
-        }
+        $now ??= time();
 
         if (is_int($this->expires) && $this->expires < $now) {
             return true;
@@ -513,7 +511,7 @@ class Zend_Http_Header_SetCookie
             return false;
         }
 
-        if ($this->getPath() && (strpos($path, $this->getPath()) !== 0)) {
+        if ($this->getPath() && (!str_starts_with($path, $this->getPath()))) {
             return false;
         }
 
@@ -530,9 +528,9 @@ class Zend_Http_Header_SetCookie
         return $this->getFieldName() . ': ' . $this->getFieldValue();
     }
 
-    public function __toString()
+    public function __toString(): string
     {
-        return $this->toString();
+        return (string) $this->toString();
     }
 
     public function toStringMultipleHeaders(array $headers)

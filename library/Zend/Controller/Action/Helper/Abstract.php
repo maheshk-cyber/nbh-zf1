@@ -113,9 +113,7 @@ abstract class Zend_Controller_Action_Helper_Abstract
     public function getRequest()
     {
         $controller = $this->getActionController();
-        if (null === $controller) {
-            $controller = $this->getFrontController();
-        }
+        $controller ??= $this->getFrontController();
 
         return $controller->getRequest();
     }
@@ -128,9 +126,7 @@ abstract class Zend_Controller_Action_Helper_Abstract
     public function getResponse()
     {
         $controller = $this->getActionController();
-        if (null === $controller) {
-            $controller = $this->getFrontController();
-        }
+        $controller ??= $this->getFrontController();
 
         return $controller->getResponse();
     }
@@ -142,11 +138,11 @@ abstract class Zend_Controller_Action_Helper_Abstract
      */
     public function getName()
     {
-        $fullClassName = get_class($this);
-        if (strpos($fullClassName, '_') !== false) {
+        $fullClassName = static::class;
+        if (str_contains($fullClassName, '_')) {
             $helperName = strrchr($fullClassName, '_');
             return ltrim($helperName, '_');
-        } elseif (strpos($fullClassName, '\\') !== false) {
+        } elseif (str_contains($fullClassName, '\\')) {
             $helperName = strrchr($fullClassName, '\\');
             return ltrim($helperName, '\\');
         } else {

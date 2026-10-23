@@ -69,12 +69,12 @@ class Zend_Dojo_View_Helper_Dojo
     public function __construct()
     {
         $registry = Zend_Registry::getInstance();
-        if (!isset($registry[__CLASS__])) {
+        if (!isset($registry[self::class])) {
             require_once 'Zend/Dojo/View/Helper/Dojo/Container.php';
             $container = new Zend_Dojo_View_Helper_Dojo_Container();
-            $registry[__CLASS__] = $container;
+            $registry[self::class] = $container;
         }
-        $this->_container = $registry[__CLASS__];
+        $this->_container = $registry[self::class];
     }
 
     /**
@@ -114,7 +114,7 @@ class Zend_Dojo_View_Helper_Dojo
             throw new Zend_Dojo_View_Exception(sprintf('Invalid method "%s" called on dojo view helper', $method));
         }
 
-        return call_user_func_array(array($this->_container, $method), $args);
+        return call_user_func_array([$this->_container, $method], $args);
     }
 
     /**
@@ -138,7 +138,7 @@ class Zend_Dojo_View_Helper_Dojo
      */
     public static function setUseProgrammatic($style = self::PROGRAMMATIC_SCRIPT)
     {
-        if (!in_array($style, array(self::PROGRAMMATIC_SCRIPT, self::PROGRAMMATIC_NOSCRIPT))) {
+        if (!in_array($style, [self::PROGRAMMATIC_SCRIPT, self::PROGRAMMATIC_NOSCRIPT])) {
             $style = self::PROGRAMMATIC_SCRIPT;
         }
         self::$_useProgrammatic = $style;

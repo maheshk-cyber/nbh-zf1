@@ -166,11 +166,11 @@ class Zend_Db_Statement_Mysqli extends Zend_Db_Statement
         if (!$this->_stmt) {
             return false;
         }
-        return array(
+        return [
             substr($this->_stmt->sqlstate, 0, 5),
             $this->_stmt->errno,
             $this->_stmt->error,
-        );
+        ];
     }
 
     /**
@@ -188,18 +188,16 @@ class Zend_Db_Statement_Mysqli extends Zend_Db_Statement
 
         // if no params were given as an argument to execute(),
         // then default to the _bindParam array
-        if ($params === null) {
-            $params = $this->_bindParam;
-        }
+        $params ??= $this->_bindParam;
         // send $params as input parameters to the statement
         if ($params) {
             array_unshift($params, str_repeat('s', count($params)));
-            $stmtParams = array();
+            $stmtParams = [];
             foreach ($params as $k => &$value) {
                 $stmtParams[$k] = &$value;
             }
             call_user_func_array(
-                array($this->_stmt, 'bind_param'),
+                [$this->_stmt, 'bind_param'],
                 $stmtParams
                 );
         }
@@ -231,7 +229,7 @@ class Zend_Db_Statement_Mysqli extends Zend_Db_Statement
         if ($this->_meta !== false) {
 
             // get the column names that will result
-            $this->_keys = array();
+            $this->_keys = [];
             foreach ($this->_meta->fetch_fields() as $col) {
                 $this->_keys[] = $this->_adapter->foldCase($col->name);
             }
@@ -242,7 +240,7 @@ class Zend_Db_Statement_Mysqli extends Zend_Db_Statement
             // set up references to the result binding space.
             // just passing $this->_values in the call_user_func_array()
             // below won't work, you need references.
-            $refs = array();
+            $refs = [];
             foreach ($this->_values as $i => &$f) {
                 $refs[$i] = &$f;
             }
@@ -250,7 +248,7 @@ class Zend_Db_Statement_Mysqli extends Zend_Db_Statement
             $this->_stmt->store_result();
             // bind to the result variables
             call_user_func_array(
-                array($this->_stmt, 'bind_result'),
+                [$this->_stmt, 'bind_result'],
                 $this->_values
             );
         }
@@ -284,13 +282,11 @@ class Zend_Db_Statement_Mysqli extends Zend_Db_Statement
         }
 
         // make sure we have a fetch mode
-        if ($style === null) {
-            $style = $this->_fetchMode;
-        }
+        $style ??= $this->_fetchMode;
 
         // dereference the result values, otherwise things like fetchAll()
         // return the same values for every entry (because of the reference).
-        $values = array();
+        $values = [];
         foreach ($this->_values as $key => $val) {
             $values[] = $val;
         }
@@ -334,7 +330,7 @@ class Zend_Db_Statement_Mysqli extends Zend_Db_Statement
      * @return bool
      * @throws Zend_Db_Statement_Mysqli_Exception
      */
-    public function nextRowset()
+    public function nextRowset(): never
     {
         /**
          * @see Zend_Db_Statement_Mysqli_Exception

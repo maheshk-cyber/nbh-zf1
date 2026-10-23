@@ -98,11 +98,11 @@ class Zend_Gdata_MediaMimeStream
         }
 
         $this->_fileHandle = fopen($filePath, 'rb', TRUE);
-        $this->_boundaryString = '=_' . md5(microtime(1) . rand(1,20));
+        $this->_boundaryString = '=_' . md5(microtime(1) . random_int(1,20));
         $entry = $this->wrapEntry($xmlString, $fileContentType);
         $closingBoundary = new Zend_Gdata_MimeBodyString("\r\n--{$this->_boundaryString}--\r\n");
         $file = new Zend_Gdata_MimeFile($this->_fileHandle);
-        $this->_parts = array($entry, $file, $closingBoundary);
+        $this->_parts = [$entry, $file, $closingBoundary];
 
         $fileSize = filesize($filePath);
         $this->_totalSize = $entry->getSize() + $fileSize

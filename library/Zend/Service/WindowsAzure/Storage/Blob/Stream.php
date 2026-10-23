@@ -120,8 +120,8 @@ class Zend_Service_WindowsAzure_Storage_Blob_Stream
     {
         $url = parse_url($path);
         if ($url['host']) {
-            $fileName = isset($url['path']) ? $url['path'] : $url['host'];
-    	    if (strpos($fileName, '/') === 0) {
+            $fileName = $url['path'] ?? $url['host'];
+    	    if (str_starts_with($fileName, '/')) {
     	        $fileName = substr($fileName, 1);
     	    }
             return $fileName;
@@ -400,7 +400,7 @@ class Zend_Service_WindowsAzure_Storage_Blob_Stream
      */
     public function url_stat($path, $flags)
     {
-        $stat = array();
+        $stat = [];
         $stat['dev'] = 0;
         $stat['ino'] = 0;
         $stat['mode'] = 0;
@@ -432,7 +432,7 @@ class Zend_Service_WindowsAzure_Storage_Blob_Stream
             $stat['mode'] = 0100000;
 
             return array_values($stat) + $stat;
-        } catch (Zend_Service_WindowsAzure_Exception $ex) {
+        } catch (Zend_Service_WindowsAzure_Exception) {
             // Unexisting file...
             return false;
         }
@@ -455,7 +455,7 @@ class Zend_Service_WindowsAzure_Storage_Blob_Stream
                     $this->_getContainerName($path)
                 );
                 return true;
-            } catch (Zend_Service_WindowsAzure_Exception $ex) {
+            } catch (Zend_Service_WindowsAzure_Exception) {
                 return false;
             }
         } else {
@@ -482,7 +482,7 @@ class Zend_Service_WindowsAzure_Storage_Blob_Stream
                     $this->_getContainerName($path)
                 );
                 return true;
-            } catch (Zend_Service_WindowsAzure_Exception $ex) {
+            } catch (Zend_Service_WindowsAzure_Exception) {
                 return false;
             }
         } else {

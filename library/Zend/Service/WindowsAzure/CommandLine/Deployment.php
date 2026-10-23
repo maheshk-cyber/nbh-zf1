@@ -79,7 +79,7 @@ class Zend_Service_WindowsAzure_CommandLine_Deployment
 	 * @command-example --PackageUrl:"http://acct.blob.core.windows.net/pkgs/service.cspkg"
 	 * @command-example --ServiceConfigLocation:".\ServiceConfiguration.cscfg" --StartImmediately --WaitFor
 	 */
-	public function createFromStorageCommand($subscriptionId, $certificate, $certificatePassphrase, $serviceName, $deploymentName, $label, $staging = false, $production = false, $packageUrl, $serviceConfigurationLocation, $startImmediately = true, $warningsAsErrors = false, $waitForOperation = false)
+	public function createFromStorageCommand($subscriptionId, $certificate, $certificatePassphrase, $serviceName, $deploymentName, $label, $staging = false, $production = false, $packageUrl = null, $serviceConfigurationLocation = null, $startImmediately = true, $warningsAsErrors = false, $waitForOperation = false)
 	{
 		$deploymentSlot = 'staging';
 		if (!$staging && !$production) {
@@ -123,7 +123,7 @@ class Zend_Service_WindowsAzure_CommandLine_Deployment
 	 * @command-example --ServiceConfigLocation:".\ServiceConfiguration.cscfg" --StorageAccount:"mystorage"
 	 * @command-example --StartImmediately --WaitFor
 	 */
-	public function createFromLocalCommand($subscriptionId, $certificate, $certificatePassphrase, $serviceName, $deploymentName, $label, $staging = false, $production = false, $packageLocation, $serviceConfigurationLocation, $storageAccount, $startImmediately = true, $warningsAsErrors = false, $waitForOperation = false)
+	public function createFromLocalCommand($subscriptionId, $certificate, $certificatePassphrase, $serviceName, $deploymentName, $label, $staging = false, $production = false, $packageLocation = null, $serviceConfigurationLocation = null, $storageAccount = null, $startImmediately = true, $warningsAsErrors = false, $waitForOperation = false)
 	{
 		$deploymentSlot = 'staging';
 		if (!$staging && !$production) {
@@ -179,7 +179,7 @@ class Zend_Service_WindowsAzure_CommandLine_Deployment
 			$result = $client->getDeploymentByDeploymentId($serviceName, $deploymentName);
 		}
 
-		$this->_displayObjectInformation($result, array('Name', 'DeploymentSlot', 'Label', 'Url', 'Status'));
+		$this->_displayObjectInformation($result, ['Name', 'DeploymentSlot', 'Label', 'Url', 'Status']);
 	}
 
 	/**
@@ -238,9 +238,7 @@ class Zend_Service_WindowsAzure_CommandLine_Deployment
 		$stagingDeploymentName = null;
 		try { $stagingDeploymentName = $client->getDeploymentBySlot($serviceName, 'staging')->Name; } catch (Exception $ex) {}
 
-		if (is_null($productionDeploymentName)) {
-			$productionDeploymentName = $stagingDeploymentName;
-		}
+		$productionDeploymentName ??= $stagingDeploymentName;
 		if (is_null($stagingDeploymentName)) {
 			require_once 'Zend/Service/Console/Exception.php';
 			throw new Zend_Service_Console_Exception('Swapping deployment slots is only possible when both slots have an active deployment or when production slot is empty.');

@@ -60,7 +60,7 @@ class Zend_Log_Filter_Priority extends Zend_Log_Filter_Abstract
         }
 
         $this->_priority = $priority;
-        $this->_operator = $operator === null ? '<=' : $operator;
+        $this->_operator = $operator ?? '<=';
     }
 
     /**
@@ -72,10 +72,10 @@ class Zend_Log_Filter_Priority extends Zend_Log_Filter_Abstract
     static public function factory($config)
     {
         $config = self::_parseConfig($config);
-        $config = array_merge(array(
+        $config = array_merge([
             'priority' => null,
             'operator' => null,
-        ), $config);
+        ], $config);
 
         // Add support for constants
         if (!is_numeric($config['priority']) && isset($config['priority']) && defined($config['priority'])) {

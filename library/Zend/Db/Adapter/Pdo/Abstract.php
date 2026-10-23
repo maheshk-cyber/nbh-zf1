@@ -218,7 +218,7 @@ abstract class Zend_Db_Adapter_Pdo_Abstract extends Zend_Db_Adapter_Abstract
      * @return Zend_Db_Statement_Pdo
      * @throws Zend_Db_Adapter_Exception To re-throw PDOException.
      */
-    public function query($sql, $bind = array())
+    public function query($sql, $bind = [])
     {
         if (empty($bind) && $sql instanceof Zend_Db_Select) {
             $bind = $sql->getBind();
@@ -368,12 +368,9 @@ abstract class Zend_Db_Adapter_Pdo_Abstract extends Zend_Db_Adapter_Abstract
      */
     public function supportsParameters($type)
     {
-        switch ($type) {
-            case 'positional':
-            case 'named':
-            default:
-                return true;
-        }
+        return match ($type) {
+            default => true,
+        };
     }
 
     /**
@@ -386,7 +383,7 @@ abstract class Zend_Db_Adapter_Pdo_Abstract extends Zend_Db_Adapter_Abstract
         $this->_connect();
         try {
             $version = $this->_connection->getAttribute(PDO::ATTR_SERVER_VERSION);
-        } catch (PDOException $e) {
+        } catch (PDOException) {
             // In case of the driver doesn't support getting attributes
             return null;
         }

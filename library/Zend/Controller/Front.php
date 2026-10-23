@@ -71,7 +71,7 @@ class Zend_Controller_Front
      * controllers
      * @var array
      */
-    protected $_invokeParams = array();
+    protected $_invokeParams = [];
 
     /**
      * Subdirectory within a module containing controllers; defaults to 'controllers'
@@ -174,7 +174,7 @@ class Zend_Controller_Front
                     break;
                 case '_controllerDir':
                 case '_invokeParams':
-                    $this->{$name} = array();
+                    $this->{$name} = [];
                     break;
                 case '_plugins':
                     $this->{$name} = new Zend_Controller_Plugin_Broker();
@@ -677,11 +677,7 @@ class Zend_Controller_Front
      */
     public function getParam($name)
     {
-        if(isset($this->_invokeParams[$name])) {
-            return $this->_invokeParams[$name];
-        }
-
-        return null;
+        return $this->_invokeParams[$name] ?? null;
     }
 
     /**
@@ -707,7 +703,7 @@ class Zend_Controller_Front
     public function clearParams($name = null)
     {
         if (null === $name) {
-            $this->_invokeParams = array();
+            $this->_invokeParams = [];
         } elseif (is_string($name) && isset($this->_invokeParams[$name])) {
             unset($this->_invokeParams[$name]);
         } elseif (is_array($name)) {
@@ -859,7 +855,7 @@ class Zend_Controller_Front
         /**
          * Set base URL of request object, if available
          */
-        if (is_callable(array($this->_request, 'setBaseUrl'))) {
+        if (is_callable([$this->_request, 'setBaseUrl'])) {
             if (null !== $this->_baseUrl) {
                 $this->_request->setBaseUrl($this->_baseUrl);
             }

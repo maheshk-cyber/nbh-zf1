@@ -122,7 +122,7 @@ class Zend_File_ClassFileLocator extends FilterIterator
                             }
                             continue;
                         }
-                        list($type, $content, $line) = $token;
+                        [$type, $content, $line] = $token;
                         switch ($type) {
                             case T_STRING:
                             case T_NS_SEPARATOR:
@@ -145,7 +145,7 @@ class Zend_File_ClassFileLocator extends FilterIterator
                         if (is_string($token)) {
                             continue;
                         }
-                        list($type, $content, $line) = $token;
+                        [$type, $content, $line] = $token;
                         if (T_STRING == $type) {
                     // If a classname was found, set it in the object, and
                     // return boolean true (found)

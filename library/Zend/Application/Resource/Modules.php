@@ -49,7 +49,7 @@ class Zend_Application_Resource_Modules extends Zend_Application_Resource_Resour
      */
     public function __construct($options = null)
     {
-        $this->_bootstraps = new ArrayObject(array(), ArrayObject::ARRAY_AS_PROPS);
+        $this->_bootstraps = new ArrayObject([], ArrayObject::ARRAY_AS_PROPS);
         parent::__construct($options);
     }
 
@@ -61,14 +61,14 @@ class Zend_Application_Resource_Modules extends Zend_Application_Resource_Resour
      */
     public function init()
     {
-        $bootstraps = array();
+        $bootstraps = [];
         $bootstrap = $this->getBootstrap();
         $bootstrap->bootstrap('FrontController');
         $front = $bootstrap->getResource('FrontController');
 
         $modules = $front->getControllerDirectory();
         $default = $front->getDefaultModule();
-        $curBootstrapClass = get_class($bootstrap);
+        $curBootstrapClass = $bootstrap !== null ? $bootstrap::class : self::class;
         foreach ($modules as $module => $moduleDirectory) {
             $bootstrapClass = $this->_formatModuleName($module) . '_Bootstrap';
             if (!class_exists($bootstrapClass, false)) {
@@ -120,7 +120,7 @@ class Zend_Application_Resource_Modules extends Zend_Application_Resource_Resour
     protected function bootstrapBootstraps($bootstraps)
     {
         $bootstrap = $this->getBootstrap();
-        $out       = new ArrayObject(array(), ArrayObject::ARRAY_AS_PROPS);
+        $out       = new ArrayObject([], ArrayObject::ARRAY_AS_PROPS);
 
         foreach ($bootstraps as $module => $bootstrapClass) {
             $moduleBootstrap = new $bootstrapClass($bootstrap);
@@ -150,7 +150,7 @@ class Zend_Application_Resource_Modules extends Zend_Application_Resource_Resour
     protected function _formatModuleName($name)
     {
         $name = strtolower($name);
-        $name = str_replace(array('-', '.'), ' ', $name);
+        $name = str_replace(['-', '.'], ' ', $name);
         $name = ucwords($name);
         $name = str_replace(' ', '', $name);
         return $name;

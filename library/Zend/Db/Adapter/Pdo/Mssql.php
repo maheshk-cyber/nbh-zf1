@@ -56,7 +56,7 @@ class Zend_Db_Adapter_Pdo_Mssql extends Zend_Db_Adapter_Pdo_Abstract
      *
      * @var array Associative array of datatypes to values 0, 1, or 2.
      */
-    protected $_numericDataTypes = array(
+    protected $_numericDataTypes = [
         Zend_Db::INT_TYPE    => Zend_Db::INT_TYPE,
         Zend_Db::BIGINT_TYPE => Zend_Db::BIGINT_TYPE,
         Zend_Db::FLOAT_TYPE  => Zend_Db::FLOAT_TYPE,
@@ -70,7 +70,7 @@ class Zend_Db_Adapter_Pdo_Mssql extends Zend_Db_Adapter_Pdo_Abstract
         'NUMERIC'            => Zend_Db::FLOAT_TYPE,
         'REAL'               => Zend_Db::FLOAT_TYPE,
         'SMALLMONEY'         => Zend_Db::FLOAT_TYPE
-    );
+    ];
 
     /**
      * Creates a PDO DSN for the adapter from $this->_config settings.
@@ -101,19 +101,11 @@ class Zend_Db_Adapter_Pdo_Mssql extends Zend_Db_Adapter_Pdo_Abstract
         // this driver supports multiple DSN prefixes
         // @see http://www.php.net/manual/en/ref.pdo-dblib.connection.php
         if (isset($dsn['pdoType'])) {
-            switch (strtolower($dsn['pdoType'])) {
-                case 'freetds':
-                case 'sybase':
-                    $this->_pdoType = 'sybase';
-                    break;
-                case 'mssql':
-                    $this->_pdoType = 'mssql';
-                    break;
-                case 'dblib':
-                default:
-                    $this->_pdoType = 'dblib';
-                    break;
-            }
+            $this->_pdoType = match (strtolower($dsn['pdoType'])) {
+                'freetds', 'sybase' => 'sybase',
+                'mssql' => 'mssql',
+                default => 'dblib',
+            };
             unset($dsn['pdoType']);
         }
 
@@ -221,7 +213,7 @@ class Zend_Db_Adapter_Pdo_Mssql extends Zend_Db_Adapter_Pdo_Abstract
     public function describeTable($tableName, $schemaName = null)
     {
         if ($schemaName != null) {
-            if (strpos($schemaName, '.') !== false) {
+            if (str_contains($schemaName, '.')) {
                 $result = explode('.', $schemaName);
                 $schemaName = $result[1];
             }
@@ -257,16 +249,16 @@ class Zend_Db_Adapter_Pdo_Mssql extends Zend_Db_Adapter_Pdo_Abstract
 
         $stmt = $this->query($sql);
         $primaryKeysResult = $stmt->fetchAll(Zend_Db::FETCH_NUM);
-        $primaryKeyColumn = array();
+        $primaryKeyColumn = [];
         $pkey_column_name = 3;
         $pkey_key_seq = 4;
         foreach ($primaryKeysResult as $pkeysRow) {
             $primaryKeyColumn[$pkeysRow[$pkey_column_name]] = $pkeysRow[$pkey_key_seq];
         }
 
-        $desc = array();
+        $desc = [];
         $p = 1;
-        foreach ($result as $key => $row) {
+        foreach ($result as $row) {
             $identity = false;
             $words = explode(' ', $row[$type_name], 2);
             if (isset($words[0])) {
@@ -283,7 +275,7 @@ class Zend_Db_Adapter_Pdo_Mssql extends Zend_Db_Adapter_Pdo_Abstract
                 $primaryPosition = null;
             }
 
-            $desc[$this->foldCase($row[$column_name])] = array(
+            $desc[$this->foldCase($row[$column_name])] = [
                 'SCHEMA_NAME'      => null, // @todo
                 'TABLE_NAME'       => $this->foldCase($row[$table_name]),
                 'COLUMN_NAME'      => $this->foldCase($row[$column_name]),
@@ -298,7 +290,7 @@ class Zend_Db_Adapter_Pdo_Mssql extends Zend_Db_Adapter_Pdo_Abstract
                 'PRIMARY'          => $isPrimary,
                 'PRIMARY_POSITION' => $primaryPosition,
                 'IDENTITY'         => $identity
-            );
+            ];
         }
         return $desc;
     }
@@ -342,7 +334,7 @@ class Zend_Db_Adapter_Pdo_Mssql extends Zend_Db_Adapter_Pdo_Abstract
             if ($orderby !== false) {
                 $orderParts = explode(',', substr($orderby, 8));
                 $pregReplaceCount = null;
-                $orderbyInverseParts = array();
+                $orderbyInverseParts = [];
                 foreach ($orderParts as $orderPart) {
                     $orderPart = rtrim($orderPart);
                     $inv = preg_replace('/\s+desc$/i', ' ASC', $orderPart, 1, $pregReplaceCount);
@@ -416,7 +408,7 @@ class Zend_Db_Adapter_Pdo_Mssql extends Zend_Db_Adapter_Pdo_Abstract
                 return $result[0][0];
             }
             return null;
-        } catch (PDOException $e) {
+        } catch (PDOException) {
             return null;
         }
     }

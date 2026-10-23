@@ -73,28 +73,28 @@ abstract class Zend_Http_UserAgent_AbstractDevice
      *
      * @var array
      */
-    protected $_images = array(
+    protected $_images = [
         'jpeg',
         'gif',
         'png',
         'pjpeg',
         'x-png',
         'bmp',
-    );
+    ];
 
     /**
      * Browser/Device features
      *
      * @var array
      */
-    protected $_aFeatures = array();
+    protected $_aFeatures = [];
 
     /**
      * Browser/Device features groups
      *
      * @var array
      */
-    protected $_aGroup = array();
+    protected $_aGroup = [];
 
     /**
      * Constructor
@@ -104,7 +104,7 @@ abstract class Zend_Http_UserAgent_AbstractDevice
      * @param  array $config
      * @return void
      */
-    public function __construct($userAgent = null, array $server = array(), array $config = array())
+    public function __construct($userAgent = null, array $server = [], array $config = [])
     {
         if (is_array($userAgent)) {
             // Restoring from serialized array
@@ -126,14 +126,14 @@ abstract class Zend_Http_UserAgent_AbstractDevice
      */
     public function serialize()
     {
-        $spec = array(
+        $spec = [
             '_aFeatures'      => $this->_aFeatures,
             '_aGroup'         => $this->_aGroup,
             '_browser'        => $this->_browser,
             '_browserVersion' => $this->_browserVersion,
             '_userAgent'      => $this->_userAgent,
             '_images'         => $this->_images,
-        );
+        ];
         return serialize($spec);
     }
 
@@ -237,9 +237,7 @@ abstract class Zend_Http_UserAgent_AbstractDevice
      */
     public function setGroup($group, $feature)
     {
-        if (!isset($this->_aGroup[$group])) {
-            $this->_aGroup[$group] = array();
-        }
+        $this->_aGroup[$group] ??= [];
         if (!in_array($feature, $this->_aGroup[$group])) {
             $this->_aGroup[$group][] = $feature;
         }
@@ -285,10 +283,10 @@ abstract class Zend_Http_UserAgent_AbstractDevice
      */
     protected function _getDefaultFeatures()
     {
-        $server = array();
+        $server = [];
 
         // gets info from user agent chain
-        $uaExtract = $this->extractFromUserAgent($this->getUserAgent());
+        $uaExtract = static::extractFromUserAgent($this->getUserAgent());
 
         if (is_array($uaExtract)) {
             foreach ($uaExtract as $key => $info) {
@@ -322,7 +320,7 @@ abstract class Zend_Http_UserAgent_AbstractDevice
         if (isset($this->list) && empty($this->_browser)) {
             $lowerUserAgent = strtolower($this->getUserAgent());
             foreach ($this->list as $browser_signature) {
-                if (strpos($lowerUserAgent, $browser_signature) !== false) {
+                if (str_contains($lowerUserAgent, $browser_signature)) {
                     $this->_browser = strtolower($browser_signature);
                     $this->setFeature('browser_name', $this->_browser, 'product_info');
                 }
@@ -340,26 +338,26 @@ abstract class Zend_Http_UserAgent_AbstractDevice
 
         /* sets the server infos */
         if (isset($this->_server['server_software'])) {
-            if (strpos($this->_server['server_software'], 'Apache') !== false || strpos($this->_server['server_software'], 'LiteSpeed') !== false) {
+            if (str_contains($this->_server['server_software'], 'Apache') || str_contains($this->_server['server_software'], 'LiteSpeed')) {
                 $server['version'] = 1;
-                if (strpos($this->_server['server_software'], 'Apache/2') !== false) {
+                if (str_contains($this->_server['server_software'], 'Apache/2')) {
                     $server['version'] = 2;
                 }
                 $server['server'] = 'apache';
             }
 
-            if (strpos($this->_server['server_software'], 'Microsoft-IIS') !== false) {
+            if (str_contains($this->_server['server_software'], 'Microsoft-IIS')) {
                 $server['server'] = 'iis';
             }
 
-            if (strpos($this->_server['server_software'], 'Unix') !== false) {
+            if (str_contains($this->_server['server_software'], 'Unix')) {
                 $server['os'] = 'unix';
                 if (isset($_ENV['MACHTYPE'])) {
-                    if (strpos($_ENV['MACHTYPE'], 'linux') !== false) {
+                    if (str_contains($_ENV['MACHTYPE'], 'linux')) {
                         $server['os'] = 'linux';
                     }
                 }
-            } elseif (strpos($this->_server['server_software'], 'Win') !== false) {
+            } elseif (str_contains($this->_server['server_software'], 'Win')) {
                 $server['os'] = 'windows';
             }
 
@@ -408,7 +406,7 @@ abstract class Zend_Http_UserAgent_AbstractDevice
         $pattern =  "(([^/\s]*)(/(\S*))?)(\s*\[[a-zA-Z][a-zA-Z]\])?\s*(\\((([^()]|(\\([^()]*\\)))*)\\))?\s*";
         preg_match("#^$pattern#", $userAgent, $match);
 
-        $comment = array();
+        $comment = [];
         if (isset($match[7])) {
             $comment = explode(';', $match[7]);
         }
@@ -419,7 +417,7 @@ abstract class Zend_Http_UserAgent_AbstractDevice
             $result['others']['full'] = $end;
         }
 
-        $match2 = array();
+        $match2 = [];
         if (isset($result['others'])) {
             preg_match_all('/(([^\/\s]*)(\/)?([^\/\(\)\s]*)?)(\s\((([^\)]*)*)\))?/i', $result['others']['full'], $match2);
         }
@@ -450,21 +448,21 @@ abstract class Zend_Http_UserAgent_AbstractDevice
             $max = count($match2[0]);
             for ($i = 0; $i < $max; $i ++) {
                 if (!empty($match2[0][$i])) {
-                    $result['others']['detail'][] = array(
+                    $result['others']['detail'][] = [
                         $match2[0][$i],
                         $match2[2][$i],
                         $match2[4][$i],
-                    );
+                    ];
                 }
             }
         }
 
         /** Security level */
-        $security = array(
+        $security = [
             'N' => 'no security',
             'U' => 'strong security',
             'I' => 'weak security',
-        );
+        ];
         if (!empty($result['browser_token'])) {
             if (isset($security[$result['browser_token']])) {
                 $result['security_level'] = $security[$result['browser_token']];
@@ -477,7 +475,7 @@ abstract class Zend_Http_UserAgent_AbstractDevice
         // Mozilla : true && false
         $compatibleOrIe = false;
         if (isset($result['compatibility_flag']) && isset($result['comment'])) {
-            $compatibleOrIe = ($result['compatibility_flag'] == 'compatible' || strpos($result['comment']['full'], "MSIE") !== false);
+            $compatibleOrIe = ($result['compatibility_flag'] == 'compatible' || str_contains($result['comment']['full'], "MSIE"));
         }
         if ($product == 'mozilla' && $compatibleOrIe) {
             if (!empty($result['browser_token'])) {
@@ -486,7 +484,7 @@ abstract class Zend_Http_UserAgent_AbstractDevice
             } else {
                 // MSIE specific chain with 'Windows' compatibility flag
                 foreach ($result['comment']['detail'] as $v) {
-                    if (strpos($v, 'MSIE') !== false) {
+                    if (str_contains($v, 'MSIE')) {
                         $real[0][1]               = trim($v);
                         $result['browser_engine'] = "MSIE";
                         $real[1][0]               = "Internet Explorer";
@@ -494,7 +492,7 @@ abstract class Zend_Http_UserAgent_AbstractDevice
                         $real[3][0]               = $temp[1];
 
                     }
-                    if (strpos($v, 'Win') !== false) {
+                    if (str_contains($v, 'Win')) {
                         $result['device_os_token'] = trim($v);
                     }
                 }
@@ -522,9 +520,9 @@ abstract class Zend_Http_UserAgent_AbstractDevice
             $result['browser_name']   = 'Internet Explorer';
         }
         if (isset($result['device_os_token'])) {
-            if (strpos($result['device_os_token'], 'Win') !== false) {
+            if (str_contains($result['device_os_token'], 'Win')) {
 
-                $windows = array(
+                $windows = [
                     'Windows NT 6.1'          => 'Windows 7',
                     'Windows NT 6.0'          => 'Windows Vista',
                     'Windows NT 5.2'          => 'Windows Server 2003',
@@ -539,7 +537,7 @@ abstract class Zend_Http_UserAgent_AbstractDevice
                     'Windows 95'              => 'Windows 95',
                     'Win95'                   => 'Windows 95',
                     'Windows CE'              => 'Windows CE',
-                );
+                ];
                 if (isset($windows[$result['device_os_token']])) {
                     $result['device_os_name'] = $windows[$result['device_os_token']];
                 } else {
@@ -549,11 +547,11 @@ abstract class Zend_Http_UserAgent_AbstractDevice
         }
 
         // iphone
-        $apple_device = array(
+        $apple_device = [
             'iPhone',
             'iPod',
             'iPad',
-        );
+        ];
         if (isset($result['compatibility_flag'])) {
             if (in_array($result['compatibility_flag'], $apple_device)) {
                 $result['device']           = strtolower($result['compatibility_flag']);
@@ -594,7 +592,7 @@ abstract class Zend_Http_UserAgent_AbstractDevice
                 if (empty($result['others']['detail'][2][1]) || $result['others']['detail'][2][1] == 'Safari') {
                     if (isset($result['others']['detail'][1])) {
                         $result['browser_name']    = ($result['others']['detail'][1][1] && $result['others']['detail'][1][1] != 'Version' ? $result['others']['detail'][1][1] : 'Safari');
-                        $result['browser_version'] = ($result['others']['detail'][1][2] ? $result['others']['detail'][1][2] : $result['others']['detail'][0][2]);
+                        $result['browser_version'] = ($result['others']['detail'][1][2] ?: $result['others']['detail'][0][2]);
                     } else {
                         $result['browser_name']    = ($result['others']['detail'][0][1] && $result['others']['detail'][0][1] != 'Version' ? $result['others']['detail'][0][1] : 'Safari');
                         $result['browser_version'] = $result['others']['detail'][0][2];
@@ -616,7 +614,7 @@ abstract class Zend_Http_UserAgent_AbstractDevice
                 if (strpos($result['browser_version'], '.') > 2 || (int) $result['browser_version'] > 20) {
                     $temp = explode('.', $result['browser_version']);
                     $build = (int) $temp[0];
-                    $awkVersion = array(
+                    $awkVersion = [
                         48  => '0.8',
                         73  => '0.9',
                         85  => '1.0',
@@ -624,7 +622,7 @@ abstract class Zend_Http_UserAgent_AbstractDevice
                         124 => '1.2',
                         300 => '1.3',
                         400 => '2.0',
-                    );
+                    ];
                     foreach ($awkVersion as $k => $v) {
                         if ($build >= $k) {
                             $result['browser_version'] = $v;
@@ -636,7 +634,7 @@ abstract class Zend_Http_UserAgent_AbstractDevice
             // Gecko (Firefox or compatible)
             if ($result['others']['detail'][0][1] == 'Gecko') {
                 $searchRV = true;
-                if (!empty($result['others']['detail'][1][1]) && !empty($result['others']['detail'][count($result['others']['detail']) - 1][2]) || strpos(strtolower($result['others']['full']), 'opera') !== false) {
+                if (!empty($result['others']['detail'][1][1]) && !empty($result['others']['detail'][count($result['others']['detail']) - 1][2]) || str_contains(strtolower($result['others']['full']), 'opera')) {
                     $searchRV = false;
                     $result['browser_engine'] = $result['others']['detail'][0][1];
 
@@ -652,10 +650,10 @@ abstract class Zend_Http_UserAgent_AbstractDevice
 
                     // exception : if the last one is 'Red Hat' or 'Debian' =>
                     // use rv: to find browser_version */
-                    if (in_array($result['others']['detail'][$last][1], array(
+                    if (in_array($result['others']['detail'][$last][1], [
                         'Debian',
                         'Hat',
-                    ))) {
+                    ])) {
                         $searchRV = true;
                     }
                     $result['browser_name']    = $result['others']['detail'][$last][1];
@@ -677,7 +675,7 @@ abstract class Zend_Http_UserAgent_AbstractDevice
                     $result['browser_name'] = 'Mozilla';
                     if (isset($result['comment']['detail'])) {
                         foreach ($result['comment']['detail'] as $rv) {
-                            if (strpos($rv, 'rv:') !== false) {
+                            if (str_contains($rv, 'rv:')) {
                                 $result['browser_version'] = trim(str_replace('rv:', '', $rv));
                             }
                         }
@@ -714,7 +712,7 @@ abstract class Zend_Http_UserAgent_AbstractDevice
 
             // Opera Mini
             if (isset($result["browser_token"])) {
-                if (strpos($result["browser_token"], 'Opera Mini') !== false) {
+                if (str_contains($result["browser_token"], 'Opera Mini')) {
                     $result['browser_name'] = 'Opera Mini';
                 }
             }
@@ -766,7 +764,7 @@ abstract class Zend_Http_UserAgent_AbstractDevice
         $config      = $this->_config;
         $browserType = $this->getType();
         if (!isset($config[$browserType]) || !isset($config[$browserType]['features'])) {
-            return array();
+            return [];
         }
         $config = $config[$browserType]['features'];
 
@@ -790,7 +788,7 @@ abstract class Zend_Http_UserAgent_AbstractDevice
             }
         }
 
-        return call_user_func(array($className, 'getFromRequest'), $this->_server, $this->_config);
+        return call_user_func([$className, 'getFromRequest'], $this->_server, $this->_config);
     }
 
     /**
@@ -986,7 +984,7 @@ abstract class Zend_Http_UserAgent_AbstractDevice
         $userAgent = strtolower($userAgent);
         foreach ($signatures as $signature) {
             if (!empty($signature)) {
-                if (strpos($userAgent, $signature) !== false) {
+                if (str_contains($userAgent, $signature)) {
                     // Browser signature was found in user agent string
                     return true;
                 }

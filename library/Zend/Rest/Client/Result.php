@@ -29,7 +29,7 @@ require_once 'Zend/Xml/Security.php';
  * @copyright  Copyright (c) 2005-2015 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Rest_Client_Result implements IteratorAggregate {
+class Zend_Rest_Client_Result implements IteratorAggregate, \Stringable {
     /**
      * @var SimpleXMLElement
      */
@@ -49,7 +49,7 @@ class Zend_Rest_Client_Result implements IteratorAggregate {
      */
     public function __construct($data)
     {
-        set_error_handler(array($this, 'handleXmlErrors'));
+        set_error_handler($this->handleXmlErrors(...));
         $this->_sxml = Zend_Xml_Security::scan($data); 
         restore_error_handler();
         if($this->_sxml === false) {
@@ -131,7 +131,7 @@ class Zend_Rest_Client_Result implements IteratorAggregate {
             if (!is_array($value)) {
                 return $this->toValue($value);
             } else {
-                $return = array();
+                $return = [];
                 foreach ($value as $element) {
                     $return[] = $this->toValue($element);
                 }
@@ -157,7 +157,7 @@ class Zend_Rest_Client_Result implements IteratorAggregate {
 
         $result = $this->_sxml->xpath("//$name");
 
-        if (sizeof($result) > 0) {
+        if (count($result) > 0) {
             return true;
         }
 
@@ -222,14 +222,14 @@ class Zend_Rest_Client_Result implements IteratorAggregate {
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         if (!$this->getStatus()) {
             $message = $this->_sxml->xpath('//message');
             return (string) $message[0];
         } else {
             $result = $this->_sxml->xpath('//response');
-            if (sizeof($result) > 1) {
+            if (count($result) > 1) {
                 return (string) "An error occured.";
             } else {
                 return (string) $result[0];

@@ -73,7 +73,7 @@ abstract class Zend_Controller_Request_Abstract
      * Request parameters
      * @var array
      */
-    protected $_params = array();
+    protected $_params = [];
 
     /**
      * Retrieve the module name
@@ -235,11 +235,8 @@ abstract class Zend_Controller_Request_Abstract
     public function getParam($key, $default = null)
     {
         $key = (string) $key;
-        if (isset($this->_params[$key])) {
-            return $this->_params[$key];
-        }
 
-        return $default;
+        return $this->_params[$key] ?? $default;
     }
 
     /**
@@ -261,11 +258,7 @@ abstract class Zend_Controller_Request_Abstract
      */
     public function getUserParam($key, $default = null)
     {
-        if (isset($this->_params[$key])) {
-            return $this->_params[$key];
-        }
-
-        return $default;
+        return $this->_params[$key] ?? $default;
     }
 
     /**
@@ -328,7 +321,7 @@ abstract class Zend_Controller_Request_Abstract
      */
     public function clearParams()
     {
-        $this->_params = array();
+        $this->_params = [];
         return $this;
     }
 

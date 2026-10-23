@@ -213,9 +213,7 @@ class Zend_View_Helper_Navigation_Sitemap
      */
     public function getServerUrl()
     {
-        if (!isset($this->_serverUrl)) {
-            $this->_serverUrl = $this->view->serverUrl();
-        }
+        $this->_serverUrl ??= $this->view->serverUrl();
 
         return $this->_serverUrl;
     }
@@ -253,10 +251,10 @@ class Zend_View_Helper_Navigation_Sitemap
     {
         $href = $page->getHref();
 
-        if (!isset($href{0})) {
+        if (!isset($href[0])) {
             // no href
             return '';
-        } elseif ($href{0} == '/') {
+        } elseif ($href[0] == '/') {
             // href is relative to root; use serverUrl helper
             $url = $this->getServerUrl() . $href;
         } elseif (preg_match('/^[a-z]+:/im', (string) $href)) {
@@ -290,9 +288,7 @@ class Zend_View_Helper_Navigation_Sitemap
      */
     public function getDomSitemap(Zend_Navigation_Container $container = null)
     {
-        if (null === $container) {
-            $container = $this->getContainer();
-        }
+        $container ??= $this->getContainer();
 
         // check if we should validate using our own validators
         if ($this->getUseSitemapValidators()) {

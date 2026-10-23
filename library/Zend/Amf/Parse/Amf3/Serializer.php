@@ -50,19 +50,19 @@ class Zend_Amf_Parse_Amf3_Serializer extends Zend_Amf_Parse_Serializer
      * An array of reference objects per amf body
      * @var array
      */
-    protected $_referenceObjects = array();
+    protected $_referenceObjects = [];
 
     /**
      * An array of reference strings per amf body
      * @var array
      */
-    protected $_referenceStrings = array();
+    protected $_referenceStrings = [];
 
     /**
      * An array of reference class definitions, indexed by classname
      * @var array
      */
-    protected $_referenceDefinitions = array();
+    protected $_referenceDefinitions = [];
 
     /**
      * Serialize PHP types to AMF3 and write to stream
@@ -343,8 +343,8 @@ class Zend_Amf_Parse_Amf3_Serializer extends Zend_Amf_Parse_Serializer
         $this->_referenceObjects[] = $array;
 
         // have to seperate mixed from numberic keys.
-        $numeric = array();
-        $string  = array();
+        $numeric = [];
+        $string  = [];
         foreach ($array as $key => &$value) {
             if (is_int($key)) {
                 $numeric[] = $value;
@@ -420,7 +420,7 @@ class Zend_Amf_Parse_Amf3_Serializer extends Zend_Amf_Parse_Serializer
         //Check to see if the object is a typed object and we need to change
         switch (true) {
              // the return class mapped name back to actionscript class name.
-            case ($className = Zend_Amf_Parse_TypeLoader::getMappedClassName(get_class($object))):
+            case ($className = Zend_Amf_Parse_TypeLoader::getMappedClassName($object::class)):
                 break;
 
             // Check to see if the user has defined an explicit Action Script type.
@@ -440,7 +440,7 @@ class Zend_Amf_Parse_Amf3_Serializer extends Zend_Amf_Parse_Serializer
 
              // By default, use object's class name
             default:
-                $className = get_class($object);
+                $className = $object::class;
                 break;
         }
 
@@ -456,7 +456,7 @@ class Zend_Amf_Parse_Amf3_Serializer extends Zend_Amf_Parse_Serializer
 
             $writeTraits = false;
         } else {
-            $propertyNames = array();
+            $propertyNames = [];
 
             if($className == ''){
                 //if there is no className, we interpret the class as dynamic without any sealed members
@@ -471,11 +471,11 @@ class Zend_Amf_Parse_Amf3_Serializer extends Zend_Amf_Parse_Serializer
                 }
             }
 
-            $this->_referenceDefinitions[$className] = array(
+            $this->_referenceDefinitions[$className] = [
                         'id'            => count($this->_referenceDefinitions),
                         'encoding'      => $encoding,
                         'propertyNames' => $propertyNames,
-                    );
+                    ];
 
             $traitsInfo = Zend_Amf_Constants::AMF3_OBJECT_ENCODING;
             $traitsInfo |= $encoding << 2;

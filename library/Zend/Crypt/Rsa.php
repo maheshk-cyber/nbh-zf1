@@ -231,10 +231,10 @@ class Zend_Crypt_Rsa
         $privateKey = new Zend_Crypt_Rsa_Key_Private($private, $passPhrase);
         $details = openssl_pkey_get_details($resource);
         $publicKey = new Zend_Crypt_Rsa_Key_Public($details['key']);
-        $return = new ArrayObject(array(
+        $return = new ArrayObject([
            'privateKey'=>$privateKey,
            'publicKey'=>$publicKey
-        ), ArrayObject::ARRAY_AS_PROPS);
+        ], ArrayObject::ARRAY_AS_PROPS);
         return $return;
     }
 
@@ -247,7 +247,7 @@ class Zend_Crypt_Rsa
         try {
             $this->_privateKey = new Zend_Crypt_Rsa_Key_Private($this->_pemString, $this->_passPhrase);
             $this->_publicKey = $this->_privateKey->getPublicKey();
-        } catch (Zend_Crypt_Exception $e) {
+        } catch (Zend_Crypt_Exception) {
             $this->_privateKey = null;
             $this->_publicKey = new Zend_Crypt_Rsa_Key_Public($this->_pemString);
         }
@@ -322,7 +322,7 @@ class Zend_Crypt_Rsa
 
     protected function _parseConfigArgs(array $config = null)
     {
-        $configs = array();
+        $configs = [];
         if (isset($config['private_key_bits'])) {
             $configs['private_key_bits'] = $config['private_key_bits'];
         }

@@ -88,8 +88,6 @@ class Zend_View_Helper_DeclareVars extends Zend_View_Helper_Abstract
      */
     protected function _declareVar($key, $value = '')
     {
-        if (!isset($this->view->$key)) {
-            $this->view->$key = $value;
-        }
+        $this->view->$key ??= $value;
     }
 }

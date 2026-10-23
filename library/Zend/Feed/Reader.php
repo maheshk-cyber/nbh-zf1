@@ -106,26 +106,26 @@ class Zend_Feed_Reader
 
     protected static $_pluginLoader = null;
 
-    protected static $_prefixPaths = array();
+    protected static $_prefixPaths = [];
 
-    protected static $_extensions = array(
-        'feed' => array(
+    protected static $_extensions = [
+        'feed' => [
             'DublinCore_Feed',
             'Atom_Feed'
-        ),
-        'entry' => array(
+        ],
+        'entry' => [
             'Content_Entry',
             'DublinCore_Entry',
             'Atom_Entry'
-        ),
-        'core' => array(
+        ],
+        'core' => [
             'DublinCore_Feed',
             'Atom_Feed',
             'Content_Entry',
             'DublinCore_Entry',
             'Atom_Entry'
-        )
-    );
+        ]
+    ];
 
     /**
      * Get the Feed cache
@@ -242,12 +242,8 @@ class Zend_Feed_Reader
         if (self::$_httpConditionalGet && $cache) {
             $data = $cache->load($cacheId);
             if ($data) {
-                if ($etag === null) {
-                    $etag = $cache->load($cacheId.'_etag');
-                }
-                if ($lastModified === null) {
-                    $lastModified = $cache->load($cacheId.'_lastmodified');
-                }
+                $etag ??= $cache->load($cacheId.'_etag');
+                $lastModified ??= $cache->load($cacheId.'_lastmodified');
                 if ($etag) {
                     $client->setHeaders('If-None-Match', $etag);
                 }
@@ -322,7 +318,7 @@ class Zend_Feed_Reader
         $dom  = $feed->getDOM()->ownerDocument;
         $type = self::detectType($dom);
         self::_registerCoreExtensions();
-        if (substr($type, 0, 3) == 'rss') {
+        if (str_starts_with($type, 'rss')) {
             $reader = new Zend_Feed_Reader_Feed_Rss($dom, $type);
         } else {
             $reader = new Zend_Feed_Reader_Feed_Atom($dom, $type);
@@ -365,11 +361,11 @@ class Zend_Feed_Reader
 
         self::_registerCoreExtensions();
 
-        if (substr($type, 0, 3) == 'rss') {
+        if (str_starts_with($type, 'rss')) {
             $reader = new Zend_Feed_Reader_Feed_Rss($dom, $type);
         } elseif (substr($type, 8, 5) == 'entry') {
             $reader = new Zend_Feed_Reader_Entry_Atom($dom->documentElement, 0, Zend_Feed_Reader::TYPE_ATOM_10);
-        } elseif (substr($type, 0, 4) == 'atom') {
+        } elseif (str_starts_with($type, 'atom')) {
             $reader = new Zend_Feed_Reader_Feed_Atom($dom, $type);
         } else {
             require_once 'Zend/Feed/Exception.php';
@@ -583,9 +579,9 @@ class Zend_Feed_Reader
     {
         if (!isset(self::$_pluginLoader)) {
             require_once 'Zend/Loader/PluginLoader.php';
-            self::$_pluginLoader = new Zend_Loader_PluginLoader(array(
+            self::$_pluginLoader = new Zend_Loader_PluginLoader([
                 'Zend_Feed_Reader_Extension_' => 'Zend/Feed/Reader/Extension/',
-            ));
+            ]);
         }
         return self::$_pluginLoader;
     }
@@ -698,25 +694,25 @@ class Zend_Feed_Reader
         self::$_httpMethodOverride = false;
         self::$_httpConditionalGet = false;
         self::$_pluginLoader       = null;
-        self::$_prefixPaths        = array();
-        self::$_extensions         = array(
-            'feed' => array(
+        self::$_prefixPaths        = [];
+        self::$_extensions         = [
+            'feed' => [
                 'DublinCore_Feed',
                 'Atom_Feed'
-            ),
-            'entry' => array(
+            ],
+            'entry' => [
                 'Content_Entry',
                 'DublinCore_Entry',
                 'Atom_Entry'
-            ),
-            'core' => array(
+            ],
+            'core' => [
                 'DublinCore_Feed',
                 'Atom_Feed',
                 'Content_Entry',
                 'DublinCore_Entry',
                 'Atom_Entry'
-            )
-        );
+            ]
+        ];
     }
 
     /**

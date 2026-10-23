@@ -81,10 +81,10 @@ abstract class Zend_Tool_Project_Provider_Abstract
             // load all base contexts ONCE
             $contextRegistry = Zend_Tool_Project_Context_Repository::getInstance();
             $contextRegistry->addContextsFromDirectory(
-                dirname(dirname(__FILE__)) . '/Context/Zf/', 'Zend_Tool_Project_Context_Zf_'
+                dirname(__FILE__, 2) . '/Context/Zf/', 'Zend_Tool_Project_Context_Zf_'
             );
             $contextRegistry->addContextsFromDirectory(
-                dirname(dirname(__FILE__)) . '/Context/Filesystem/', 'Zend_Tool_Project_Context_Filesystem_'
+                dirname(__FILE__, 2) . '/Context/Filesystem/', 'Zend_Tool_Project_Context_Filesystem_'
             );
 
             // determine if there are project specfic providers ONCE
@@ -108,7 +108,7 @@ abstract class Zend_Tool_Project_Provider_Abstract
 
     public function getContextClasses()
     {
-        return array();
+        return [];
     }
 
     /**
@@ -250,7 +250,7 @@ abstract class Zend_Tool_Project_Provider_Abstract
         }
 
         $contents = file_get_contents($pathToProfileFile);
-        if (strstr($contents, '<projectProvidersDirectory') === false) {
+        if (!str_contains($contents, '<projectProvidersDirectory')) {
             return false;
         }
 

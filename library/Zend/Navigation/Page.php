@@ -32,7 +32,7 @@ require_once 'Zend/Navigation/Container.php';
  * @copyright  Copyright (c) 2005-2015 Zend Technologies USA Inc. (http://www.zend.com)
  * @license   http://framework.zend.com/license/new-bsd     New BSD License
  */
-abstract class Zend_Navigation_Page extends Zend_Navigation_Container
+abstract class Zend_Navigation_Page extends Zend_Navigation_Container implements \Stringable
 {
     /**
      * Page label
@@ -102,7 +102,7 @@ abstract class Zend_Navigation_Page extends Zend_Navigation_Container
      *
      * @var array
      */
-    protected $_rel = array();
+    protected $_rel = [];
 
     /**
      * Reverse links to other pages
@@ -111,7 +111,7 @@ abstract class Zend_Navigation_Page extends Zend_Navigation_Container
      *
      * @var array
      */
-    protected $_rev = array();
+    protected $_rev = [];
 
     /**
      * Page order used by parent container
@@ -160,14 +160,14 @@ abstract class Zend_Navigation_Page extends Zend_Navigation_Container
      *
      * @var array
      */
-    protected $_properties = array();
+    protected $_properties = [];
 
     /**
      * Custom HTML attributes
      *
      * @var array
      */
-    protected $_customHtmlAttribs = array();
+    protected $_customHtmlAttribs = [];
 
     /**
      * The type of page to use when it wasn't set
@@ -566,7 +566,7 @@ abstract class Zend_Navigation_Page extends Zend_Navigation_Container
      */
     public function setRel($relations = null)
     {
-        $this->_rel = array();
+        $this->_rel = [];
 
         if (null !== $relations) {
             if ($relations instanceof Zend_Config) {
@@ -607,9 +607,7 @@ abstract class Zend_Navigation_Page extends Zend_Navigation_Container
     public function getRel($relation = null)
     {
         if (null !== $relation) {
-            return isset($this->_rel[$relation]) ?
-                   $this->_rel[$relation] :
-                   null;
+            return $this->_rel[$relation] ?? null;
         }
 
         return $this->_rel;
@@ -629,7 +627,7 @@ abstract class Zend_Navigation_Page extends Zend_Navigation_Container
      */
     public function setRev($relations = null)
     {
-        $this->_rev = array();
+        $this->_rev = [];
 
         if (null !== $relations) {
             if ($relations instanceof Zend_Config) {
@@ -670,9 +668,7 @@ abstract class Zend_Navigation_Page extends Zend_Navigation_Container
     public function getRev($relation = null)
     {
         if (null !== $relation) {
-            return isset($this->_rev[$relation]) ?
-                   $this->_rev[$relation] :
-                   null;
+            return $this->_rev[$relation] ?? null;
         }
 
         return $this->_rev;
@@ -728,11 +724,7 @@ abstract class Zend_Navigation_Page extends Zend_Navigation_Container
             );
         }
 
-        if (isset($this->_customHtmlAttribs[$name])) {
-            return $this->_customHtmlAttribs[$name];
-        }
-
-        return null;
+        return $this->_customHtmlAttribs[$name] ?? null;
     }
 
     /**
@@ -786,7 +778,7 @@ abstract class Zend_Navigation_Page extends Zend_Navigation_Container
      */
     public function clearCustomHtmlAttribs()
     {
-        $this->_customHtmlAttribs = array();
+        $this->_customHtmlAttribs = [];
 
         return $this;
     }
@@ -1189,9 +1181,9 @@ abstract class Zend_Navigation_Page extends Zend_Navigation_Container
      *
      * @return string  page label
      */
-    public function __toString()
+    public function __toString(): string
     {
-        return $this->_label;
+        return (string) $this->_label;
     }
 
     // Public methods:
@@ -1307,7 +1299,7 @@ abstract class Zend_Navigation_Page extends Zend_Navigation_Container
     {
         return array_merge(
             $this->getCustomProperties(),
-            array(
+            [
                 'label'             => $this->getlabel(),
                 'fragment'          => $this->getFragment(),
                 'id'                => $this->getId(),
@@ -1323,9 +1315,9 @@ abstract class Zend_Navigation_Page extends Zend_Navigation_Container
                 'privilege'         => $this->getPrivilege(),
                 'active'            => $this->isActive(),
                 'visible'           => $this->isVisible(),
-                'type'              => get_class($this),
+                'type'              => static::class,
                 'pages'             => parent::toArray()
-            )
+            ]
         );
     }
 

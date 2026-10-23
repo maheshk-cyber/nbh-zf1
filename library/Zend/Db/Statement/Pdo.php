@@ -105,7 +105,7 @@ class Zend_Db_Statement_Pdo extends Zend_Db_Statement implements IteratorAggrega
                     $type = PDO::PARAM_BOOL;
                 } elseif ($variable === null) {
                     $type = PDO::PARAM_NULL;
-                } elseif (is_integer($variable)) {
+                } elseif (is_int($variable)) {
                     $type = PDO::PARAM_INT;
                 } else {
                     $type = PDO::PARAM_STR;
@@ -247,9 +247,7 @@ class Zend_Db_Statement_Pdo extends Zend_Db_Statement implements IteratorAggrega
      */
     public function fetch($style = null, $cursor = null, $offset = null)
     {
-        if ($style === null) {
-            $style = $this->_fetchMode;
-        }
+        $style ??= $this->_fetchMode;
         try {
             return $this->_stmt->fetch($style, $cursor, $offset);
         } catch (PDOException $e) {
@@ -278,14 +276,10 @@ class Zend_Db_Statement_Pdo extends Zend_Db_Statement implements IteratorAggrega
      */
     public function fetchAll($style = null, $col = null)
     {
-        if ($style === null) {
-            $style = $this->_fetchMode;
-        }
+        $style ??= $this->_fetchMode;
         try {
             if ($style == PDO::FETCH_COLUMN) {
-                if ($col === null) {
-                    $col = 0;
-                }
+                $col ??= 0;
                 return $this->_stmt->fetchAll($style, $col);
             } else {
                 return $this->_stmt->fetchAll($style);
@@ -321,7 +315,7 @@ class Zend_Db_Statement_Pdo extends Zend_Db_Statement implements IteratorAggrega
      * @return mixed One object instance of the specified class.
      * @throws Zend_Db_Statement_Exception
      */
-    public function fetchObject($class = 'stdClass', array $config = array())
+    public function fetchObject($class = 'stdClass', array $config = [])
     {
         try {
             return $this->_stmt->fetchObject($class, $config);

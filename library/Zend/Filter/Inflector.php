@@ -63,7 +63,7 @@ class Zend_Filter_Inflector implements Zend_Filter_Interface
     /**
      * @var array
      */
-    protected $_rules = array();
+    protected $_rules = [];
 
     /**
      * Constructor
@@ -76,7 +76,7 @@ class Zend_Filter_Inflector implements Zend_Filter_Interface
             $options = $options->toArray();
         } else if (!is_array($options)) {
             $options = func_get_args();
-            $temp    = array();
+            $temp    = [];
 
             if (!empty($options)) {
                 $temp['target'] = array_shift($options);
@@ -108,7 +108,7 @@ class Zend_Filter_Inflector implements Zend_Filter_Interface
     public function getPluginLoader()
     {
         if (!$this->_pluginLoader instanceof Zend_Loader_PluginLoader_Interface) {
-            $this->_pluginLoader = new Zend_Loader_PluginLoader(array('Zend_Filter_' => 'Zend/Filter/'), __CLASS__);
+            $this->_pluginLoader = new Zend_Loader_PluginLoader(['Zend_Filter_' => 'Zend/Filter/'], self::class);
         }
 
         return $this->_pluginLoader;
@@ -330,10 +330,7 @@ class Zend_Filter_Inflector implements Zend_Filter_Interface
     {
         if (null !== $spec) {
             $spec = $this->_normalizeSpec($spec);
-            if (isset($this->_rules[$spec])) {
-                return $this->_rules[$spec];
-            }
-            return false;
+            return $this->_rules[$spec] ?? false;
         }
 
         return $this->_rules;
@@ -364,7 +361,7 @@ class Zend_Filter_Inflector implements Zend_Filter_Interface
      */
     public function clearRules()
     {
-        $this->_rules = array();
+        $this->_rules = [];
         return $this;
     }
 
@@ -379,7 +376,7 @@ class Zend_Filter_Inflector implements Zend_Filter_Interface
     public function setFilterRule($spec, $ruleSet)
     {
         $spec = $this->_normalizeSpec($spec);
-        $this->_rules[$spec] = array();
+        $this->_rules[$spec] = [];
         return $this->addFilterRule($spec, $ruleSet);
     }
 
@@ -393,17 +390,15 @@ class Zend_Filter_Inflector implements Zend_Filter_Interface
     public function addFilterRule($spec, $ruleSet)
     {
         $spec = $this->_normalizeSpec($spec);
-        if (!isset($this->_rules[$spec])) {
-            $this->_rules[$spec] = array();
-        }
+        $this->_rules[$spec] ??= [];
 
         if (!is_array($ruleSet)) {
-            $ruleSet = array($ruleSet);
+            $ruleSet = [$ruleSet];
         }
 
         if (is_string($this->_rules[$spec])) {
             $temp = $this->_rules[$spec];
-            $this->_rules[$spec] = array();
+            $this->_rules[$spec] = [];
             $this->_rules[$spec][] = $temp;
         }
 
@@ -460,7 +455,7 @@ class Zend_Filter_Inflector implements Zend_Filter_Interface
         }
 
         $pregQuotedTargetReplacementIdentifier = preg_quote($this->_targetReplacementIdentifier, '#');
-        $processedParts = array();
+        $processedParts = [];
 
         foreach ($this->_rules as $ruleName => $ruleValue) {
             if (isset($source[$ruleName])) {

@@ -86,34 +86,6 @@ class Zend_Service_WindowsAzure_Storage
 	protected $_apiVersion = '2009-09-19';
 	
 	/**
-	 * Storage host name
-	 *
-	 * @var string
-	 */
-	protected $_host = '';
-	
-	/**
-	 * Account name for Windows Azure
-	 *
-	 * @var string
-	 */
-	protected $_accountName = '';
-	
-	/**
-	 * Account key for Windows Azure
-	 *
-	 * @var string
-	 */
-	protected $_accountKey = '';
-	
-	/**
-	 * Use path-style URI's
-	 *
-	 * @var boolean
-	 */
-	protected $_usePathStyleUri = false;
-	
-	/**
 	 * Zend_Service_WindowsAzure_Credentials_CredentialsAbstract instance
 	 *
 	 * @var Zend_Service_WindowsAzure_Credentials_CredentialsAbstract
@@ -163,26 +135,33 @@ class Zend_Service_WindowsAzure_Storage
 	protected $_proxyCredentials = '';
 	
 	/**
-	 * Creates a new Zend_Service_WindowsAzure_Storage instance
-	 *
-	 * @param string $host Storage host name
-	 * @param string $accountName Account name for Windows Azure
-	 * @param string $accountKey Account key for Windows Azure
-	 * @param boolean $usePathStyleUri Use path-style URI's
-	 * @param Zend_Service_WindowsAzure_RetryPolicy_RetryPolicyAbstract $retryPolicy Retry policy to use when making requests
-	 */
-	public function __construct(
-		$host = self::URL_DEV_BLOB,
-		$accountName = Zend_Service_WindowsAzure_Credentials_CredentialsAbstract::DEVSTORE_ACCOUNT,
-		$accountKey = Zend_Service_WindowsAzure_Credentials_CredentialsAbstract::DEVSTORE_KEY,
-		$usePathStyleUri = false,
+     * Creates a new Zend_Service_WindowsAzure_Storage instance
+     *
+     * @param string $_host Storage host name
+     * @param string $_accountName Account name for Windows Azure
+     * @param string $_accountKey Account key for Windows Azure
+     * @param boolean $_usePathStyleUri Use path-style URI's
+     * @param Zend_Service_WindowsAzure_RetryPolicy_RetryPolicyAbstract $retryPolicy Retry policy to use when making requests
+     */
+    public function __construct(
+		/**
+         * Storage host name
+         */
+        protected $_host = self::URL_DEV_BLOB,
+		/**
+         * Account name for Windows Azure
+         */
+        protected $_accountName = Zend_Service_WindowsAzure_Credentials_CredentialsAbstract::DEVSTORE_ACCOUNT,
+		/**
+         * Account key for Windows Azure
+         */
+        protected $_accountKey = Zend_Service_WindowsAzure_Credentials_CredentialsAbstract::DEVSTORE_KEY,
+		/**
+         * Use path-style URI's
+         */
+        protected $_usePathStyleUri = false,
 		Zend_Service_WindowsAzure_RetryPolicy_RetryPolicyAbstract $retryPolicy = null
 	) {
-		$this->_host = $host;
-		$this->_accountName = $accountName;
-		$this->_accountKey = $accountKey;
-		$this->_usePathStyleUri = $usePathStyleUri;
-		
 		// Using local storage?
 		if (!$this->_usePathStyleUri
 			&& ($this->_host == self::URL_DEV_BLOB
@@ -204,15 +183,15 @@ class Zend_Service_WindowsAzure_Storage
 		}
 		
 		// Setup default Zend_Http_Client channel
-		$options = array(
+		$options = [
 			'adapter' => 'Zend_Http_Client_Adapter_Proxy'
-		);
+		];
 		if (function_exists('curl_init')) {
 			// Set cURL options if cURL is used afterwards
-			$options['curloptions'] = array(
+			$options['curloptions'] = [
 					CURLOPT_FOLLOWLOCATION => true,
 					CURLOPT_TIMEOUT => 120,
-			);
+			];
 		}
 		$this->_httpClientChannel = new Zend_Http_Client(null, $options);
 	}
@@ -268,19 +247,19 @@ class Zend_Service_WindowsAzure_Storage
 	    if ($this->_useProxy) {
 	    	$credentials = explode(':', $this->_proxyCredentials);
 	    	
-	    	$this->_httpClientChannel->setConfig(array(
+	    	$this->_httpClientChannel->setConfig([
 				'proxy_host' => $this->_proxyUrl,
 	    		'proxy_port' => $this->_proxyPort,
 	    		'proxy_user' => $credentials[0],
 	    		'proxy_pass' => $credentials[1],
-	    	));
+	    	]);
 	    } else {
-			$this->_httpClientChannel->setConfig(array(
+			$this->_httpClientChannel->setConfig([
 				'proxy_host' => '',
 	    		'proxy_port' => 8080,
 	    		'proxy_user' => '',
 	    		'proxy_pass' => '',
-	    	));
+	    	]);
 	    }
 	}
 	
@@ -348,28 +327,24 @@ class Zend_Service_WindowsAzure_Storage
 		$path = '/',
 		$queryString = '',
 		$httpVerb = Zend_Http_Client::GET,
-		$headers = array(),
+		$headers = [],
 		$forTableStorage = false,
 		$rawData = null,
 		$resourceType = Zend_Service_WindowsAzure_Storage::RESOURCE_UNKNOWN,
 		$requiredPermission = Zend_Service_WindowsAzure_Credentials_CredentialsAbstract::PERMISSION_READ
 	) {
 	    // Clean path
-		if (strpos($path, '/') !== 0) {
+		if (!str_starts_with($path, '/')) {
 			$path = '/' . $path;
 		}
 			
 		// Clean headers
-		if (is_null($headers)) {
-		    $headers = array();
-		}
+		$headers ??= [];
 		
 		// Ensure cUrl will also work correctly:
 		//  - disable Content-Type if required
 		//  - disable Expect: 100 Continue
-		if (!isset($headers["Content-Type"])) {
-			$headers["Content-Type"] = '';
-		}
+		$headers["Content-Type"] ??= '';
 		$headers["Expect"]= '';
 
 		// Add version header
@@ -393,8 +368,8 @@ class Zend_Service_WindowsAzure_Storage
 				
 		// Execute request
 		$response = $this->_retryPolicy->execute(
-		    array($this->_httpClientChannel, 'request'),
-		    array($httpVerb)
+		    [$this->_httpClientChannel, 'request'],
+		    [$httpVerb]
 		);
 		
 		return $response;
@@ -437,17 +412,17 @@ class Zend_Service_WindowsAzure_Storage
 	 * @param array $metadata
 	 * @return HTTP headers containing metadata
 	 */
-	protected function _generateMetadataHeaders($metadata = array())
+	protected function _generateMetadataHeaders($metadata = [])
 	{
 		// Validate
 		if (!is_array($metadata)) {
-			return array();
+			return [];
 		}
 		
 		// Return headers
-		$headers = array();
+		$headers = [];
 		foreach ($metadata as $key => $value) {
-			if (strpos($value, "\r") !== false || strpos($value, "\n") !== false) {
+			if (str_contains($value, "\r") || str_contains($value, "\n")) {
                             require_once 'Zend/Service/WindowsAzure/Exception.php';
                             throw new Zend_Service_WindowsAzure_Exception('Metadata cannot contain newline characters.');
 			}
@@ -468,17 +443,17 @@ class Zend_Service_WindowsAzure_Storage
 	 * @param array $headers HTTP headers containing metadata
 	 * @return array
 	 */
-	protected function _parseMetadataHeaders($headers = array())
+	protected function _parseMetadataHeaders($headers = [])
 	{
 		// Validate
 		if (!is_array($headers)) {
-			return array();
+			return [];
 		}
 		
 		// Return metadata
-		$metadata = array();
+		$metadata = [];
 		foreach ($headers as $key => $value) {
-		    if (substr(strtolower($key), 0, 10) == "x-ms-meta-") {
+		    if (str_starts_with(strtolower($key), "x-ms-meta-")) {
 		        $metadata[str_replace("x-ms-meta-", '', strtolower($key))] = $value;
 		    }
 		}
@@ -498,7 +473,7 @@ class Zend_Service_WindowsAzure_Storage
 			return get_object_vars($element->Metadata);
 		}
 
-		return array();
+		return [];
 	}
 	
 	/**
@@ -512,9 +487,7 @@ class Zend_Service_WindowsAzure_Storage
 	    $tz = @date_default_timezone_get();
 	    @date_default_timezone_set('UTC');
 	    
-	    if (is_null($timestamp)) {
-	        $timestamp = time();
-	    }
+	    $timestamp ??= time();
 	        
 	    $returnValue = str_replace('+00:00', '.0000000Z', @date('c', $timestamp));
 	    @date_default_timezone_set($tz);

@@ -33,20 +33,17 @@ require_once 'Zend/Paginator/Adapter/Interface.php';
 class Zend_Paginator_Adapter_Null implements Zend_Paginator_Adapter_Interface
 {
     /**
-     * Item count
-     *
-     * @var integer
-     */
-    protected $_count = null;
-
-    /**
      * Constructor.
      *
-     * @param array $count Total item count
+     * @param array $_count Total item count
      */
-    public function __construct($count = 0)
+    public function __construct(
+        /**
+         * Item count
+         */
+        protected $_count = 0
+    )
     {
-        $this->_count = $count;
     }
 
     /**
@@ -59,7 +56,7 @@ class Zend_Paginator_Adapter_Null implements Zend_Paginator_Adapter_Interface
     public function getItems($offset, $itemCountPerPage)
     {
         if ($offset >= $this->count()) {
-            return array();
+            return [];
         }
 
         $remainItemCount  = $this->count() - $offset;

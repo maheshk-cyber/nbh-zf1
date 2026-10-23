@@ -317,7 +317,7 @@ class Zend_Layout
     {
         if (null === $this->_container) {
             require_once 'Zend/View/Helper/Placeholder/Registry.php';
-            $this->_container = Zend_View_Helper_Placeholder_Registry::getRegistry()->getContainer(__CLASS__);
+            $this->_container = Zend_View_Helper_Placeholder_Registry::getRegistry()->getContainer(self::class);
         }
 
         return $this->_container;
@@ -640,7 +640,7 @@ class Zend_Layout
             require_once 'Zend/Filter/Inflector.php';
             $inflector = new Zend_Filter_Inflector();
             $inflector->setTargetReference($this->_inflectorTarget)
-                      ->addRules(array(':script' => array('Word_CamelCaseToDash', 'StringToLower')))
+                      ->addRules([':script' => ['Word_CamelCaseToDash', 'StringToLower']])
                       ->setStaticRuleReference('suffix', $this->_viewSuffix);
             $this->setInflector($inflector);
         }
@@ -700,11 +700,7 @@ class Zend_Layout
      */
     public function __get($key)
     {
-        if (isset($this->_container[$key])) {
-            return $this->_container[$key];
-        }
-
-        return null;
+        return $this->_container[$key] ?? null;
     }
 
     /**
@@ -772,13 +768,11 @@ class Zend_Layout
      */
     public function render($name = null)
     {
-        if (null === $name) {
-            $name = $this->getLayout();
-        }
+        $name ??= $this->getLayout();
 
         if ($this->inflectorEnabled() && (null !== ($inflector = $this->getInflector())))
         {
-            $name = $this->_inflector->filter(array('script' => $name));
+            $name = $this->_inflector->filter(['script' => $name]);
         }
 
         $view = $this->getView();

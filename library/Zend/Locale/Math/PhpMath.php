@@ -36,15 +36,15 @@ class Zend_Locale_Math_PhpMath extends Zend_Locale_Math
     public static function disable()
     {
         self::$_bcmathDisabled = true;
-        self::$add   = array('Zend_Locale_Math_PhpMath', 'Add');
-        self::$sub   = array('Zend_Locale_Math_PhpMath', 'Sub');
-        self::$pow   = array('Zend_Locale_Math_PhpMath', 'Pow');
-        self::$mul   = array('Zend_Locale_Math_PhpMath', 'Mul');
-        self::$div   = array('Zend_Locale_Math_PhpMath', 'Div');
-        self::$comp  = array('Zend_Locale_Math_PhpMath', 'Comp');
-        self::$sqrt  = array('Zend_Locale_Math_PhpMath', 'Sqrt');
-        self::$mod   = array('Zend_Locale_Math_PhpMath', 'Mod');
-        self::$scale = array('Zend_Locale_Math_PhpMath', 'Scale');
+        self::$add   = ['Zend_Locale_Math_PhpMath', 'Add'];
+        self::$sub   = ['Zend_Locale_Math_PhpMath', 'Sub'];
+        self::$pow   = ['Zend_Locale_Math_PhpMath', 'Pow'];
+        self::$mul   = ['Zend_Locale_Math_PhpMath', 'Mul'];
+        self::$div   = ['Zend_Locale_Math_PhpMath', 'Div'];
+        self::$comp  = ['Zend_Locale_Math_PhpMath', 'Comp'];
+        self::$sqrt  = ['Zend_Locale_Math_PhpMath', 'Sqrt'];
+        self::$mod   = ['Zend_Locale_Math_PhpMath', 'Mod'];
+        self::$scale = ['Zend_Locale_Math_PhpMath', 'Scale'];
 
         self::$defaultScale     = 0;
         self::$defaultPrecision = 1;
@@ -60,7 +60,7 @@ class Zend_Locale_Math_PhpMath extends Zend_Locale_Math
             $scale     = Zend_Locale_Math_PhpMath::$defaultScale;
             $precision = Zend_Locale_Math_PhpMath::$defaultPrecision;
         } else {
-            $precision = pow(10, -$scale);
+            $precision = 10 ** -$scale;
         }
 
         if (empty($op1)) {
@@ -83,7 +83,7 @@ class Zend_Locale_Math_PhpMath extends Zend_Locale_Math
             $scale     = Zend_Locale_Math_PhpMath::$defaultScale;
             $precision = Zend_Locale_Math_PhpMath::$defaultPrecision;
         } else {
-            $precision = pow(10, -$scale);
+            $precision = 10 ** -$scale;
         }
 
         if (empty($op1)) {
@@ -102,9 +102,7 @@ class Zend_Locale_Math_PhpMath extends Zend_Locale_Math
 
     public static function Pow($op1, $op2, $scale = null)
     {
-        if ($scale === null) {
-            $scale = Zend_Locale_Math_PhpMath::$defaultScale;
-        }
+        $scale ??= Zend_Locale_Math_PhpMath::$defaultScale;
 
         $op1 = self::normalize($op1);
         $op2 = self::normalize($op2);
@@ -113,7 +111,7 @@ class Zend_Locale_Math_PhpMath extends Zend_Locale_Math
         // Provide the same behavior
         $op2 = ($op2 > 0) ? floor($op2) : ceil($op2);
 
-        $result = pow($op1, $op2);
+        $result = $op1 ** $op2;
         if (is_infinite($result)  or  is_nan($result)) {
             require_once 'Zend/Locale/Math/Exception.php';
             throw new Zend_Locale_Math_Exception("power overflow: $op1 ^ $op2", $op1, $op2, $result);
@@ -124,9 +122,7 @@ class Zend_Locale_Math_PhpMath extends Zend_Locale_Math
 
     public static function Mul($op1, $op2, $scale = null)
     {
-        if ($scale === null) {
-            $scale = Zend_Locale_Math_PhpMath::$defaultScale;
-        }
+        $scale ??= Zend_Locale_Math_PhpMath::$defaultScale;
 
         if (empty($op1)) {
             $op1 = 0;
@@ -144,9 +140,7 @@ class Zend_Locale_Math_PhpMath extends Zend_Locale_Math
 
     public static function Div($op1, $op2, $scale = null)
     {
-        if ($scale === null) {
-            $scale = Zend_Locale_Math_PhpMath::$defaultScale;
-        }
+        $scale ??= Zend_Locale_Math_PhpMath::$defaultScale;
 
         if (empty($op2)) {
             require_once 'Zend/Locale/Math/Exception.php';
@@ -168,9 +162,7 @@ class Zend_Locale_Math_PhpMath extends Zend_Locale_Math
 
     public static function Sqrt($op1, $scale = null)
     {
-        if ($scale === null) {
-            $scale = Zend_Locale_Math_PhpMath::$defaultScale;
-        }
+        $scale ??= Zend_Locale_Math_PhpMath::$defaultScale;
 
         if (empty($op1)) {
             $op1 = 0;
@@ -208,9 +200,7 @@ class Zend_Locale_Math_PhpMath extends Zend_Locale_Math
 
     public static function Comp($op1, $op2, $scale = null)
     {
-        if ($scale === null) {
-            $scale     = Zend_Locale_Math_PhpMath::$defaultScale;
-        }
+        $scale ??= Zend_Locale_Math_PhpMath::$defaultScale;
 
         if (empty($op1)) {
             $op1 = 0;
@@ -239,7 +229,7 @@ class Zend_Locale_Math_PhpMath extends Zend_Locale_Math
             throw new Zend_Locale_Math_Exception("can not scale to precision $scale", $scale, null, null);
         }
         self::$defaultScale     = $scale;
-        self::$defaultPrecision = pow(10, -$scale);
+        self::$defaultPrecision = 10 ** -$scale;
         return true;
     }
 }

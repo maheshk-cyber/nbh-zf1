@@ -90,7 +90,7 @@ class Zend_Search_Lucene_Search_Query_Empty extends Zend_Search_Lucene_Search_Qu
      */
     public function matchedDocs()
     {
-        return array();
+        return [];
     }
 
     /**
@@ -112,7 +112,7 @@ class Zend_Search_Lucene_Search_Query_Empty extends Zend_Search_Lucene_Search_Qu
      */
     public function getQueryTerms()
     {
-        return array();
+        return [];
     }
 
     /**
@@ -130,7 +130,7 @@ class Zend_Search_Lucene_Search_Query_Empty extends Zend_Search_Lucene_Search_Qu
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return '<EmptyQuery>';
     }

@@ -36,14 +36,14 @@ abstract class Zend_Navigation_Container implements RecursiveIterator, Countable
      *
      * @var Zend_Navigation_Page[]
      */
-    protected $_pages = array();
+    protected $_pages = [];
 
     /**
      * An index that contains the order in which to iterate pages
      *
      * @var array
      */
-    protected $_index = array();
+    protected $_index = [];
 
     /**
      * Whether index is dirty and needs to be re-arranged
@@ -62,7 +62,7 @@ abstract class Zend_Navigation_Container implements RecursiveIterator, Countable
     protected function _sort()
     {
         if ($this->_dirtyIndex) {
-            $newIndex = array();
+            $newIndex = [];
             $index = 0;
 
             foreach ($this->_pages as $hash => $page) {
@@ -245,8 +245,8 @@ abstract class Zend_Navigation_Container implements RecursiveIterator, Countable
      */
     public function removePages()
     {
-        $this->_pages = array();
-        $this->_index = array();
+        $this->_pages = [];
+        $this->_index = [];
         return $this;
     }
 
@@ -364,7 +364,7 @@ abstract class Zend_Navigation_Container implements RecursiveIterator, Countable
      */
     public function findAllBy($property, $value, $useRegex = false)
     {        
-        $found = array();
+        $found = [];
 
         $iterator = new RecursiveIteratorIterator(
             $this,
@@ -475,7 +475,7 @@ abstract class Zend_Navigation_Container implements RecursiveIterator, Countable
         throw new Zend_Navigation_Exception(
             sprintf(
                 'Bad method call: Unknown method %s::%s',
-                get_class($this),
+                static::class,
                 $method
             )
         );
@@ -488,7 +488,7 @@ abstract class Zend_Navigation_Container implements RecursiveIterator, Countable
      */
     public function toArray()
     {
-        $pages = array();
+        $pages = [];
 
         $this->_dirtyIndex = true;
         $this->_sort();
@@ -600,11 +600,7 @@ abstract class Zend_Navigation_Container implements RecursiveIterator, Countable
     {
         $hash = key($this->_index);
 
-        if (isset($this->_pages[$hash])) {
-            return $this->_pages[$hash];
-        }
-
-        return null;
+        return $this->_pages[$hash] ?? null;
     }
 
     // Countable interface:

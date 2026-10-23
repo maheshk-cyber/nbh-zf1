@@ -45,18 +45,11 @@ class Zend_Service_WindowsAzure_Storage_Batch
     protected $_forTableStorage = false;
     
     /**
-     * Base URL
-     * 
-     * @var string
-     */
-    protected $_baseUrl;
-    
-    /**
      * Pending operations
      * 
      * @var unknown_type
      */
-    protected $_operations = array();
+    protected $_operations = [];
     
     /**
      * Does the batch contain a single select?
@@ -67,13 +60,16 @@ class Zend_Service_WindowsAzure_Storage_Batch
     
     /**
      * Creates a new Zend_Service_WindowsAzure_Storage_Batch
-     * 
+     *
      * @param Zend_Service_WindowsAzure_Storage_BatchStorageAbstract $storageClient Storage client the batch is defined on
+     * @param string $baseUrl
      */
-    public function __construct(Zend_Service_WindowsAzure_Storage_BatchStorageAbstract $storageClient = null, $baseUrl = '')
+    public function __construct(Zend_Service_WindowsAzure_Storage_BatchStorageAbstract $storageClient = null, /**
+     * Base URL
+     */
+    protected $_baseUrl = '')
     {
         $this->_storageClient = $storageClient;
-        $this->_baseUrl       = $baseUrl;
         $this->_beginBatch();
     }
     
@@ -119,7 +115,7 @@ class Zend_Service_WindowsAzure_Storage_Batch
 	 * @param mixed $rawData Optional RAW HTTP data to be sent over the wire
 	 * @throws Zend_Service_WindowsAzure_Exception
 	 */
-	public function enlistOperation($path = '/', $queryString = '', $httpVerb = Zend_Http_Client::GET, $headers = array(), $forTableStorage = false, $rawData = null)
+	public function enlistOperation($path = '/', $queryString = '', $httpVerb = Zend_Http_Client::GET, $headers = [], $forTableStorage = false, $rawData = null)
 	{
 	    // Set _forTableStorage
 	    if ($forTableStorage) {
@@ -136,14 +132,12 @@ class Zend_Service_WindowsAzure_Storage_Batch
 	    }
 	    
 	    // Clean path
-		if (strpos($path, '/') !== 0) {
+		if (!str_starts_with($path, '/')) {
 			$path = '/' . $path;
 		}
 			
 		// Clean headers
-		if (is_null($headers)) {
-		    $headers = array();
-		}
+		$headers ??= [];
 		    
 		// URL encoding
 		$path           = Zend_Service_WindowsAzure_Storage::urlencode($path);
@@ -153,9 +147,7 @@ class Zend_Service_WindowsAzure_Storage_Batch
 		$requestUrl     = $this->getBaseUrl() . $path . $queryString;
 		
 		// Generate $rawData
-		if (is_null($rawData)) {
-		    $rawData = '';
-		}
+		$rawData ??= '';
 		    
 		// Add headers
 		if ($httpVerb != Zend_Http_Client::GET) {

@@ -50,13 +50,9 @@ class Zend_Controller_Action_Helper_Url extends Zend_Controller_Action_Helper_Ab
     {
         $request = $this->getRequest();
 
-        if (null === $controller) {
-            $controller = $request->getControllerName();
-        }
+        $controller ??= $request->getControllerName();
 
-        if (null === $module) {
-            $module = $request->getModuleName();
-        }
+        $module ??= $request->getModuleName();
 
         $url = $controller . '/' . $action;
         if ($module != $this->getFrontController()->getDispatcher()->getDefaultModule()) {
@@ -68,7 +64,7 @@ class Zend_Controller_Action_Helper_Url extends Zend_Controller_Action_Helper_Ab
         }
 
         if (null !== $params) {
-            $paramPairs = array();
+            $paramPairs = [];
             foreach ($params as $key => $value) {
                 $paramPairs[] = urlencode($key) . '/' . urlencode($value);
             }
@@ -93,7 +89,7 @@ class Zend_Controller_Action_Helper_Url extends Zend_Controller_Action_Helper_Ab
      * @param  boolean $encode
      * @return string Url for the link href attribute.
      */
-    public function url($urlOptions = array(), $name = null, $reset = false, $encode = true)
+    public function url($urlOptions = [], $name = null, $reset = false, $encode = true)
     {
         $router = $this->getFrontController()->getRouter();
         return $router->assemble($urlOptions, $name, $reset, $encode);

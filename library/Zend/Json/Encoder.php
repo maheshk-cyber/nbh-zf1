@@ -30,37 +30,30 @@
 class Zend_Json_Encoder
 {
     /**
-     * Whether or not to check for possible cycling
-     *
-     * @var boolean
-     */
-    protected $_cycleCheck;
-
-    /**
-     * Additional options used during encoding
-     *
-     * @var array
-     */
-    protected $_options = array();
-
-    /**
      * Array of visited objects; used to prevent cycling.
      *
      * @var array
      */
-    protected $_visited = array();
+    protected $_visited = [];
 
     /**
      * Constructor
      *
-     * @param boolean $cycleCheck Whether or not to check for recursion when encoding
-     * @param array $options Additional options used during encoding
+     * @param boolean $_cycleCheck Whether or not to check for recursion when encoding
+     * @param array $_options Additional options used during encoding
      * @return void
      */
-    protected function __construct($cycleCheck = false, $options = array())
+    protected function __construct(
+        /**
+         * Whether or not to check for possible cycling
+         */
+        protected $_cycleCheck = false,
+        /**
+         * Additional options used during encoding
+         */
+        protected $_options = []
+    )
     {
-        $this->_cycleCheck = $cycleCheck;
-        $this->_options = $options;
     }
 
     /**
@@ -71,7 +64,7 @@ class Zend_Json_Encoder
      * @param array $options Additional options used during encoding
      * @return string  The encoded value
      */
-    public static function encode($value, $cycleCheck = false, $options = array())
+    public static function encode($value, $cycleCheck = false, $options = [])
     {
         $encoder = new self(($cycleCheck) ? true : false, $options);
         return $encoder->_encodeValue($value);
@@ -119,13 +112,13 @@ class Zend_Json_Encoder
                 if (isset($this->_options['silenceCyclicalExceptions'])
                     && $this->_options['silenceCyclicalExceptions']===true) {
 
-                    return '"* RECURSION (' . get_class($value) . ') *"';
+                    return '"* RECURSION (' . $value::class . ') *"';
 
                 } else {
                     require_once 'Zend/Json/Exception.php';
                     throw new Zend_Json_Exception(
                         'Cycles not supported in JSON encoding, cycle introduced by '
-                        . 'class "' . get_class($value) . '"'
+                        . 'class "' . $value::class . '"'
                     );
                 }
             }
@@ -154,7 +147,7 @@ class Zend_Json_Encoder
                 }
             }
         }
-        $className = get_class($value);
+        $className = $value::class;
         return '{"__className":' . $this->_encodeString($className)
                 . $props . '}';
     }
@@ -191,7 +184,7 @@ class Zend_Json_Encoder
      */
     protected function _encodeArray(&$array)
     {
-        $tmpArray = array();
+        $tmpArray = [];
 
         // Check for associative array
         if (!empty($array) && (array_keys($array) !== range(0, count($array) - 1))) {
@@ -256,14 +249,14 @@ class Zend_Json_Encoder
     {
         // Escape these characters with a backslash:
         // " \ / \n \r \t \b \f
-        $search  = array('\\', "\n", "\t", "\r", "\b", "\f", '"', '/');
-        $replace = array('\\\\', '\\n', '\\t', '\\r', '\\b', '\\f', '\"', '\\/');
+        $search  = ['\\', "\n", "\t", "\r", "\b", "\f", '"', '/'];
+        $replace = ['\\\\', '\\n', '\\t', '\\r', '\\b', '\\f', '\"', '\\/'];
         $string  = str_replace($search, $replace, $string);
 
         // Escape certain ASCII characters:
         // 0x08 => \b
         // 0x0c => \f
-        $string = str_replace(array(chr(0x08), chr(0x0C)), array('\b', '\f'), $string);
+        $string = str_replace([chr(0x08), chr(0x0C)], ['\b', '\f'], $string);
         $string = self::encodeUnicodeString($string);
 
         return '"' . $string . '"';
@@ -282,7 +275,7 @@ class Zend_Json_Encoder
         $result    = "constants : {";
         $constants = $cls->getConstants();
 
-        $tmpArray = array();
+        $tmpArray = [];
         if (!empty($constants)) {
             foreach ($constants as $key => $value) {
                 $tmpArray[] = "$key: " . self::encode($value);
@@ -374,7 +367,7 @@ class Zend_Json_Encoder
         $result = "variables:{";
         $cnt = 0;
 
-        $tmpArray = array();
+        $tmpArray = [];
         foreach ($properties as $prop) {
             if (! $prop->isPublic()) {
                 continue;
@@ -548,31 +541,24 @@ class Zend_Json_Encoder
         if( function_exists('mb_convert_encoding') ) {
             return mb_convert_encoding($utf8, 'UTF-16', 'UTF-8');
         }
-
-        switch (strlen($utf8)) {
-            case 1:
-                // this case should never be reached, because we are in ASCII range
-                // see: http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
-                return $utf8;
-
-            case 2:
-                // return a UTF-16 character from a 2-byte UTF-8 char
-                // see: http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
-                return chr(0x07 & (ord($utf8{0}) >> 2))
-                     . chr((0xC0 & (ord($utf8{0}) << 6))
-                         | (0x3F & ord($utf8{1})));
-
-            case 3:
-                // return a UTF-16 character from a 3-byte UTF-8 char
-                // see: http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
-                return chr((0xF0 & (ord($utf8{0}) << 4))
-                         | (0x0F & (ord($utf8{1}) >> 2)))
-                     . chr((0xC0 & (ord($utf8{1}) << 6))
-                         | (0x7F & ord($utf8{2})));
-        }
-
-        // ignoring UTF-32 for now, sorry
-        return '';
+        return match (strlen($utf8)) {
+            // this case should never be reached, because we are in ASCII range
+            // see: http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
+            1 => $utf8,
+            // return a UTF-16 character from a 2-byte UTF-8 char
+            // see: http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
+            2 => chr(0x07 & (ord($utf8[0]) >> 2))
+                 . chr((0xC0 & (ord($utf8[0]) << 6))
+                     | (0x3F & ord($utf8[1]))),
+            // return a UTF-16 character from a 3-byte UTF-8 char
+            // see: http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
+            3 => chr((0xF0 & (ord($utf8[0]) << 4))
+                     | (0x0F & (ord($utf8[1]) >> 2)))
+                 . chr((0xC0 & (ord($utf8[1]) << 6))
+                     | (0x7F & ord($utf8[2]))),
+            // ignoring UTF-32 for now, sorry
+            default => '',
+        };
     }
 }
 

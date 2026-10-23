@@ -45,7 +45,7 @@ class Zend_Service_Console_Command_ParameterSource_Argv
 	 * @param array $argv Argument values passed to the script when run in console.
 	 * @return mixed
 	 */
-	public function getValueForParameter($parameter, $argv = array())
+	public function getValueForParameter($parameter, $argv = [])
 	{
 		// Default value
 		$parameterValue = null;
@@ -55,7 +55,7 @@ class Zend_Service_Console_Command_ParameterSource_Argv
 			$parameterInput = explode('=', $parameterInput, 2);
 
 			if (in_array($parameterInput[0], $parameter->aliases)) {
-				$parameterValue = isset($parameterInput[1]) ? $parameterInput[1] : true;
+				$parameterValue = $parameterInput[1] ?? true;
 				break;
 			}
 		}

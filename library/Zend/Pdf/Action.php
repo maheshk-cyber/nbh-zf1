@@ -60,7 +60,7 @@ abstract class Zend_Pdf_Action extends Zend_Pdf_Target implements RecursiveItera
      *
      * @var array  Array of Zend_Pdf_Action objects
      */
-    public $next = array();
+    public $next = [];
 
     /**
      * Object constructor
@@ -114,9 +114,7 @@ abstract class Zend_Pdf_Action extends Zend_Pdf_Target implements RecursiveItera
      */
     public static function load(Zend_Pdf_Element $dictionary, SplObjectStorage $processedActions = null)
     {
-        if ($processedActions === null) {
-            $processedActions = new SplObjectStorage();
-        }
+        $processedActions ??= new SplObjectStorage();
 
         require_once 'Zend/Pdf/Element.php';
         if ($dictionary->getType() != Zend_Pdf_Element::TYPE_DICTIONARY) {
@@ -254,9 +252,7 @@ abstract class Zend_Pdf_Action extends Zend_Pdf_Target implements RecursiveItera
      */
     public function dumpAction(Zend_Pdf_ElementFactory_Interface $factory, SplObjectStorage $processedActions = null)
     {
-        if ($processedActions === null) {
-            $processedActions = new SplObjectStorage();
-        }
+        $processedActions ??= new SplObjectStorage();
         if ($processedActions->contains($this)) {
             require_once 'Zend/Pdf/Exception.php';
             throw new Zend_Pdf_Exception('Action chain cyclyc reference is detected.');

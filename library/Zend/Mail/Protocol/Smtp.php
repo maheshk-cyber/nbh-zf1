@@ -120,7 +120,7 @@ class Zend_Mail_Protocol_Smtp extends Zend_Mail_Protocol_Abstract
      * @return void
      * @throws Zend_Mail_Protocol_Exception
      */
-    public function __construct($host = '127.0.0.1', $port = null, array $config = array())
+    public function __construct($host = '127.0.0.1', $port = null, array $config = [])
     {
         if (isset($config['ssl'])) {
             switch (strtolower($config['ssl'])) {
@@ -192,7 +192,7 @@ class Zend_Mail_Protocol_Smtp extends Zend_Mail_Protocol_Abstract
              * @see Zend_Mail_Protocol_Exception
              */
             require_once 'Zend/Mail/Protocol/Exception.php';
-            throw new Zend_Mail_Protocol_Exception(join(', ', $this->_validHost->getMessages()));
+            throw new Zend_Mail_Protocol_Exception(implode(', ', $this->_validHost->getMessages()));
         }
 
         // Initiate helo sequence
@@ -231,7 +231,7 @@ class Zend_Mail_Protocol_Smtp extends Zend_Mail_Protocol_Abstract
         try {
             $this->_send('EHLO ' . $host);
             $this->_expect(250, 300); // Timeout set for 5 minutes as per RFC 2821 4.5.3.2
-        } catch (Zend_Mail_Protocol_Exception $e) {
+        } catch (Zend_Mail_Protocol_Exception) {
             $this->_send('HELO ' . $host);
             $this->_expect(250, 300); // Timeout set for 5 minutes as per RFC 2821 4.5.3.2
         } catch (Zend_Mail_Protocol_Exception $e) {
@@ -286,7 +286,7 @@ class Zend_Mail_Protocol_Smtp extends Zend_Mail_Protocol_Abstract
 
         // Set rcpt to true, as per 4.1.1.3 of RFC 2821
         $this->_send('RCPT TO:<' . $to . '>');
-        $this->_expect(array(250, 251), 300); // Timeout set for 5 minutes as per RFC 2821 4.5.3.2
+        $this->_expect([250, 251], 300); // Timeout set for 5 minutes as per RFC 2821 4.5.3.2
         $this->_rcpt = true;
     }
 
@@ -313,7 +313,7 @@ class Zend_Mail_Protocol_Smtp extends Zend_Mail_Protocol_Abstract
         $this->_expect(354, 120); // Timeout set for 2 minutes as per RFC 2821 4.5.3.2
 
         foreach (explode(Zend_Mime::LINEEND, $data) as $line) {
-            if (strpos($line, '.') === 0) {
+            if (str_starts_with($line, '.')) {
                 // Escape lines prefixed with a '.'
                 $line = '.' . $line;
             }
@@ -337,7 +337,7 @@ class Zend_Mail_Protocol_Smtp extends Zend_Mail_Protocol_Abstract
     {
         $this->_send('RSET');
         // MS ESMTP doesn't follow RFC, see [ZF-1377]
-        $this->_expect(array(250, 220));
+        $this->_expect([250, 220]);
 
         $this->_mail = false;
         $this->_rcpt = false;
@@ -370,7 +370,7 @@ class Zend_Mail_Protocol_Smtp extends Zend_Mail_Protocol_Abstract
     public function vrfy($user)
     {
         $this->_send('VRFY ' . $user);
-        $this->_expect(array(250, 251, 252), 300); // Timeout set for 5 minutes as per RFC 2821 4.5.3.2
+        $this->_expect([250, 251, 252], 300); // Timeout set for 5 minutes as per RFC 2821 4.5.3.2
     }
 
 

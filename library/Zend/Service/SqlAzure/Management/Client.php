@@ -72,27 +72,6 @@ class Zend_Service_SqlAzure_Management_Client
 	protected $_apiVersion = '1.0';
 	
 	/**
-	 * Subscription ID
-	 *
-	 * @var string
-	 */
-	protected $_subscriptionId = '';
-	
-	/**
-	 * Management certificate path (.PEM)
-	 *
-	 * @var string
-	 */
-	protected $_certificatePath = '';
-	
-	/**
-	 * Management certificate passphrase
-	 *
-	 * @var string
-	 */
-	protected $_certificatePassphrase = '';
-	
-	/**
 	 * Zend_Http_Client channel used for communication with REST services
 	 * 
 	 * @var Zend_Http_Client
@@ -114,42 +93,47 @@ class Zend_Service_SqlAzure_Management_Client
 	protected $_lastRequestId = null;
 	
 	/**
-	 * Creates a new Zend_Service_SqlAzure_Management instance
-	 * 
-	 * @param string $subscriptionId Subscription ID
-	 * @param string $certificatePath Management certificate path (.PEM)
-	 * @param string $certificatePassphrase Management certificate passphrase
+     * Creates a new Zend_Service_SqlAzure_Management instance
+     *
+     * @param string $_subscriptionId Subscription ID
+     * @param string $_certificatePath Management certificate path (.PEM)
+     * @param string $_certificatePassphrase Management certificate passphrase
      * @param Zend_Service_WindowsAzure_RetryPolicy_RetryPolicyAbstract $retryPolicy Retry policy to use when making requests
-	 */
-	public function __construct(
-		$subscriptionId,
-		$certificatePath,
-		$certificatePassphrase,
+     */
+    public function __construct(
+		/**
+         * Subscription ID
+         */
+        protected $_subscriptionId,
+		/**
+         * Management certificate path (.PEM)
+         */
+        protected $_certificatePath,
+		/**
+         * Management certificate passphrase
+         */
+        protected $_certificatePassphrase,
 		Zend_Service_WindowsAzure_RetryPolicy_RetryPolicyAbstract $retryPolicy = null
 	) {
-		$this->_subscriptionId = $subscriptionId;
-		$this->_certificatePath = $certificatePath;
-		$this->_certificatePassphrase = $certificatePassphrase;
-		
 		$this->_retryPolicy = $retryPolicy;
 		if (is_null($this->_retryPolicy)) {
 		    $this->_retryPolicy = Zend_Service_WindowsAzure_RetryPolicy_RetryPolicyAbstract::noRetry();
 		}
 		
 		// Setup default Zend_Http_Client channel
-		$options = array(
+		$options = [
 		    'adapter'       => 'Zend_Http_Client_Adapter_Socket',
 		    'ssltransport'  => 'ssl',
 			'sslcert'       => $this->_certificatePath,
 			'sslpassphrase' => $this->_certificatePassphrase,
 			'sslusecontext' => true,
-		);
+		];
 		if (function_exists('curl_init')) {
 			// Set cURL options if cURL is used afterwards
-			$options['curloptions'] = array(
+			$options['curloptions'] = [
 					CURLOPT_FOLLOWLOCATION => true,
 					CURLOPT_TIMEOUT => 120,
-			);
+			];
 		}
 		$this->_httpClientChannel = new Zend_Http_Client(null, $options);
 	}
@@ -218,25 +202,21 @@ class Zend_Service_SqlAzure_Management_Client
 		$path = '/',
 		$queryString = '',
 		$httpVerb = Zend_Http_Client::GET,
-		$headers = array(),
+		$headers = [],
 		$rawData = null
 	) {
 	    // Clean path
-		if (strpos($path, '/') !== 0) {
+		if (!str_starts_with($path, '/')) {
 			$path = '/' . $path;
 		}
 			
 		// Clean headers
-		if (is_null($headers)) {
-		    $headers = array();
-		}
+		$headers ??= [];
 		
 		// Ensure cUrl will also work correctly:
 		//  - disable Content-Type if required
 		//  - disable Expect: 100 Continue
-		if (!isset($headers["Content-Type"])) {
-			$headers["Content-Type"] = '';
-		}
+		$headers["Content-Type"] ??= '';
 		//$headers["Expect"] = '';
 
 		// Add version header
@@ -258,8 +238,8 @@ class Zend_Service_SqlAzure_Management_Client
 
 		// Execute request
 		$response = $this->_retryPolicy->execute(
-		    array($this->_httpClientChannel, 'request'),
-		    array($httpVerb)
+		    [$this->_httpClientChannel, 'request'],
+		    [$httpVerb]
 		);
 		
 		// Store request id
@@ -364,7 +344,7 @@ class Zend_Service_SqlAzure_Management_Client
     	
                 $response = $this->_performRequest(self::OP_SERVERS, '',
     		Zend_Http_Client::POST,
-    		array('Content-Type' => 'application/xml; charset=utf-8'),
+    		['Content-Type' => 'application/xml; charset=utf-8'],
     		'<Server xmlns="http://schemas.microsoft.com/sqlazure/2010/12/"><AdministratorLogin>' . $administratorLogin . '</AdministratorLogin><AdministratorLoginPassword>' . $administratorPassword . '</AdministratorLoginPassword><Location>' . $location . '</Location></Server>');
  	
                 if ($response->isSuccessful()) {
@@ -396,15 +376,15 @@ class Zend_Service_SqlAzure_Management_Client
 		$xmlServices = null;
 			
                 if (!$xml->Server) {
-                    return array();
+                    return [];
 		}
 		if (count($xml->Server) > 1) {
     		    $xmlServices = $xml->Server;
     		} else {
-    		    $xmlServices = array($xml->Server);
+    		    $xmlServices = [$xml->Server];
     		}
     		
-		$services = array();
+		$services = [];
 		if (!is_null($xmlServices)) {				
 				
                     for ($i = 0; $i < count($xmlServices); $i++) {
@@ -463,7 +443,7 @@ class Zend_Service_SqlAzure_Management_Client
     	
             $response = $this->_performRequest(self::OP_SERVERS . '/' . $serverName, '?op=ResetPassword',
     		Zend_Http_Client::POST,
-    		array('Content-Type' => 'application/xml; charset=utf-8'),
+    		['Content-Type' => 'application/xml; charset=utf-8'],
     		'<AdministratorLoginPassword xmlns="http://schemas.microsoft.com/sqlazure/2010/12/">' . $administratorPassword . '</AdministratorLoginPassword>');
     		
             if (!$response->isSuccessful()) {
@@ -503,7 +483,7 @@ class Zend_Service_SqlAzure_Management_Client
     	
             $response = $this->_performRequest(self::OP_SERVERS . '/' . $serverName . '/' . self::OP_FIREWALLRULES . '/' . $ruleName, '',
     		Zend_Http_Client::PUT,
-    		array('Content-Type' => 'application/xml; charset=utf-8'),
+    		['Content-Type' => 'application/xml; charset=utf-8'],
     		'<FirewallRule xmlns="http://schemas.microsoft.com/sqlazure/2010/12/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.microsoft.com/sqlazure/2010/12/ FirewallRule.xsd"><StartIpAddress>' . $startIpAddress . '</StartIpAddress><EndIpAddress>' . $endIpAddress . '</EndIpAddress></FirewallRule>');
 
             if ($response->isSuccessful()) {
@@ -540,15 +520,15 @@ class Zend_Service_SqlAzure_Management_Client
 		$xmlServices = null;
 			
     		if (!$xml->FirewallRule) {
-                    return array();
+                    return [];
 		}
 		if (count($xml->FirewallRule) > 1) {
     		    $xmlServices = $xml->FirewallRule;
     		} else {
-    		    $xmlServices = array($xml->FirewallRule);
+    		    $xmlServices = [$xml->FirewallRule];
     		}
     		
-		$services = array();
+		$services = [];
 		if (!is_null($xmlServices)) {				
                     
                     for ($i = 0; $i < count($xmlServices); $i++) {

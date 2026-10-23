@@ -56,7 +56,7 @@ class Zend_OpenId_Consumer
     /**
      * Parameters required for signature
      */
-    protected $_signParams = array('op_endpoint', 'return_to', 'response_nonce', 'assoc_handle');
+    protected $_signParams = ['op_endpoint', 'return_to', 'response_nonce', 'assoc_handle'];
 
     /**
      * Reference to an implementation of storage object
@@ -66,19 +66,11 @@ class Zend_OpenId_Consumer
     protected $_storage = null;
 
     /**
-     * Enables or disables consumer to use association with server based on
-     * Diffie-Hellman key agreement
-     *
-     * @var Zend_OpenId_Consumer_Storage $_dumbMode
-     */
-    protected $_dumbMode = false;
-
-    /**
      * Internal cache to prevent unnecessary access to storage
      *
      * @var array $_cache
      */
-    protected $_cache = array();
+    protected $_cache = [];
 
     /**
      * HTTP client to make HTTP requests
@@ -108,11 +100,15 @@ class Zend_OpenId_Consumer
      *
      * @param Zend_OpenId_Consumer_Storage $storage implementation of custom
      *  storage object
-     * @param bool $dumbMode Enables or disables consumer to use association
+     * @param bool $_dumbMode Enables or disables consumer to use association
      *  with server based on Diffie-Hellman key agreement
      */
     public function __construct(Zend_OpenId_Consumer_Storage $storage = null,
-                                $dumbMode = false)
+                                /**
+                                 * Enables or disables consumer to use association with server based on
+                                 * Diffie-Hellman key agreement
+                                 */
+                                protected $_dumbMode = false)
     {
         if ($storage === null) {
             require_once "Zend/OpenId/Consumer/Storage/File.php";
@@ -120,7 +116,6 @@ class Zend_OpenId_Consumer
         } else {
             $this->_storage = $storage;
         }
-        $this->_dumbMode = $dumbMode;
     }
 
     /**
@@ -306,7 +301,7 @@ class Zend_OpenId_Consumer
             // @see https://openid.net/specs/openid-authentication-2_0.html#positive_assertions
             $toCheck = $this->_signParams;
             if (isset($params['openid_claimed_id']) && isset($params['openid_identity'])) {
-                $toCheck = array_merge($toCheck, array('claimed_id', 'identity'));
+                $toCheck = array_merge($toCheck, ['claimed_id', 'identity']);
             }
             foreach ($toCheck as $param) {
                 if (!in_array($param, $signed, true)) {
@@ -379,13 +374,13 @@ class Zend_OpenId_Consumer
                 return false;
             }
 
-            $params2 = array();
+            $params2 = [];
             foreach ($params as $key => $val) {
-                if (strpos($key, 'openid_ns_') === 0) {
+                if (str_starts_with($key, 'openid_ns_')) {
                     $key = 'openid.ns.' . substr($key, strlen('openid_ns_'));
-                } else if (strpos($key, 'openid_sreg_') === 0) {
+                } else if (str_starts_with($key, 'openid_sreg_')) {
                     $key = 'openid.sreg.' . substr($key, strlen('openid_sreg_'));
-                } else if (strpos($key, 'openid_') === 0) {
+                } else if (str_starts_with($key, 'openid_')) {
                     $key = 'openid.' . substr($key, strlen('openid_'));
                 }
                 $params2[$key] = $val;
@@ -396,14 +391,14 @@ class Zend_OpenId_Consumer
                 $this->_setError("'Dumb' signature verification HTTP request failed");
                 return false;
             }
-            $r = array();
+            $r = [];
             if (is_string($ret)) {
                 foreach(explode("\n", $ret) as $line) {
                     $line = trim($line);
                     if (!empty($line)) {
                         $x = explode(':', $line, 2);
                         if (is_array($x) && count($x) == 2) {
-                            list($key, $value) = $x;
+                            [$key, $value] = $x;
                             $r[trim($key)] = trim($value);
                         }
                     }
@@ -444,7 +439,7 @@ class Zend_OpenId_Consumer
      */
     protected function _addAssociation($url, $handle, $macFunc, $secret, $expires)
     {
-        $this->_cache[$url] = array($handle, $macFunc, $secret, $expires);
+        $this->_cache[$url] = [$handle, $macFunc, $secret, $expires];
         return $this->_storage->addAssociation(
             $url,
             $handle,
@@ -479,7 +474,7 @@ class Zend_OpenId_Consumer
                 $macFunc,
                 $secret,
                 $expires)) {
-            $this->_cache[$url] = array($handle, $macFunc, $secret, $expires);
+            $this->_cache[$url] = [$handle, $macFunc, $secret, $expires];
             return true;
         }
         return false;
@@ -497,17 +492,17 @@ class Zend_OpenId_Consumer
      *  request
      * @return mixed
      */
-    protected function _httpRequest($url, $method = 'GET', array $params = array(), &$status = null)
+    protected function _httpRequest($url, $method = 'GET', array $params = [], &$status = null)
     {
         $client = $this->_httpClient;
         if ($client === null) {
             $client = new Zend_Http_Client(
                     $url,
-                    array(
+                    [
                         'maxredirects' => 4,
                         'timeout'      => 15,
                         'useragent'    => 'Zend_OpenId'
-                    )
+                    ]
                 );
         } else {
             $client->setUri($url);
@@ -566,21 +561,21 @@ class Zend_OpenId_Consumer
             return true;
         }
 
-        $params = array();
+        $params = [];
 
         if ($version >= 2.0) {
-            $params = array(
+            $params = [
                 'openid.ns'           => Zend_OpenId::NS_2_0,
                 'openid.mode'         => 'associate',
                 'openid.assoc_type'   => 'HMAC-SHA256',
                 'openid.session_type' => 'DH-SHA256',
-            );
+            ];
         } else {
-            $params = array(
+            $params = [
                 'openid.mode'         => 'associate',
                 'openid.assoc_type'   => 'HMAC-SHA1',
                 'openid.session_type' => 'DH-SHA1',
-            );
+            ];
         }
 
         $dh = Zend_OpenId::createDhKey(pack('H*', Zend_OpenId::DH_P),
@@ -602,21 +597,21 @@ class Zend_OpenId_Consumer
                 return false;
             }
 
-            $r = array();
+            $r = [];
             $bad_response = false;
             foreach(explode("\n", $ret) as $line) {
                 $line = trim($line);
                 if (!empty($line)) {
                     $x = explode(':', $line, 2);
                     if (is_array($x) && count($x) == 2) {
-                        list($key, $value) = $x;
+                        [$key, $value] = $x;
                         $r[trim($key)] = trim($value);
                     } else {
                         $bad_response = true;
                     }
                 }
             }
-            if ($bad_response && strpos($ret, 'Unknown session type') !== false) {
+            if ($bad_response && str_contains($ret, 'Unknown session type')) {
                 $r['error_code'] = 'unsupported-type';
             }
             $ret = $r;
@@ -751,7 +746,7 @@ class Zend_OpenId_Consumer
             return true;
         }
 
-        $response = $this->_httpRequest($id, 'GET', array(), $status);
+        $response = $this->_httpRequest($id, 'GET', [], $status);
         if ($status != 200 || !is_string($response)) {
             return false;
         }
@@ -885,7 +880,7 @@ class Zend_OpenId_Consumer
             unset($expires);
         }
 
-        $params = array();
+        $params = [];
         if ($version >= 2.0) {
             $params['openid.ns'] = Zend_OpenId::NS_2_0;
         }
@@ -902,9 +897,9 @@ class Zend_OpenId_Consumer
                 $this->_session->identity = $id;
                 $this->_session->claimed_id = $claimedId;
             } else if (defined('SID')) {
-                $_SESSION["zend_openid"] = array(
+                $_SESSION["zend_openid"] = [
                     "identity" => $id,
-                    "claimed_id" => $claimedId);
+                    "claimed_id" => $claimedId];
             } else {
                 require_once "Zend/Session/Namespace.php";
                 $this->_session = new Zend_Session_Namespace("zend_openid");

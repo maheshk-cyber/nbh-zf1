@@ -46,7 +46,7 @@ class Zend_EventManager_Event implements Zend_EventManager_EventDescription
     /**
      * @var array|ArrayAccess|object The event parameters
      */
-    protected $params = array();
+    protected $params = [];
 
     /**
      * @var bool Whether or not to stop propagation
@@ -114,7 +114,7 @@ class Zend_EventManager_Event implements Zend_EventManager_EventDescription
             require_once 'Zend/EventManager/Exception/InvalidArgumentException.php';
             throw new Zend_EventManager_Exception_InvalidArgumentException(sprintf(
                 'Event parameters must be an array or object; received "%s"',
-                (is_object($params) ? get_class($params) : gettype($params))
+                (get_debug_type($params))
             ));
         }
 

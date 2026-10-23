@@ -86,9 +86,9 @@ class Zend_ProgressBar_Adapter_Console extends Zend_ProgressBar_Adapter
      *
      * @var array
      */
-    protected $_elements = array(self::ELEMENT_PERCENT,
+    protected $_elements = [self::ELEMENT_PERCENT,
                                  self::ELEMENT_BAR,
-                                 self::ELEMENT_ETA);
+                                 self::ELEMENT_ETA];
 
     /**
      * Which action to do at finish call
@@ -227,8 +227,8 @@ class Zend_ProgressBar_Adapter_Console extends Zend_ProgressBar_Adapter
      */
     public function setWidth($width = null)
     {
-        if ($width === null || !is_integer($width)) {
-            if (substr(PHP_OS, 0, 3) === 'WIN') {
+        if ($width === null || !is_int($width)) {
+            if (str_starts_with(PHP_OS, 'WIN')) {
                 // We have to default to 79 on windows, because the windows
                 // terminal always has a fixed width of 80 characters and the
                 // cursor is counted to the line, else windows would line break
@@ -263,10 +263,10 @@ class Zend_ProgressBar_Adapter_Console extends Zend_ProgressBar_Adapter
      */
     public function setElements(array $elements)
     {
-        $allowedElements = array(self::ELEMENT_PERCENT,
+        $allowedElements = [self::ELEMENT_PERCENT,
                                  self::ELEMENT_BAR,
                                  self::ELEMENT_ETA,
-                                 self::ELEMENT_TEXT);
+                                 self::ELEMENT_TEXT];
 
         if (count(array_diff($elements, $allowedElements)) > 0) {
             require_once 'Zend/ProgressBar/Adapter/Exception.php';
@@ -365,9 +365,9 @@ class Zend_ProgressBar_Adapter_Console extends Zend_ProgressBar_Adapter
      */
     public function setFinishAction($action)
     {
-        $allowedActions = array(self::FINISH_ACTION_CLEAR_LINE,
+        $allowedActions = [self::FINISH_ACTION_CLEAR_LINE,
                                 self::FINISH_ACTION_EOL,
-                                self::FINISH_ACTION_NONE);
+                                self::FINISH_ACTION_NONE];
 
         if (!in_array($action, $allowedActions)) {
             require_once 'Zend/ProgressBar/Adapter/Exception.php';
@@ -401,7 +401,7 @@ class Zend_ProgressBar_Adapter_Console extends Zend_ProgressBar_Adapter
         }
 
         // Build all elements
-        $renderedElements = array();
+        $renderedElements = [];
 
         foreach ($this->_elements as $element) {
             switch ($element) {

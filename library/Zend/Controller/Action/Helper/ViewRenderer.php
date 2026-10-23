@@ -179,7 +179,7 @@ class Zend_Controller_Action_Helper_ViewRenderer extends Zend_Controller_Action_
      * @param  array               $options
      * @return void
      */
-    public function __construct(Zend_View_Interface $view = null, array $options = array())
+    public function __construct(Zend_View_Interface $view = null, array $options = [])
     {
         if (null !== $view) {
             $this->setView($view);
@@ -224,9 +224,7 @@ class Zend_Controller_Action_Helper_ViewRenderer extends Zend_Controller_Action_
     {
         $request = $this->getRequest();
         $module  = $request->getModuleName();
-        if (null === $module) {
-            $module = $this->getFrontController()->getDispatcher()->getDefaultModule();
-        }
+        $module ??= $this->getFrontController()->getDispatcher()->getDefaultModule();
 
         return $module;
     }
@@ -274,11 +272,11 @@ class Zend_Controller_Action_Helper_ViewRenderer extends Zend_Controller_Action_
             require_once 'Zend/Filter/Word/UnderscoreToSeparator.php';
             $this->_inflector = new Zend_Filter_Inflector();
             $this->_inflector->setStaticRuleReference('moduleDir', $this->_moduleDir) // moduleDir must be specified before the less specific 'module'
-                 ->addRules(array(
-                     ':module'     => array('Word_CamelCaseToDash', 'StringToLower'),
-                     ':controller' => array('Word_CamelCaseToDash', new Zend_Filter_Word_UnderscoreToSeparator('/'), 'StringToLower', new Zend_Filter_PregReplace('/\./', '-')),
-                     ':action'     => array('Word_CamelCaseToDash', new Zend_Filter_PregReplace('#[^a-z0-9' . preg_quote('/', '#') . ']+#i', '-'), 'StringToLower'),
-                 ))
+                 ->addRules([
+                     ':module'     => ['Word_CamelCaseToDash', 'StringToLower'],
+                     ':controller' => ['Word_CamelCaseToDash', new Zend_Filter_Word_UnderscoreToSeparator('/'), 'StringToLower', new Zend_Filter_PregReplace('/\./', '-')],
+                     ':action'     => ['Word_CamelCaseToDash', new Zend_Filter_PregReplace('#[^a-z0-9' . preg_quote('/', '#') . ']+#i', '-'), 'StringToLower'],
+                 ])
                  ->setStaticRuleReference('suffix', $this->_viewSuffix)
                  ->setTargetReference($this->_inflectorTarget);
         }
@@ -351,7 +349,7 @@ class Zend_Controller_Action_Helper_ViewRenderer extends Zend_Controller_Action_
             return $default;
         }
 
-        $class = get_class($this->_actionController);
+        $class = $this->_actionController::class;
 
         if (!strstr($class, '_')) {
             return $default;
@@ -384,11 +382,11 @@ class Zend_Controller_Action_Helper_ViewRenderer extends Zend_Controller_Action_
         $dispatcher = $this->getFrontController()->getDispatcher();
         $request = $this->getRequest();
 
-        $parts = array(
+        $parts = [
             'module'     => (($moduleName = $request->getModuleName()) != '') ? $dispatcher->formatModuleName($moduleName) : $moduleName,
             'controller' => $request->getControllerName(),
             'action'     => $dispatcher->formatActionName($request->getActionName())
-            );
+            ];
 
         $path = $inflector->filter($parts);
         return $path;
@@ -449,15 +447,15 @@ class Zend_Controller_Action_Helper_ViewRenderer extends Zend_Controller_Action_
      * @throws Zend_Controller_Action_Exception
      * @return void
      */
-    public function initView($path = null, $prefix = null, array $options = array())
+    public function initView($path = null, $prefix = null, array $options = [])
     {
         if (null === $this->view) {
             $this->setView(new Zend_View());
         }
 
         // Reset some flags every time
-        $options['noController'] = (isset($options['noController'])) ? $options['noController'] : false;
-        $options['noRender']     = (isset($options['noRender'])) ? $options['noRender'] : false;
+        $options['noController'] ??= false;
+        $options['noRender'] ??= false;
         $this->_scriptAction     = null;
         $this->_responseSegment  = null;
 
@@ -476,16 +474,14 @@ class Zend_Controller_Action_Helper_ViewRenderer extends Zend_Controller_Action_
             }
         }
 
-        if (null === $prefix) {
-            $prefix = $this->_generateDefaultPrefix();
-        }
+        $prefix ??= $this->_generateDefaultPrefix();
 
         // Determine if this path has already been registered
         $currentPaths = $this->view->getScriptPaths();
-        $path         = str_replace(array('/', '\\'), '/', $path);
+        $path         = str_replace(['/', '\\'], '/', $path);
         $pathExists   = false;
         foreach ($currentPaths as $tmpPath) {
-            $tmpPath = str_replace(array('/', '\\'), '/', $tmpPath);
+            $tmpPath = str_replace(['/', '\\'], '/', $tmpPath);
             if (strstr($tmpPath, $path)) {
                 $pathExists = true;
                 break;
@@ -614,20 +610,18 @@ class Zend_Controller_Action_Helper_ViewRenderer extends Zend_Controller_Action_
      * @param  array  $vars
      * @return string
      */
-    public function getViewScript($action = null, array $vars = array())
+    public function getViewScript($action = null, array $vars = [])
     {
         $request = $this->getRequest();
         if ((null === $action) && (!isset($vars['action']))) {
             $action = $this->getScriptAction();
-            if (null === $action) {
-                $action = $request->getActionName();
-            }
+            $action ??= $request->getActionName();
             $vars['action'] = $action;
         } elseif (null !== $action) {
             $vars['action'] = $action;
         }
         
-        $replacePattern = array('/[^a-z0-9]+$/i', '/^[^a-z0-9]+/i');
+        $replacePattern = ['/[^a-z0-9]+$/i', '/^[^a-z0-9]+/i'];
         $vars['action'] = preg_replace($replacePattern, '', $vars['action']);
 
         $inflector = $this->getInflector();
@@ -836,7 +830,7 @@ class Zend_Controller_Action_Helper_ViewRenderer extends Zend_Controller_Action_
      * @param  array $vars
      * @return string
      */
-    protected function _translateSpec(array $vars = array())
+    protected function _translateSpec(array $vars = [])
     {
         $inflector  = $this->getInflector();
         $request    = $this->getRequest();
@@ -850,7 +844,7 @@ class Zend_Controller_Action_Helper_ViewRenderer extends Zend_Controller_Action_
         $filter     = new Zend_Filter_Word_CamelCaseToDash();
         $controller = $filter->filter($request->getControllerName());
         $controller = $dispatcher->formatControllerName($controller);
-        if ('Controller' == substr($controller, -10)) {
+        if (str_ends_with($controller, 'Controller')) {
             $controller = substr($controller, 0, -10);
         }
 
@@ -904,9 +898,7 @@ class Zend_Controller_Action_Helper_ViewRenderer extends Zend_Controller_Action_
      */
     public function renderScript($script, $name = null)
     {
-        if (null === $name) {
-            $name = $this->getResponseSegment();
-        }
+        $name ??= $this->getResponseSegment();
 
         $this->getResponse()->appendBody(
             $this->view->render($script),
@@ -944,7 +936,7 @@ class Zend_Controller_Action_Helper_ViewRenderer extends Zend_Controller_Action_
      * @param  string $name
      * @return void
      */
-    public function renderBySpec($action = null, array $vars = array(), $name = null)
+    public function renderBySpec($action = null, array $vars = [], $name = null)
     {
         if (null !== $name) {
             $this->setResponseSegment($name);

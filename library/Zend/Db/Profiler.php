@@ -83,7 +83,7 @@ class Zend_Db_Profiler
      *
      * @var array
      */
-    protected $_queryProfiles = array();
+    protected $_queryProfiles = [];
 
     /**
      * Stores enabled state of the profiler.  If set to False, calls to
@@ -219,7 +219,7 @@ class Zend_Db_Profiler
      */
     public function clear()
     {
-        $this->_queryProfiles = array();
+        $this->_queryProfiles = [];
 
         return $this;
     }
@@ -234,9 +234,7 @@ class Zend_Db_Profiler
     {
         $this->_queryProfiles[] = clone $query;
 
-        end($this->_queryProfiles);
-
-        return key($this->_queryProfiles);
+        return array_key_last($this->_queryProfiles);
     }
 
     /**
@@ -257,25 +255,13 @@ class Zend_Db_Profiler
         }
 
         // make sure we have a query type
-        if (null === $queryType) {
-            switch (strtolower(substr(ltrim($queryText), 0, 6))) {
-                case 'insert':
-                    $queryType = self::INSERT;
-                    break;
-                case 'update':
-                    $queryType = self::UPDATE;
-                    break;
-                case 'delete':
-                    $queryType = self::DELETE;
-                    break;
-                case 'select':
-                    $queryType = self::SELECT;
-                    break;
-                default:
-                    $queryType = self::QUERY;
-                    break;
-            }
-        }
+        $queryType ??= match (strtolower(substr(ltrim($queryText), 0, 6))) {
+            'insert' => self::INSERT,
+            'update' => self::UPDATE,
+            'delete' => self::DELETE,
+            'select' => self::SELECT,
+            default => self::QUERY,
+        };
 
         /**
          * @see Zend_Db_Profiler_Query
@@ -283,9 +269,7 @@ class Zend_Db_Profiler
         require_once 'Zend/Db/Profiler/Query.php';
         $this->_queryProfiles[] = new Zend_Db_Profiler_Query($queryText, $queryType);
 
-        end($this->_queryProfiles);
-
-        return key($this->_queryProfiles);
+        return array_key_last($this->_queryProfiles);
     }
 
     /**
@@ -382,7 +366,7 @@ class Zend_Db_Profiler
      */
     public function getQueryProfiles($queryType = null, $showUnfinished = false)
     {
-        $queryProfiles = array();
+        $queryProfiles = [];
         foreach ($this->_queryProfiles as $key => $qp) {
             if ($queryType === null) {
                 $condition = true;
@@ -414,7 +398,7 @@ class Zend_Db_Profiler
     public function getTotalElapsedSecs($queryType = null)
     {
         $elapsedSecs = 0;
-        foreach ($this->_queryProfiles as $key => $qp) {
+        foreach ($this->_queryProfiles as $qp) {
             if (null === $queryType) {
                 $condition = true;
             } else {

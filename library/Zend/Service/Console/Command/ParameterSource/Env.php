@@ -45,14 +45,14 @@ class Zend_Service_Console_Command_ParameterSource_Env
 	 * @param array $argv Argument values passed to the script when run in console.
 	 * @return mixed
 	 */
-	public function getValueForParameter($parameter, $argv = array())
+	public function getValueForParameter($parameter, $argv = [])
 	{
 		// Default value
 		$parameterValue = null;
 
 		// Fetch value for parameter
 		foreach ($parameter->aliases as $alias) {
-			while (strpos($alias, '-') !== false) {
+			while (str_contains($alias, '-')) {
 				$alias = substr($alias, 1);
 			}
 			$value = getenv($alias);

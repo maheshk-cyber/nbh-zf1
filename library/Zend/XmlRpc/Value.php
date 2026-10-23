@@ -158,7 +158,7 @@ abstract class Zend_XmlRpc_Value
     {
         if (!$this->_xml) {
             $this->generateXml();
-            $this->_xml = (string) $this->getGenerator();
+            $this->_xml = (string) static::getGenerator();
         }
         return $this->_xml;
     }
@@ -248,7 +248,7 @@ abstract class Zend_XmlRpc_Value
 
             default:
                 require_once 'Zend/XmlRpc/Value/Exception.php';
-                throw new Zend_XmlRpc_Value_Exception('Given type is not a '. __CLASS__ .' constant');
+                throw new Zend_XmlRpc_Value_Exception('Given type is not a '. self::class .' constant');
         }
     }
 
@@ -275,7 +275,7 @@ abstract class Zend_XmlRpc_Value
             return self::XMLRPC_TYPE_ARRAY;
         } elseif (is_int($value)) {
             return ($value > PHP_INT_MAX) ? self::XMLRPC_TYPE_I8 : self::XMLRPC_TYPE_INTEGER;
-        } elseif (is_double($value)) {
+        } elseif (is_float($value)) {
             return self::XMLRPC_TYPE_DOUBLE;
         } elseif (is_bool($value)) {
             return self::XMLRPC_TYPE_BOOLEAN;
@@ -426,7 +426,7 @@ abstract class Zend_XmlRpc_Value
                     require_once 'Zend/XmlRpc/Value/Exception.php';
                     throw new Zend_XmlRpc_Value_Exception('Invalid XML for XML-RPC native '. self::XMLRPC_TYPE_ARRAY .' type: ARRAY tag must contain DATA tag');
                 }
-                $values = array();
+                $values = [];
                 // Parse all the elements of the array from the XML string
                 // (simple xml element) to Zend_XmlRpc_Value objects
                 foreach ($data->value as $element) {
@@ -436,7 +436,7 @@ abstract class Zend_XmlRpc_Value
                 $xmlrpcValue = new Zend_XmlRpc_Value_Array($values);
                 break;
             case self::XMLRPC_TYPE_STRUCT:
-                $values = array();
+                $values = [];
                 // Parse all the memebers of the struct from the XML string
                 // (simple xml element) to Zend_XmlRpc_Value objects
                 foreach ($value->member as $member) {
@@ -486,13 +486,16 @@ abstract class Zend_XmlRpc_Value
      */
     protected static function _extractTypeAndValue(SimpleXMLElement $xml, &$type, &$value)
     {
-        list($type, $value) = each($xml);
-
+        $type = key($xml);
+        $value = current($xml);
+        next($xml);
         if (!$type and $value === null) {
-            $namespaces = array('ex' => 'http://ws.apache.org/xmlrpc/namespaces/extensions');
+            $namespaces = ['ex' => 'http://ws.apache.org/xmlrpc/namespaces/extensions'];
             foreach ($namespaces as $namespaceName => $namespaceUri) {
                 $namespaceXml = $xml->children($namespaceUri);
-                list($type, $value) = each($namespaceXml);
+                $type = key($namespaceXml);
+                $value = current($namespaceXml);
+                next($namespaceXml);
                 if ($type !== null) {
                     $type = $namespaceName . ':' . $type;
                     break;
@@ -509,7 +512,7 @@ abstract class Zend_XmlRpc_Value
         if (!$type) {
             $type = self::XMLRPC_TYPE_STRING;
             if (preg_match('#^<value>.*</value>$#', $xml->asXML())) {
-                $value = str_replace(array('<value>', '</value>'), '', $xml->asXML());
+                $value = str_replace(['<value>', '</value>'], '', $xml->asXML());
             }
         }
     }
@@ -520,6 +523,6 @@ abstract class Zend_XmlRpc_Value
      */
     protected function _setXML($xml)
     {
-        $this->_xml = $this->getGenerator()->stripDeclaration($xml);
+        $this->_xml = static::getGenerator()->stripDeclaration($xml);
     }
 }

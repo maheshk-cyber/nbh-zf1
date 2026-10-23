@@ -53,17 +53,17 @@ class Zend_Tag_Item implements Zend_Tag_Taggable
      *
      * @var string
      */
-    protected $_params = array();
+    protected $_params = [];
 
     /**
      * Option keys to skip when calling setOptions()
      *
      * @var array
      */
-    protected $_skipOptions = array(
+    protected $_skipOptions = [
         'options',
         'param'
-    );
+    ];
 
     /**
      * Create a new tag according to the options
@@ -212,9 +212,6 @@ class Zend_Tag_Item implements Zend_Tag_Taggable
      */
     public function getParam($name)
     {
-        if (isset($this->_params[$name])) {
-            return $this->_params[$name];
-        }
-        return null;
+        return $this->_params[$name] ?? null;
     }
 }

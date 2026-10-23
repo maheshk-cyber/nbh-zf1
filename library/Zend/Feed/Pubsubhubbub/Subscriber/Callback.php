@@ -91,9 +91,7 @@ class Zend_Feed_Pubsubhubbub_Subscriber_Callback
      */
     public function handle(array $httpGetData = null, $sendResponseNow = false)
     {
-        if ($httpGetData === null) {
-            $httpGetData = $_GET;
-        }
+        $httpGetData ??= $_GET;
 
         /**
          * Handle any feed updates (sorry for the mess :P)
@@ -154,12 +152,12 @@ class Zend_Feed_Pubsubhubbub_Subscriber_Callback
         if (strtolower($_SERVER['REQUEST_METHOD']) !== 'get') {
             return false;
         }
-        $required = array(
+        $required = [
             'hub_mode',
             'hub_topic',
             'hub_challenge',
             'hub_verify_token',
-        );
+        ];
         foreach ($required as $key) {
             if (!array_key_exists($key, $httpGetData)) {
                 return false;
@@ -302,13 +300,13 @@ class Zend_Feed_Pubsubhubbub_Subscriber_Callback
      */
     protected function _parseQueryString()
     {
-        $params      = array();
+        $params      = [];
         $queryString = '';
         if (isset($_SERVER['QUERY_STRING'])) {
             $queryString = $_SERVER['QUERY_STRING'];
         }
         if (empty($queryString)) {
-            return array();
+            return [];
         }
         $parts = explode('&', $queryString);
         foreach ($parts as $kvpair) {
@@ -319,7 +317,7 @@ class Zend_Feed_Pubsubhubbub_Subscriber_Callback
                 if (is_array($params[$key])) {
                     $params[$key][] = $value;
                 } else {
-                    $params[$key] = array($params[$key], $value);
+                    $params[$key] = [$params[$key], $value];
                 }
             } else {
                 $params[$key] = $value;

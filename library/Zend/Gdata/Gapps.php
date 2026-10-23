@@ -111,37 +111,32 @@ class Zend_Gdata_Gapps extends Zend_Gdata
     const APPS_EMAIL_LIST_RECIPIENT_POSTFIX = '/recipient';
 
     /**
-     * The domain which is being administered via the Provisioning API.
-     *
-     * @var string
-     */
-    protected $_domain = null;
-
-    /**
      * Namespaces used for Zend_Gdata_Gapps
      *
      * @var array
      */
-    public static $namespaces = array(
-        array('apps', 'http://schemas.google.com/apps/2006', 1, 0)
-    );
+    public static $namespaces = [
+        ['apps', 'http://schemas.google.com/apps/2006', 1, 0]
+    ];
 
     /**
      * Create Gdata_Gapps object
      *
      * @param Zend_Http_Client $client (optional) The HTTP client to use when
      *          when communicating with the Google Apps servers.
-     * @param string $domain (optional) The Google Apps domain which is to be
+     * @param string $_domain (optional) The Google Apps domain which is to be
      *          accessed.
      * @param string $applicationId The identity of the app in the form of Company-AppName-Version
      */
-    public function __construct($client = null, $domain = null, $applicationId = 'MyCompany-MyApp-1.0')
+    public function __construct($client = null, /**
+     * The domain which is being administered via the Provisioning API.
+     */
+    protected $_domain = null, $applicationId = 'MyCompany-MyApp-1.0')
     {
         $this->registerPackage('Zend_Gdata_Gapps');
         $this->registerPackage('Zend_Gdata_Gapps_Extension');
         parent::__construct($client, $applicationId);
         $this->_httpClient->setParameterPost('service', self::AUTH_SERVICE_NAME);
-        $this->_domain = $domain;
     }
 
     /**
@@ -171,7 +166,7 @@ class Zend_Gdata_Gapps extends Zend_Gdata
             $error = new Zend_Gdata_Gapps_ServiceException();
             $error->importFromString($response->getBody());
             throw $error;
-        } catch (Zend_Gdata_App_Exception $e2) {
+        } catch (Zend_Gdata_App_Exception) {
             // Unable to convert the response to a ServiceException,
             // most likely because the server didn't return an
             // AppsForYourDomainErrors document. Throw the original
@@ -216,7 +211,7 @@ class Zend_Gdata_Gapps extends Zend_Gdata
      * @throws Zend_Gdata_Gapps_ServiceException
      * @return Zend_Http_Response
      */
-    public function get($uri, $extraHeaders = array())
+    public function get($uri, $extraHeaders = [])
     {
         try {
             return parent::get($uri, $extraHeaders);
@@ -688,9 +683,7 @@ class Zend_Gdata_Gapps extends Zend_Gdata
      */
     public function insertUser($user, $uri = null)
     {
-        if ($uri === null) {
-            $uri = $this->getBaseUrl() . self::APPS_USER_PATH;
-        }
+        $uri ??= $this->getBaseUrl() . self::APPS_USER_PATH;
         $newEntry = $this->insertEntry($user, $uri, 'Zend_Gdata_Gapps_UserEntry');
         return $newEntry;
     }
@@ -711,9 +704,7 @@ class Zend_Gdata_Gapps extends Zend_Gdata
      */
     public function insertNickname($nickname, $uri = null)
     {
-        if ($uri === null) {
-            $uri = $this->getBaseUrl() . self::APPS_NICKNAME_PATH;
-        }
+        $uri ??= $this->getBaseUrl() . self::APPS_NICKNAME_PATH;
         $newEntry = $this->insertEntry($nickname, $uri, 'Zend_Gdata_Gapps_NicknameEntry');
         return $newEntry;
     }
@@ -805,9 +796,7 @@ class Zend_Gdata_Gapps extends Zend_Gdata
      */
     public function insertEmailList($emailList, $uri = null)
     {
-        if ($uri === null) {
-            $uri = $this->getBaseUrl() . self::APPS_EMAIL_LIST_PATH;
-        }
+        $uri ??= $this->getBaseUrl() . self::APPS_EMAIL_LIST_PATH;
         $newEntry = $this->insertEntry($emailList, $uri, 'Zend_Gdata_Gapps_EmailListEntry');
         return $newEntry;
     }
@@ -867,19 +856,19 @@ class Zend_Gdata_Gapps extends Zend_Gdata
                      }
                      $foundClassName = $name . '_' . $class;
                      break;
-                 } catch (Zend_Exception $e) {
+                 } catch (Zend_Exception) {
                      // package wasn't here- continue searching
                  }
             }
             if ($foundClassName != null) {
                 $reflectionObj = new ReflectionClass($foundClassName);
                 // Prepend the domain to the query
-                $args = array_merge(array($this->getDomain()), $args);
+                $args = array_merge([$this->getDomain()], $args);
                 return $reflectionObj->newInstanceArgs($args);
             } else {
                 require_once 'Zend/Gdata/App/Exception.php';
                 throw new Zend_Gdata_App_Exception(
-                        "Unable to find '${class}' in registered packages");
+                        "Unable to find '{$class}' in registered packages");
             }
         } else {
             return parent::__call($method, $args);
@@ -1273,7 +1262,7 @@ class Zend_Gdata_Gapps extends Zend_Gdata
         //if the enitiy is not a member, an exception is thrown
         try {
             $results = $this->get($uri);
-        } catch (Exception $e) {
+        } catch (Exception) {
             $results = false;
         }
 
@@ -1387,7 +1376,7 @@ class Zend_Gdata_Gapps extends Zend_Gdata
         //if the enitiy is not an owner of the group, an exception is thrown
         try {
             $results = $this->get($uri);
-        } catch (Exception $e) {
+        } catch (Exception) {
             $results = false;
         }
 

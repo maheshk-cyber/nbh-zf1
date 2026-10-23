@@ -77,13 +77,6 @@ require_once 'Zend/XmlRpc/Fault.php';
 class Zend_XmlRpc_Client
 {
     /**
-     * Full address of the XML-RPC service
-     * @var string
-     * @example http://time.xmlrpc.com/RPC2
-     */
-    protected $_serverAddress;
-
-    /**
      * HTTP Client to use for requests
      * @var Zend_Http_Client
      */
@@ -111,7 +104,7 @@ class Zend_XmlRpc_Client
      * Proxy object for more convenient method calls
      * @var array of Zend_XmlRpc_Client_ServerProxy
      */
-    protected $_proxyCache = array();
+    protected $_proxyCache = [];
 
     /**
      * Flag for skipping system lookup
@@ -122,12 +115,16 @@ class Zend_XmlRpc_Client
     /**
      * Create a new XML-RPC client to a remote server
      *
-     * @param  string $server      Full address of the XML-RPC service
+     * @param string $_serverAddress Full address of the XML-RPC service
      *                             (e.g. http://time.xmlrpc.com/RPC2)
      * @param  Zend_Http_Client $httpClient HTTP Client to use for requests
      * @return void
      */
-    public function __construct($server, Zend_Http_Client $httpClient = null)
+    public function __construct(/**
+     * Full address of the XML-RPC service
+     * @example http://time.xmlrpc.com/RPC2
+     */
+    protected $_serverAddress, Zend_Http_Client $httpClient = null)
     {
         if ($httpClient === null) {
             $this->_httpClient = new Zend_Http_Client();
@@ -136,7 +133,6 @@ class Zend_XmlRpc_Client
         }
 
         $this->_introspector  = new Zend_XmlRpc_Client_ServerIntrospection($this);
-        $this->_serverAddress = $server;
     }
 
 
@@ -272,13 +268,13 @@ class Zend_XmlRpc_Client
             $http->setUri($this->_serverAddress);
         }
 
-        $http->setHeaders(array(
+        $http->setHeaders([
             'Content-Type: text/xml; charset=utf-8',
             'Accept: text/xml',
-        ));
+        ]);
 
         if ($http->getHeader('user-agent') === null) {
-            $http->setHeaders(array('User-Agent: Zend_XmlRpc_Client'));
+            $http->setHeaders(['User-Agent: Zend_XmlRpc_Client']);
         }
 
         $xml = $this->_lastRequest->__toString();
@@ -296,9 +292,7 @@ class Zend_XmlRpc_Client
                                     $httpResponse->getStatus());
         }
 
-        if ($response === null) {
-            $response = new Zend_XmlRpc_Response();
-        }
+        $response ??= new Zend_XmlRpc_Response();
         $this->_lastResponse = $response;
         $this->_lastResponse->loadXml(trim($httpResponse->getBody()));
     }
@@ -311,19 +305,19 @@ class Zend_XmlRpc_Client
      * @return mixed
      * @throws Zend_XmlRpc_Client_FaultException
      */
-    public function call($method, $params=array())
+    public function call($method, $params=[])
     {
-        if (!$this->skipSystemLookup() && ('system.' != substr($method, 0, 7))) {
+        if (!$this->skipSystemLookup() && (!str_starts_with($method, 'system.'))) {
             // Ensure empty array/struct params are cast correctly
             // If system.* methods are not available, bypass. (ZF-2978)
             $success = true;
             try {
                 $signatures = $this->getIntrospector()->getMethodSignature($method);
-            } catch (Zend_XmlRpc_Exception $e) {
+            } catch (Zend_XmlRpc_Exception) {
                 $success = false;
             }
             if ($success) {
-                $validTypes = array(
+                $validTypes = [
                     Zend_XmlRpc_Value::XMLRPC_TYPE_ARRAY,
                     Zend_XmlRpc_Value::XMLRPC_TYPE_BASE64,
                     Zend_XmlRpc_Value::XMLRPC_TYPE_BOOLEAN,
@@ -334,10 +328,10 @@ class Zend_XmlRpc_Client
                     Zend_XmlRpc_Value::XMLRPC_TYPE_NIL,
                     Zend_XmlRpc_Value::XMLRPC_TYPE_STRING,
                     Zend_XmlRpc_Value::XMLRPC_TYPE_STRUCT,
-                );
+                ];
 
                 if (!is_array($params)) {
-                    $params = array($params);
+                    $params = [$params];
                 }
 
                 foreach ($params as $key => $param)

@@ -95,7 +95,7 @@ class Zend_TimeSync_Sntp extends Zend_TimeSync_Protocol
     {
         $this->_connect();
         $this->_delay = time();
-        fputs($this->_socket, $data);
+        fwrite($this->_socket, $data);
     }
 
     /**

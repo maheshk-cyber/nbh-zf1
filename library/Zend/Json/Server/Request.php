@@ -27,7 +27,7 @@
  * @copyright  Copyright (c) 2005-2015 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Json_Server_Request
+class Zend_Json_Server_Request implements \Stringable
 {
     /**
      * Request ID
@@ -57,7 +57,7 @@ class Zend_Json_Server_Request
      * Request parameters
      * @var array
      */
-    protected $_params = array();
+    protected $_params = [];
 
     /**
      * JSON-RPC version of request
@@ -126,7 +126,7 @@ class Zend_Json_Server_Request
      */
     public function setParams(array $params)
     {
-        $this->_params = array();
+        $this->_params = [];
         return $this->addParams($params);
     }
 
@@ -259,9 +259,9 @@ class Zend_Json_Server_Request
      */
     public function toJson()
     {
-        $jsonArray = array(
+        $jsonArray = [
             'method' => $this->getMethod()
-        );
+        ];
         if (null !== ($id = $this->getId())) {
             $jsonArray['id'] = $id;
         }
@@ -282,7 +282,7 @@ class Zend_Json_Server_Request
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->toJson();
     }

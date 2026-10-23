@@ -40,7 +40,7 @@ class Zend_Dom_Query_Css2Xpath
         $path = (string) $path;
         if (strstr($path, ',')) {
             $paths       = explode(',', $path);
-            $expressions = array();
+            $expressions = [];
             foreach ($paths as $path) {
                 $xpath = self::transform(trim($path));
                 if (is_string($xpath)) {
@@ -52,20 +52,20 @@ class Zend_Dom_Query_Css2Xpath
             return implode('|', $expressions);
         }
 
-        $paths    = array('//');
+        $paths    = ['//'];
         $path     = preg_replace('|\s+>\s+|', '>', $path);
         $segments = preg_split('/\s+/', $path);
         foreach ($segments as $key => $segment) {
             $pathSegment = self::_tokenize($segment);
             if (0 == $key) {
-                if (0 === strpos($pathSegment, '[contains(')) {
+                if (str_starts_with($pathSegment, '[contains(')) {
                     $paths[0] .= '*' . ltrim($pathSegment, '*');
                 } else {
                     $paths[0] .= $pathSegment;
                 }
                 continue;
             }
-            if (0 === strpos($pathSegment, '[contains(')) {
+            if (str_starts_with($pathSegment, '[contains(')) {
                 foreach ($paths as $key => $xpath) {
                     $paths[$key] .= '//*' . ltrim($pathSegment, '*');
                     $paths[]      = $xpath . $pathSegment;
@@ -101,21 +101,21 @@ class Zend_Dom_Query_Css2Xpath
         // arbitrary attribute strict equality
         $expression = preg_replace_callback(
             '|\[([a-z0-9_-]+)=[\'"]([^\'"]+)[\'"]\]|i',
-            array(__CLASS__, '_createEqualityExpression'),
+            self::_createEqualityExpression(...),
             $expression
         );
 
         // arbitrary attribute contains full word
         $expression = preg_replace_callback(
             '|\[([a-z0-9_-]+)~=[\'"]([^\'"]+)[\'"]\]|i',
-            array(__CLASS__, '_normalizeSpaceAttribute'),
+            self::_normalizeSpaceAttribute(...),
             $expression
         );
 
         // arbitrary attribute contains specified content
         $expression = preg_replace_callback(
             '|\[([a-z0-9_-]+)\*=[\'"]([^\'"]+)[\'"]\]|i',
-            array(__CLASS__, '_createContainsExpression'),
+            self::_createContainsExpression(...),
             $expression
         );
 

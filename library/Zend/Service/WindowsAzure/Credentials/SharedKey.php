@@ -89,7 +89,7 @@ class Zend_Service_WindowsAzure_Credentials_SharedKey
 		$queryString = $this->_prepareQueryStringForSigning($queryString);
 	
 		// Canonicalized headers
-		$canonicalizedHeaders = array();
+		$canonicalizedHeaders = [];
 		
 		// Request date
 		$requestDate = '';
@@ -108,7 +108,7 @@ class Zend_Service_WindowsAzure_Credentials_SharedKey
 				}
 
 				$headers[$header] = $value;
-				if (substr($header, 0, strlen(Zend_Service_WindowsAzure_Credentials_CredentialsAbstract::PREFIX_STORAGE_HEADER)) == Zend_Service_WindowsAzure_Credentials_CredentialsAbstract::PREFIX_STORAGE_HEADER) {
+				if (str_starts_with($header, Zend_Service_WindowsAzure_Credentials_CredentialsAbstract::PREFIX_STORAGE_HEADER)) {
 				    $canonicalizedHeaders[] = strtolower($header) . ':' . $value;
 				}
 			}
@@ -141,7 +141,7 @@ class Zend_Service_WindowsAzure_Credentials_SharedKey
 		}
 
 		// Create string to sign   
-		$stringToSign   = array();
+		$stringToSign   = [];
 		$stringToSign[] = strtoupper($httpVerb); 									// VERB
     	$stringToSign[] = $this->_issetOr($headers, 'Content-Encoding', '');		// Content-Encoding
     	$stringToSign[] = $this->_issetOr($headers, 'Content-Language', '');		// Content-Language

@@ -68,7 +68,7 @@ class Zend_Service_WindowsAzure_Log_Writer_WindowsAzure
      *
      * @var array
      */
-    protected $_messageBuffer = array();
+    protected $_messageBuffer = [];
 
     /**
      * @param Zend_Service_Service_WindowsAzure_Storage_Table|Zend_Service_WindowsAzure_Storage_Table $tableStorageConnection
@@ -145,11 +145,11 @@ class Zend_Service_WindowsAzure_Log_Writer_WindowsAzure
     {
         $config = self::_parseConfig($config);
         $config = array_merge(
-            array(
+            [
                  'connection' => null,
                  'tableName' => null,
                  'createTable' => true,
-            ), $config
+            ], $config
         );
 
         return new self(
@@ -166,11 +166,11 @@ class Zend_Service_WindowsAzure_Log_Writer_WindowsAzure
      */
     public function setFormatter(
         Zend_Service_Log_Formatter_Interface $formatter
-    )
+    ): never
     {
         require_once 'Zend/Service/Log/Exception.php';
         throw new Zend_Service_Log_Exception(
-            get_class($this) . ' does not support formatting');
+            static::class . ' does not support formatting');
     }
 
     /**

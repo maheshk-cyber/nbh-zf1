@@ -72,7 +72,7 @@ class Zend_Gdata_Docs extends Zend_Gdata
     /**
      * @var array
      */
-    protected static $SUPPORTED_FILETYPES = array(
+    protected static $SUPPORTED_FILETYPES = [
         'TXT'  => 'text/plain',
         'CSV'  => 'text/csv',
         'TSV'  => 'text/tab-separated-values',
@@ -89,7 +89,7 @@ class Zend_Gdata_Docs extends Zend_Gdata
         'XLSX' => 'application/vnd.ms-excel',
         'PPT'  => 'application/vnd.ms-powerpoint',
         'PPS'  => 'application/vnd.ms-powerpoint'
-    );
+    ];
 
     /**
      * Create Gdata_Docs object
@@ -239,9 +239,7 @@ class Zend_Gdata_Docs extends Zend_Gdata
     )
     {
         // Set the URI to which the file will be uploaded.
-        if ($uri === null) {
-            $uri = $this->_defaultPostUri;
-        }
+        $uri ??= $this->_defaultPostUri;
 
         // Create the media source which describes the file.
         $fs = $this->newMediaFileSource($fileLocation);
@@ -289,7 +287,7 @@ class Zend_Gdata_Docs extends Zend_Gdata
         $title    = new Zend_Gdata_App_Extension_Title($folderName);
         $entry    = new Zend_Gdata_Entry();
 
-        $entry->setCategory(array($category));
+        $entry->setCategory([$category]);
         $entry->setTitle($title);
 
         $uri = self::DOCUMENTS_LIST_FEED_URI;

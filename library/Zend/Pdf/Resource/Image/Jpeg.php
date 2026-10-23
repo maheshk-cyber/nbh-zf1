@@ -73,17 +73,11 @@ class Zend_Pdf_Resource_Image_Jpeg extends Zend_Pdf_Resource_Image
 
         parent::__construct();
 
-        switch ($imageInfo['channels']) {
-            case 3:
-                $colorSpace = 'DeviceRGB';
-                break;
-            case 4:
-                $colorSpace = 'DeviceCMYK';
-                break;
-            default:
-                $colorSpace = 'DeviceGray';
-                break;
-        }
+        $colorSpace = match ($imageInfo['channels']) {
+            3 => 'DeviceRGB',
+            4 => 'DeviceCMYK',
+            default => 'DeviceGray',
+        };
 
         $imageDictionary = $this->_resource->dictionary;
         $imageDictionary->Width            = new Zend_Pdf_Element_Numeric($imageInfo[0]);
@@ -122,7 +116,7 @@ class Zend_Pdf_Resource_Image_Jpeg extends Zend_Pdf_Resource_Image
 
         $this->_width  = $imageInfo[0];
         $this->_height = $imageInfo[1];
-        $this->_imageProperties = array();
+        $this->_imageProperties = [];
         $this->_imageProperties['bitDepth'] = $imageInfo['bits'];
         $this->_imageProperties['jpegImageType'] = $imageInfo[2];
         $this->_imageProperties['jpegColorType'] = $imageInfo['channels'];

@@ -52,7 +52,7 @@ abstract class Zend_Service_Ebay_Finding_Abstract
     /**
      * @var array
      */
-    protected $_attributes = array();
+    protected $_attributes = [];
 
     /**
      * @param  DOMElement $dom
@@ -77,14 +77,9 @@ abstract class Zend_Service_Ebay_Finding_Abstract
             if (array_key_exists($tag, $this->_attributes)) {
                 return $this->_attributes[$tag];
             }
-            return array();
+            return [];
         }
-
-        // a specific attribute
-        if (isset($this->_attributes[$tag][$attribute])) {
-            return $this->_attributes[$tag][$attribute];
-        }
-        return null;
+        return $this->_attributes[$tag][$attribute] ?? null;
     }
 
     /**
@@ -143,7 +138,7 @@ abstract class Zend_Service_Ebay_Finding_Abstract
     protected function _query($path, $type, $array = false)
     {
         // find values
-        $values = array();
+        $values = [];
         $nodes  = $this->_xPath->query($path, $this->_dom);
         foreach ($nodes as $node) {
             $value    = (string) $node->nodeValue;

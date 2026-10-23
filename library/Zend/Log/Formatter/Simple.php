@@ -49,9 +49,7 @@ class Zend_Log_Formatter_Simple extends Zend_Log_Formatter_Abstract
      */
     public function __construct($format = null)
     {
-        if ($format === null) {
-            $format = self::DEFAULT_FORMAT . PHP_EOL;
-        }
+        $format ??= self::DEFAULT_FORMAT . PHP_EOL;
 
         if (!is_string($format)) {
             require_once 'Zend/Log/Exception.php';

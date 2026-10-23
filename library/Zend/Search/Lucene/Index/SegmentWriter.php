@@ -85,13 +85,6 @@ abstract class Zend_Search_Lucene_Index_SegmentWriter
     protected $_docCount = 0;
 
     /**
-     * Segment name
-     *
-     * @var string
-     */
-    protected $_name;
-
-    /**
      * File system adapter.
      *
      * @var Zend_Search_Lucene_Storage_Directory
@@ -104,14 +97,14 @@ abstract class Zend_Search_Lucene_Index_SegmentWriter
      *
      * @var unknown_type
      */
-    protected $_files = array();
+    protected $_files = [];
 
     /**
      * Segment fields. Array of Zend_Search_Lucene_Index_FieldInfo objects for this segment
      *
      * @var array
      */
-    protected $_fields = array();
+    protected $_fields = [];
 
     /**
      * Normalization factors.
@@ -123,7 +116,7 @@ abstract class Zend_Search_Lucene_Index_SegmentWriter
      *
      * @var array
      */
-    protected $_norms = array();
+    protected $_norms = [];
 
 
     /**
@@ -145,12 +138,14 @@ abstract class Zend_Search_Lucene_Index_SegmentWriter
      * Object constructor.
      *
      * @param Zend_Search_Lucene_Storage_Directory $directory
-     * @param string $name
+     * @param string $_name
      */
-    public function __construct(Zend_Search_Lucene_Storage_Directory $directory, $name)
+    public function __construct(Zend_Search_Lucene_Storage_Directory $directory, /**
+     * Segment name
+     */
+    protected $_name)
     {
         $this->_directory = $directory;
-        $this->_name      = $name;
     }
 
 
@@ -593,7 +588,7 @@ abstract class Zend_Search_Lucene_Index_SegmentWriter
         $cfsFile = $this->_directory->createFile($this->_name . '.cfs');
         $cfsFile->writeVInt(count($this->_files));
 
-        $dataOffsetPointers = array();
+        $dataOffsetPointers = [];
         foreach ($this->_files as $fileName) {
             $dataOffsetPointers[$fileName] = $cfsFile->tell();
             $cfsFile->writeLong(0); // write dummy data

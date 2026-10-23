@@ -84,14 +84,12 @@ class Zend_Filter_Alpha implements Zend_Filter_Interface
         }
 
         $this->allowWhiteSpace = (boolean) $allowWhiteSpace;
-        if (null === self::$_unicodeEnabled) {
-            self::$_unicodeEnabled = (@preg_match('/\pL/u', 'a')) ? true : false;
-        }
+        self::$_unicodeEnabled ??= (@preg_match('/\pL/u', 'a')) ? true : false;
 
         if (null === self::$_meansEnglishAlphabet) {
             $this->_locale = new Zend_Locale('auto');
             self::$_meansEnglishAlphabet = in_array($this->_locale->getLanguage(),
-                                                    array('ja', 'ko', 'zh')
+                                                    ['ja', 'ko', 'zh']
                                                     );
         }
 

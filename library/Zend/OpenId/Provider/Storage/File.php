@@ -115,7 +115,7 @@ class Zend_OpenId_Provider_Storage_File extends Zend_OpenId_Provider_Storage
                 fclose($lock);
                 return false;
             }
-            $data = serialize(array($handle, $macFunc, $secret, $expires));
+            $data = serialize([$handle, $macFunc, $secret, $expires]);
             fwrite($f, $data);
             fclose($f);
             fclose($lock);
@@ -157,7 +157,7 @@ class Zend_OpenId_Provider_Storage_File extends Zend_OpenId_Provider_Storage
             $ret = false;
             $data = stream_get_contents($f);
             if (!empty($data)) {
-                list($storedHandle, $macFunc, $secret, $expires) = unserialize($data);
+                [$storedHandle, $macFunc, $secret, $expires] = unserialize($data);
                 if ($handle === $storedHandle && $expires > time()) {
                     $ret = true;
                 } else {
@@ -229,7 +229,7 @@ class Zend_OpenId_Provider_Storage_File extends Zend_OpenId_Provider_Storage
                 fclose($lock);
                 return false;
             }
-            $data = serialize(array($id, $password, array()));
+            $data = serialize([$id, $password, []]);
             fwrite($f, $data);
             fclose($f);
             fclose($lock);
@@ -266,7 +266,7 @@ class Zend_OpenId_Provider_Storage_File extends Zend_OpenId_Provider_Storage
             $ret = false;
             $data = stream_get_contents($f);
             if (!empty($data)) {
-                list($storedId, $storedPassword, $trusted) = unserialize($data);
+                [$storedId, $storedPassword, $trusted] = unserialize($data);
                 if ($id === $storedId) {
                     $ret = true;
                 }
@@ -307,7 +307,7 @@ class Zend_OpenId_Provider_Storage_File extends Zend_OpenId_Provider_Storage
             $ret = false;
             $data = stream_get_contents($f);
             if (!empty($data)) {
-                list($storedId, $storedPassword, $trusted) = unserialize($data);
+                [$storedId, $storedPassword, $trusted] = unserialize($data);
                 if ($id === $storedId && $password === $storedPassword) {
                     $ret = true;
                 }
@@ -375,7 +375,7 @@ class Zend_OpenId_Provider_Storage_File extends Zend_OpenId_Provider_Storage
             $ret = false;
             $data = stream_get_contents($f);
             if (!empty($data)) {
-                list($storedId, $storedPassword, $trusted) = unserialize($data);
+                [$storedId, $storedPassword, $trusted] = unserialize($data);
                 if ($id === $storedId) {
                     $ret = $trusted;
                 }
@@ -417,7 +417,7 @@ class Zend_OpenId_Provider_Storage_File extends Zend_OpenId_Provider_Storage
             $ret = false;
             $data = stream_get_contents($f);
             if (!empty($data)) {
-                list($storedId, $storedPassword, $sites) = unserialize($data);
+                [$storedId, $storedPassword, $sites] = unserialize($data);
                 if ($id === $storedId) {
                     if ($trusted === null) {
                         unset($sites[$site]);
@@ -426,7 +426,7 @@ class Zend_OpenId_Provider_Storage_File extends Zend_OpenId_Provider_Storage
                     }
                     rewind($f);
                     ftruncate($f, 0);
-                    $data = serialize(array($id, $storedPassword, $sites));
+                    $data = serialize([$id, $storedPassword, $sites]);
                     fwrite($f, $data);
                     $ret = true;
                 }

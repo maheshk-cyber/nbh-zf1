@@ -23,19 +23,12 @@ class Zend_Cloud_Infrastructure_ImageList implements Countable, Iterator, ArrayA
     /**
      * @var array Array of Zend_Cloud_Infrastructure_Image
      */
-    protected $images = array();
+    protected $images = [];
 
     /**
      * @var int Iterator key
      */
     protected $iteratorKey = 0;
-
-    /**
-     * The Image adapter (if exists)
-     * 
-     * @var object
-     */
-    protected $adapter;
 
     /**
      * Constructor
@@ -44,14 +37,15 @@ class Zend_Cloud_Infrastructure_ImageList implements Countable, Iterator, ArrayA
      * @param  null|object $adapter
      * @return boolean
      */
-    public function __construct($images, $adapter = null)
+    public function __construct($images, /**
+     * The Image adapter (if exists)
+     */
+    protected $adapter = null)
     {
         if (empty($images) || !is_array($images)) {
             require_once 'Zend/Cloud/Infrastructure/Exception.php';
-            throw new Zend_Cloud_Infrastructure_Exception(__CLASS__ . ' expects an array of images');
+            throw new Zend_Cloud_Infrastructure_Exception(self::class . ' expects an array of images');
         }
-
-        $this->adapter = $adapter;
         $this->constructFromArray($images);
     }
 

@@ -60,17 +60,17 @@ class Zend_Reflection_File implements Reflector
     /**
      * @var string[]
      */
-    protected $_requiredFiles   = array();
+    protected $_requiredFiles   = [];
 
     /**
      * @var Zend_Reflection_Class[]
      */
-    protected $_classes         = array();
+    protected $_classes         = [];
 
     /**
      * @var Zend_Reflection_Function[]
      */
-    protected $_functions       = array();
+    protected $_functions       = [];
 
     /**
      * @var string
@@ -208,7 +208,7 @@ class Zend_Reflection_File implements Reflector
      */
     public function getClasses($reflectionClass = 'Zend_Reflection_Class')
     {
-        $classes = array();
+        $classes = [];
         foreach ($this->_classes as $class) {
             $instance = new $reflectionClass($class);
             if (!$instance instanceof Zend_Reflection_Class) {
@@ -228,7 +228,7 @@ class Zend_Reflection_File implements Reflector
      */
     public function getFunctions($reflectionClass = 'Zend_Reflection_Function')
     {
-        $functions = array();
+        $functions = [];
         foreach ($this->_functions as $function) {
             $instance = new $reflectionClass($function);
             if (!$instance instanceof Zend_Reflection_Function) {
@@ -292,7 +292,7 @@ class Zend_Reflection_File implements Reflector
      * @todo   What should this serialization look like?
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return '';
     }
@@ -355,7 +355,7 @@ class Zend_Reflection_File implements Reflector
                 case T_DOLLAR_OPEN_CURLY_BRACES:
                 case T_CURLY_OPEN:
                     $embeddedVariableTrapped = true;
-                    continue;
+                    break;
 
                 // Name of something
                 case T_STRING:
@@ -366,7 +366,7 @@ class Zend_Reflection_File implements Reflector
                         $this->_classes[] = $value;
                         $classTrapped = false;
                     }
-                    continue;
+                    break;
 
                 // Required file names are T_CONSTANT_ENCAPSED_STRING
                 case T_CONSTANT_ENCAPSED_STRING:
@@ -374,7 +374,7 @@ class Zend_Reflection_File implements Reflector
                         $this->_requiredFiles[] = $value ."\n";
                         $requireTrapped = false;
                     }
-                    continue;
+                    break;
 
                 // Functions
                 case T_FUNCTION:

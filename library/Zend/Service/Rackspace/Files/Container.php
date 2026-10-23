@@ -85,11 +85,8 @@ class Zend_Service_Rackspace_Files_Container
     public function getSize()
     {
         $data = $this->getInfo();
-        if (isset($data['bytes'])) {
-            return $data['bytes'];
-        }
 
-        return false;
+        return $data['bytes'] ?? false;
     }
 
     /**
@@ -100,11 +97,8 @@ class Zend_Service_Rackspace_Files_Container
     public function getObjectCount()
     {
         $data = $this->getInfo();
-        if (isset($data['count'])) {
-            return $data['count'];
-        }
 
-        return false;
+        return $data['count'] ?? false;
     }
 
     /**
@@ -115,11 +109,8 @@ class Zend_Service_Rackspace_Files_Container
     public function isCdnEnabled()
     {
         $data = $this->getCdnInfo();
-        if (isset($data['cdn_enabled'])) {
-            return $data['cdn_enabled'];
-        }
 
-        return false;
+        return $data['cdn_enabled'] ?? false;
     }
 
     /**
@@ -130,11 +121,8 @@ class Zend_Service_Rackspace_Files_Container
     public function getCdnTtl()
     {
         $data = $this->getCdnInfo();
-        if (isset($data['ttl'])) {
-            return $data['ttl'];
-        }
 
-        return false;
+        return $data['ttl'] ?? false;
     }
 
     /**
@@ -145,11 +133,8 @@ class Zend_Service_Rackspace_Files_Container
     public function isCdnLogEnabled()
     {
         $data = $this->getCdnInfo();
-        if (isset($data['log_retention'])) {
-            return $data['log_retention'];
-        }
 
-        return false;
+        return $data['log_retention'] ?? false;
     }
 
     /**
@@ -160,11 +145,8 @@ class Zend_Service_Rackspace_Files_Container
     public function getCdnUri()
     {
         $data = $this->getCdnInfo();
-        if (isset($data['cdn_uri'])) {
-            return $data['cdn_uri'];
-        }
 
-        return false;
+        return $data['cdn_uri'] ?? false;
     }
 
     /**
@@ -175,11 +157,8 @@ class Zend_Service_Rackspace_Files_Container
     public function getCdnUriSsl()
     {
         $data = $this->getCdnInfo();
-        if (isset($data['cdn_uri_ssl'])) {
-            return $data['cdn_uri_ssl'];
-        }
 
-        return false;
+        return $data['cdn_uri_ssl'] ?? false;
     }
 
     /**
@@ -240,7 +219,7 @@ class Zend_Service_Rackspace_Files_Container
      *
      * @return Zend_Service_Rackspace_Files_Object|bool
      */
-    public function getObject($name, $headers = array())
+    public function getObject($name, $headers = [])
     {
         return $this->service->getObject($this->getName(), $name, $headers);
     }
@@ -254,7 +233,7 @@ class Zend_Service_Rackspace_Files_Container
      *
      * @return bool
      */
-    public function addObject($name, $file, $metadata = array())
+    public function addObject($name, $file, $metadata = [])
     {
         return $this->service->storeObject(
             $this->getName(), $name, $file, $metadata
@@ -285,7 +264,7 @@ class Zend_Service_Rackspace_Files_Container
      * @return bool
      */
     public function copyObject(
-        $obj_source, $container_dest, $obj_dest, $metadata = array(),
+        $obj_source, $container_dest, $obj_dest, $metadata = [],
         $content_type = null
     )
     {
@@ -319,7 +298,7 @@ class Zend_Service_Rackspace_Files_Container
      *
      * @return bool
      */
-    public function setMetadataObject($object, $metadata = array())
+    public function setMetadataObject($object, $metadata = [])
     {
         return $this->service->setMetadataObject(
             $this->getName(), $object, $metadata

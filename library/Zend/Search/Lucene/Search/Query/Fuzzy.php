@@ -49,14 +49,7 @@ class Zend_Search_Lucene_Search_Query_Fuzzy extends Zend_Search_Lucene_Search_Qu
      *
      * keys are integers representing a word size
      */
-    private $_maxDistances = array();
-
-    /**
-     * Base searching term.
-     *
-     * @var Zend_Search_Lucene_Index_Term
-     */
-    private $_term;
+    private $_maxDistances = [];
 
     /**
      * A value between 0 and 1 to set the required similarity
@@ -114,12 +107,15 @@ class Zend_Search_Lucene_Search_Query_Fuzzy extends Zend_Search_Lucene_Search_Qu
     /**
      * Zend_Search_Lucene_Search_Query_Wildcard constructor.
      *
-     * @param Zend_Search_Lucene_Index_Term $term
+     * @param Zend_Search_Lucene_Index_Term $_term
      * @param float   $minimumSimilarity
      * @param integer $prefixLength
      * @throws Zend_Search_Lucene_Exception
      */
-    public function __construct(Zend_Search_Lucene_Index_Term $term, $minimumSimilarity = self::DEFAULT_MIN_SIMILARITY, $prefixLength = null)
+    public function __construct(/**
+     * Base searching term.
+     */
+    private readonly Zend_Search_Lucene_Index_Term $_term, $minimumSimilarity = self::DEFAULT_MIN_SIMILARITY, $prefixLength = null)
     {
         if ($minimumSimilarity < 0) {
             require_once 'Zend/Search/Lucene/Exception.php';
@@ -133,10 +129,8 @@ class Zend_Search_Lucene_Search_Query_Fuzzy extends Zend_Search_Lucene_Search_Qu
             require_once 'Zend/Search/Lucene/Exception.php';
             throw new Zend_Search_Lucene_Exception('prefixLength cannot be less than 0');
         }
-
-        $this->_term              = $term;
         $this->_minimumSimilarity = $minimumSimilarity;
-        $this->_prefixLength      = ($prefixLength !== null)? $prefixLength : self::$_defaultPrefixLength;
+        $this->_prefixLength      = $prefixLength ?? self::$_defaultPrefixLength;
     }
 
     /**
@@ -182,15 +176,15 @@ class Zend_Search_Lucene_Search_Query_Fuzzy extends Zend_Search_Lucene_Search_Qu
      */
     public function rewrite(Zend_Search_Lucene_Interface $index)
     {
-        $this->_matches  = array();
-        $this->_scores   = array();
-        $this->_termKeys = array();
+        $this->_matches  = [];
+        $this->_scores   = [];
+        $this->_termKeys = [];
 
         if ($this->_term->field === null) {
             // Search through all fields
             $fields = $index->getFieldNames(true /* indexed fields list */);
         } else {
-            $fields = array($this->_term->field);
+            $fields = [$this->_term->field];
         }
 
         require_once 'Zend/Search/Lucene/Index/Term.php';
@@ -221,9 +215,7 @@ class Zend_Search_Lucene_Search_Query_Fuzzy extends Zend_Search_Lucene_Search_Qu
                     // Calculate similarity
                     $target = substr($index->currentTerm()->text, $prefixByteLength);
 
-                    $maxDistance = isset($this->_maxDistances[strlen($target)])?
-                                       $this->_maxDistances[strlen($target)] :
-                                       $this->_calculateMaxDistance($prefixUtf8Length, $termRestLength, strlen($target));
+                    $maxDistance = $this->_maxDistances[strlen($target)] ?? $this->_calculateMaxDistance($prefixUtf8Length, $termRestLength, strlen($target));
 
                     if ($termRestLength == 0) {
                         // we don't have anything to compare.  That means if we just add
@@ -263,9 +255,7 @@ class Zend_Search_Lucene_Search_Query_Fuzzy extends Zend_Search_Lucene_Search_Qu
                     // Calculate similarity
                     $target = $index->currentTerm()->text;
 
-                    $maxDistance = isset($this->_maxDistances[strlen($target)])?
-                                       $this->_maxDistances[strlen($target)] :
-                                       $this->_calculateMaxDistance(0, $termRestLength, strlen($target));
+                    $maxDistance = $this->_maxDistances[strlen($target)] ?? $this->_calculateMaxDistance(0, $termRestLength, strlen($target));
 
                     if ($maxDistance < abs($termRestLength - strlen($target))){
                         //just adding the characters of term to target or vice-versa results in too many edits
@@ -335,7 +325,7 @@ class Zend_Search_Lucene_Search_Query_Fuzzy extends Zend_Search_Lucene_Search_Qu
      * @param Zend_Search_Lucene_Interface $index
      * @return Zend_Search_Lucene_Search_Query
      */
-    public function optimize(Zend_Search_Lucene_Interface $index)
+    public function optimize(Zend_Search_Lucene_Interface $index): never
     {
         require_once 'Zend/Search/Lucene/Exception.php';
         throw new Zend_Search_Lucene_Exception('Fuzzy query should not be directly used for search. Use $query->rewrite($index)');
@@ -364,7 +354,7 @@ class Zend_Search_Lucene_Search_Query_Fuzzy extends Zend_Search_Lucene_Search_Qu
      * @return Zend_Search_Lucene_Search_Weight
      * @throws Zend_Search_Lucene_Exception
      */
-    public function createWeight(Zend_Search_Lucene_Interface $reader)
+    public function createWeight(Zend_Search_Lucene_Interface $reader): never
     {
         require_once 'Zend/Search/Lucene/Exception.php';
         throw new Zend_Search_Lucene_Exception('Fuzzy query should not be directly used for search. Use $query->rewrite($index)');
@@ -379,7 +369,7 @@ class Zend_Search_Lucene_Search_Query_Fuzzy extends Zend_Search_Lucene_Search_Qu
      * @param Zend_Search_Lucene_Index_DocsFilter|null $docsFilter
      * @throws Zend_Search_Lucene_Exception
      */
-    public function execute(Zend_Search_Lucene_Interface $reader, $docsFilter = null)
+    public function execute(Zend_Search_Lucene_Interface $reader, $docsFilter = null): never
     {
         require_once 'Zend/Search/Lucene/Exception.php';
         throw new Zend_Search_Lucene_Exception('Fuzzy query should not be directly used for search. Use $query->rewrite($index)');
@@ -393,7 +383,7 @@ class Zend_Search_Lucene_Search_Query_Fuzzy extends Zend_Search_Lucene_Search_Qu
      * @return array
      * @throws Zend_Search_Lucene_Exception
      */
-    public function matchedDocs()
+    public function matchedDocs(): never
     {
         require_once 'Zend/Search/Lucene/Exception.php';
         throw new Zend_Search_Lucene_Exception('Fuzzy query should not be directly used for search. Use $query->rewrite($index)');
@@ -407,7 +397,7 @@ class Zend_Search_Lucene_Search_Query_Fuzzy extends Zend_Search_Lucene_Search_Qu
      * @return float
      * @throws Zend_Search_Lucene_Exception
      */
-    public function score($docId, Zend_Search_Lucene_Interface $reader)
+    public function score($docId, Zend_Search_Lucene_Interface $reader): never
     {
         require_once 'Zend/Search/Lucene/Exception.php';
         throw new Zend_Search_Lucene_Exception('Fuzzy query should not be directly used for search. Use $query->rewrite($index)');
@@ -420,7 +410,7 @@ class Zend_Search_Lucene_Search_Query_Fuzzy extends Zend_Search_Lucene_Search_Qu
      */
     protected function _highlightMatches(Zend_Search_Lucene_Search_Highlighter_Interface $highlighter)
     {
-        $words = array();
+        $words = [];
 
         require_once 'Zend/Search/Lucene/Index/Term.php';
         $prefix           = Zend_Search_Lucene_Index_Term::getPrefix($this->_term->text, $this->_prefixLength);
@@ -445,9 +435,7 @@ class Zend_Search_Lucene_Search_Query_Fuzzy extends Zend_Search_Lucene_Search_Qu
                 // Calculate similarity
                 $target = substr($termText, $prefixByteLength);
 
-                $maxDistance = isset($this->_maxDistances[strlen($target)])?
-                                   $this->_maxDistances[strlen($target)] :
-                                   $this->_calculateMaxDistance($prefixUtf8Length, $termRestLength, strlen($target));
+                $maxDistance = $this->_maxDistances[strlen($target)] ?? $this->_calculateMaxDistance($prefixUtf8Length, $termRestLength, strlen($target));
 
                 if ($termRestLength == 0) {
                     // we don't have anything to compare.  That means if we just add
@@ -481,7 +469,7 @@ class Zend_Search_Lucene_Search_Query_Fuzzy extends Zend_Search_Lucene_Search_Qu
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         // It's used only for query visualisation, so we don't care about characters escaping
         return (($this->_term->field === null)? '' : $this->_term->field . ':')

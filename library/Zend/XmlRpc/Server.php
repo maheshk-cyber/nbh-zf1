@@ -144,7 +144,7 @@ class Zend_XmlRpc_Server extends Zend_Server_Abstract
      * PHP types => XML-RPC types
      * @var array
      */
-    protected $_typeMap = array(
+    protected $_typeMap = [
         'i4'                         => 'i4',
         'int'                        => 'int',
         'integer'                    => 'int',
@@ -174,7 +174,7 @@ class Zend_XmlRpc_Server extends Zend_Server_Abstract
         'ex:nil'                     => 'nil',
         'void'                       => 'void',
         'mixed'                      => 'struct',
-    );
+    ];
 
     /**
      * Send arguments to all methods or just constructor?
@@ -211,7 +211,7 @@ class Zend_XmlRpc_Server extends Zend_Server_Abstract
             require_once 'Zend/XmlRpc/Server/Exception.php';
             throw new Zend_XmlRpc_Server_Exception('Unknown instance method called on server: ' . $method);
         }
-        return call_user_func_array(array($system, $method), $params);
+        return call_user_func_array([$system, $method], $params);
     }
 
     /**
@@ -360,7 +360,7 @@ class Zend_XmlRpc_Server extends Zend_Server_Abstract
     {
         if (!is_array($definition) && (!$definition instanceof Zend_Server_Definition)) {
             if (is_object($definition)) {
-                $type = get_class($definition);
+                $type = $definition::class;
             } else {
                 $type = gettype($definition);
             }
@@ -376,7 +376,7 @@ class Zend_XmlRpc_Server extends Zend_Server_Abstract
         }
 
         foreach ($definition as $key => $method) {
-            if ('system.' == substr($key, 0, 7)) {
+            if (str_starts_with($key, 'system.')) {
                 continue;
             }
             $this->_table->addMethod($method, $key);
@@ -538,10 +538,7 @@ class Zend_XmlRpc_Server extends Zend_Server_Abstract
      */
     protected function _fixType($type)
     {
-        if (isset($this->_typeMap[$type])) {
-            return $this->_typeMap[$type];
-        }
-        return 'void';
+        return $this->_typeMap[$type] ?? 'void';
     }
 
     /**

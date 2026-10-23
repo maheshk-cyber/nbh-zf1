@@ -44,13 +44,6 @@ require_once 'Zend/Pdf/Element/String.php';
 class Zend_Pdf_StringParser
 {
     /**
-     * Source PDF
-     *
-     * @var string
-     */
-    public $data = '';
-
-    /**
      * Current position in a data
      *
      * @var integer
@@ -69,7 +62,7 @@ class Zend_Pdf_StringParser
      *
      * @var array
      */
-    private $_elements = array();
+    private $_elements = [];
 
     /**
      * PDF objects factory.
@@ -87,7 +80,7 @@ class Zend_Pdf_StringParser
     public function cleanUp()
     {
         $this->_context = null;
-        $this->_elements = array();
+        $this->_elements = [];
         $this->_objFactory = null;
     }
 
@@ -245,7 +238,7 @@ class Zend_Pdf_StringParser
         }
 
         if ( /* self::isDelimiter( ord($this->data[$start]) ) */
-             strpos('()<>[]{}/%', $this->data[$this->offset]) !== false ) {
+             str_contains('()<>[]{}/%', $this->data[$this->offset]) ) {
 
             switch (substr($this->data, $this->offset, 2)) {
                 case '<<':
@@ -286,9 +279,7 @@ class Zend_Pdf_StringParser
      */
     public function readElement($nextLexeme = null)
     {
-        if ($nextLexeme === null) {
-            $nextLexeme = $this->readLexeme();
-        }
+        $nextLexeme ??= $this->readLexeme();
 
         /**
          * Note: readElement() method is a public method and could be invoked from other classes.
@@ -433,7 +424,7 @@ class Zend_Pdf_StringParser
      */
     private function _readArray()
     {
-        $elements = array();
+        $elements = [];
 
         while ( strlen($nextLexeme = $this->readLexeme()) != 0 ) {
             if ($nextLexeme != ']') {
@@ -528,9 +519,7 @@ class Zend_Pdf_StringParser
      */
     private function _readNumeric($nextLexeme = null)
     {
-        if ($nextLexeme === null) {
-            $nextLexeme = $this->readLexeme();
-        }
+        $nextLexeme ??= $this->readLexeme();
 
         return new Zend_Pdf_Element_Numeric($nextLexeme);
     }
@@ -554,7 +543,7 @@ class Zend_Pdf_StringParser
 
         $this->offset    = $offset;
         $this->_context  = $context;
-        $this->_elements = array();
+        $this->_elements = [];
 
         $objNum = $this->readLexeme();
         if (!ctype_digit($objNum)) {
@@ -722,10 +711,13 @@ class Zend_Pdf_StringParser
      *
      * @param string $pdfString
      * @param Zend_Pdf_ElementFactory_Interface $factory
+     * @param string $source
      */
-    public function __construct($source, Zend_Pdf_ElementFactory_Interface $factory)
+    public function __construct(/**
+     * Source PDF
+     */
+    public $data, Zend_Pdf_ElementFactory_Interface $factory)
     {
-        $this->data         = $source;
         $this->_objFactory  = $factory;
     }
 }

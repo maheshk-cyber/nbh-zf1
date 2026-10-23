@@ -234,7 +234,7 @@ abstract class Zend_Feed_Pubsubhubbub_CallbackAbstract
                 $scheme = 'https';
             }
             $schemeAndHttpHost = $scheme . '://' . $this->_getHttpHost();
-            if (strpos($callbackUrl, $schemeAndHttpHost) === 0) {
+            if (str_starts_with($callbackUrl, $schemeAndHttpHost)) {
                 $callbackUrl = substr($callbackUrl, strlen($schemeAndHttpHost));
             }
         } elseif (isset($_SERVER['ORIG_PATH_INFO'])) {

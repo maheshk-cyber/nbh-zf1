@@ -64,7 +64,7 @@ abstract class Zend_Pdf_FileParser_Font_OpenType extends Zend_Pdf_FileParser_Fon
      * Stores the byte offsets to the various information tables.
      * @var array
      */
-    protected $_tableDirectory = array();
+    protected $_tableDirectory = [];
 
 
 
@@ -310,7 +310,7 @@ abstract class Zend_Pdf_FileParser_Font_OpenType extends Zend_Pdf_FileParser_Fon
          * use Mac Roman if nothing else is available. We will extract the
          * actual strings later.
          */
-        $nameRecords = array();
+        $nameRecords = [];
         for ($nameIndex = 0; $nameIndex < $nameCount; $nameIndex++) {
 
             $platformID = $this->readUInt(2);
@@ -341,14 +341,14 @@ abstract class Zend_Pdf_FileParser_Font_OpenType extends Zend_Pdf_FileParser_Fon
              * exists for both Mac Roman and Microsoft Unicode, the Unicode entry
              * will prevail since it is processed last.
              */
-            $nameRecords[$nameID][$languageCode] = array('platform' => $platformID,
+            $nameRecords[$nameID][$languageCode] = ['platform' => $platformID,
                                                          'offset'   => $nameOffset,
-                                                         'length'   => $nameLength );
+                                                         'length'   => $nameLength ];
         }
 
         /* Now go back and extract the interesting strings.
          */
-        $fontNames = array();
+        $fontNames = [];
         foreach ($nameRecords as $name => $languages) {
             foreach ($languages as $language => $attributes) {
                 $stringOffset = $storageOffset + $attributes['offset'];
@@ -762,7 +762,7 @@ abstract class Zend_Pdf_FileParser_Font_OpenType extends Zend_Pdf_FileParser_Fon
          * the glyph's advance width and its left side bearing. We don't use the
          * left side bearing.
          */
-        $glyphWidths = array();
+        $glyphWidths = [];
         for ($i = 0; $i < $this->numberHMetrics; $i++) {
             $glyphWidths[$i] = $this->readUInt(2);
             $this->skipBytes(2);
@@ -818,7 +818,7 @@ abstract class Zend_Pdf_FileParser_Font_OpenType extends Zend_Pdf_FileParser_Fon
         /* Like the name table, there may be many different encoding subtables
          * present. Ideally, we are looking for an acceptable Unicode table.
          */
-        $subtables = array();
+        $subtables = [];
         for ($subtableIndex = 0; $subtableIndex < $subtableCount; $subtableIndex++) {
 
             $platformID = $this->readUInt(2);
@@ -850,7 +850,7 @@ abstract class Zend_Pdf_FileParser_Font_OpenType extends Zend_Pdf_FileParser_Fon
 
         /* In preferred order, find a subtable to use.
          */
-        $offsets = array();
+        $offsets = [];
 
         /* Unicode 2.0 or later semantics
          */
@@ -898,7 +898,7 @@ abstract class Zend_Pdf_FileParser_Font_OpenType extends Zend_Pdf_FileParser_Fon
                     if ($language != 0) {
                         $this->_debugLog('Type 0 cmap tables must be language-independent;'
                                          . ' language: %d; skipping', $language);
-                        continue;
+                        break;
                     }
                     break;
 
@@ -917,7 +917,7 @@ abstract class Zend_Pdf_FileParser_Font_OpenType extends Zend_Pdf_FileParser_Fon
                 case 0xa:    // break intentionally omitted
                 case 0xc:
                     $this->_debugLog('Format: 0x%x currently unsupported; skipping', $format);
-                    continue;
+                    break;
                     //$this->skipBytes(2);
                     //$cmapLength = $this->readUInt(4);
                     //$language = $this->readUInt(4);
@@ -929,7 +929,7 @@ abstract class Zend_Pdf_FileParser_Font_OpenType extends Zend_Pdf_FileParser_Fon
 
                 default:
                     $this->_debugLog('Unknown subtable format: 0x%x; skipping', $format);
-                    continue;
+                    break;
             }
             $cmapType = $format;
             break;
@@ -1057,78 +1057,44 @@ abstract class Zend_Pdf_FileParser_Font_OpenType extends Zend_Pdf_FileParser_Fon
              *   http://www.microsoft.com/globaldev/reference/lcid-all.mspx
              */
             $languageID &= 0xff;
-            switch ($languageID) {
-                case 0x09:
-                    return 'en';
-                case 0x0c:
-                    return 'fr';
-                case 0x07:
-                    return 'de';
-                case 0x10:
-                    return 'it';
-                case 0x13:
-                    return 'nl';
-                case 0x1d:
-                    return 'sv';
-                case 0x0a:
-                    return 'es';
-                case 0x06:
-                    return 'da';
-                case 0x16:
-                    return 'pt';
-                case 0x14:
-                    return 'no';
-                case 0x0d:
-                    return 'he';
-                case 0x11:
-                    return 'ja';
-                case 0x01:
-                    return 'ar';
-                case 0x0b:
-                    return 'fi';
-                case 0x08:
-                    return 'el';
-
-                default:
-                    return null;
-            }
+            return match ($languageID) {
+                0x09 => 'en',
+                0x0c => 'fr',
+                0x07 => 'de',
+                0x10 => 'it',
+                0x13 => 'nl',
+                0x1d => 'sv',
+                0x0a => 'es',
+                0x06 => 'da',
+                0x16 => 'pt',
+                0x14 => 'no',
+                0x0d => 'he',
+                0x11 => 'ja',
+                0x01 => 'ar',
+                0x0b => 'fi',
+                0x08 => 'el',
+                default => null,
+            };
 
         } else if ($platformID == 1) {    // Macintosh encoding.
-            switch ($languageID) {
-                case 0:
-                    return 'en';
-                case 1:
-                    return 'fr';
-                case 2:
-                    return 'de';
-                case 3:
-                    return 'it';
-                case 4:
-                    return 'nl';
-                case 5:
-                    return 'sv';
-                case 6:
-                    return 'es';
-                case 7:
-                    return 'da';
-                case 8:
-                    return 'pt';
-                case 9:
-                    return 'no';
-                case 10:
-                    return 'he';
-                case 11:
-                    return 'ja';
-                case 12:
-                    return 'ar';
-                case 13:
-                    return 'fi';
-                case 14:
-                    return 'el';
-
-                default:
-                    return null;
-            }
+            return match ($languageID) {
+                0 => 'en',
+                1 => 'fr',
+                2 => 'de',
+                3 => 'it',
+                4 => 'nl',
+                5 => 'sv',
+                6 => 'es',
+                7 => 'da',
+                8 => 'pt',
+                9 => 'no',
+                10 => 'he',
+                11 => 'ja',
+                12 => 'ar',
+                13 => 'fi',
+                14 => 'el',
+                default => null,
+            };
 
         } else {    // Unknown encoding.
             return null;

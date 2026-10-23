@@ -51,7 +51,7 @@ class Zend_Controller_Dispatcher_Standard extends Zend_Controller_Dispatcher_Abs
      * Controller directory(ies)
      * @var array
      */
-    protected $_controllerDirectory = array();
+    protected $_controllerDirectory = [];
 
     /**
      * Constructor: Set current module to default value
@@ -59,7 +59,7 @@ class Zend_Controller_Dispatcher_Standard extends Zend_Controller_Dispatcher_Abs
      * @param  array $params
      * @return void
      */
-    public function __construct(array $params = array())
+    public function __construct(array $params = [])
     {
         parent::__construct($params);
         $this->_curModule = $this->getDefaultModule();
@@ -74,9 +74,7 @@ class Zend_Controller_Dispatcher_Standard extends Zend_Controller_Dispatcher_Abs
      */
     public function addControllerDirectory($path, $module = null)
     {
-        if (null === $module) {
-            $module = $this->_defaultModule;
-        }
+        $module ??= $this->_defaultModule;
 
         $module = (string) $module;
         $path   = rtrim((string) $path, '/\\');
@@ -93,7 +91,7 @@ class Zend_Controller_Dispatcher_Standard extends Zend_Controller_Dispatcher_Abs
      */
     public function setControllerDirectory($directory, $module = null)
     {
-        $this->_controllerDirectory = array();
+        $this->_controllerDirectory = [];
 
         if (is_string($directory)) {
             $this->addControllerDirectory($directory, $module);

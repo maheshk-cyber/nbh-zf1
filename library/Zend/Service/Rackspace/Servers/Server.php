@@ -80,11 +80,11 @@ class Zend_Service_Rackspace_Servers_Server
      * 
      * @var array 
      */
-    protected $addresses = array();
+    protected $addresses = [];
     /**
      * @var array
      */
-    protected $metadata = array();
+    protected $metadata = [];
     /**
      * The service that has created the server object
      *
@@ -231,10 +231,7 @@ class Zend_Service_Rackspace_Servers_Server
      */
     public function getPrivateIp()
     {
-        if (isset($this->addresses['private'])) {
-            return $this->addresses['private'];
-        }
-        return false;
+        return $this->addresses['private'] ?? false;
     }
     /**
      * Get the public IPs
@@ -243,10 +240,7 @@ class Zend_Service_Rackspace_Servers_Server
      */
     public function getPublicIp()
     {
-        if (isset($this->addresses['public'])) {
-            return $this->addresses['public'];
-        }
-        return false;
+        return $this->addresses['public'] ?? false;
     }
     /**
      * Get the metadata of the container
@@ -309,7 +303,7 @@ class Zend_Service_Rackspace_Servers_Server
      */
     public function toArray()
     {
-        return array (
+        return  [
             'name'      => $this->name,
             'id'        => $this->id,
             'imageId'   => $this->imageId,
@@ -320,6 +314,6 @@ class Zend_Service_Rackspace_Servers_Server
             'adminPass' => $this->adminPass,
             'addresses' => $this->addresses,
             'metadata'  => $this->metadata
-        );
+        ];
     }
 }

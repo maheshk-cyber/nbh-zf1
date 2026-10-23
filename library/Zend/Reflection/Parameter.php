@@ -83,15 +83,11 @@ class Zend_Reflection_Parameter extends ReflectionParameter
         $phpReflection = parent::getDeclaringFunction();
         if ($phpReflection instanceof ReflectionMethod) {
             $baseClass = 'Zend_Reflection_Method';
-            if (null === $reflectionClass) {
-                $reflectionClass = $baseClass;
-            }
+            $reflectionClass ??= $baseClass;
             $zendReflection = new $reflectionClass($this->getDeclaringClass()->getName(), $phpReflection->getName());
         } else {
             $baseClass = 'Zend_Reflection_Function';
-            if (null === $reflectionClass) {
-                $reflectionClass = $baseClass;
-            }
+            $reflectionClass ??= $baseClass;
             $zendReflection = new $reflectionClass($phpReflection->getName());
         }
         if (!$zendReflection instanceof $baseClass) {

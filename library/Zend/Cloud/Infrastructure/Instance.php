@@ -66,12 +66,12 @@ class Zend_Cloud_Infrastructure_Instance
      * 
      * @var array 
      */
-    protected $attributeRequired = array(
+    protected $attributeRequired = [
         self::INSTANCE_ID,
         self::INSTANCE_STATUS,
         self::INSTANCE_IMAGEID,
         self::INSTANCE_ZONE
-    );
+    ];
 
     /**
      * Constructor
@@ -106,7 +106,7 @@ class Zend_Cloud_Infrastructure_Instance
                 throw new Zend_Cloud_Infrastructure_Exception(sprintf(
                     'The param "%s" is a required param for %s', 
                     $key,
-                    __CLASS__
+                    self::class
                 ));
             }
         }
@@ -198,9 +198,7 @@ class Zend_Cloud_Infrastructure_Instance
      */
     public function getPublicDns()
     {
-        if (!isset($this->attributes[self::INSTANCE_PUBLICDNS])) {
-            $this->attributes[self::INSTANCE_PUBLICDNS] =  $this->adapter->publicDnsInstance($this->attributes[self::INSTANCE_ID]);
-        }
+        $this->attributes[self::INSTANCE_PUBLICDNS] ??= $this->adapter->publicDnsInstance($this->attributes[self::INSTANCE_ID]);
         return $this->attributes[self::INSTANCE_PUBLICDNS];
     }
 

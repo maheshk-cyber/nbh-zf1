@@ -35,8 +35,8 @@ class Zend_Tool_Project_Context_Repository implements Countable
     protected static $_instance = null;
     protected static $_isInitialized = false;
 
-    protected $_shortContextNames = array();
-    protected $_contexts          = array();
+    protected $_shortContextNames = [];
+    protected $_contexts          = [];
 
     /**
      * Enter description here...
@@ -72,7 +72,7 @@ class Zend_Tool_Project_Context_Repository implements Countable
     {
         $prefix = trim($prefix, '_') . '_';
         foreach (new DirectoryIterator($directory) as $directoryItem) {
-            if ($directoryItem->isDot() || (substr($directoryItem->getFilename(), -4) !== '.php')) {
+            if ($directoryItem->isDot() || (!str_ends_with($directoryItem->getFilename(), '.php'))) {
                 continue;
             }
             $class = $prefix . substr($directoryItem->getFilename(), 0, -4);
@@ -117,13 +117,13 @@ class Zend_Tool_Project_Context_Repository implements Countable
         }
 
         $this->_shortContextNames[$normalName] = $index;
-        $this->_contexts[$index] = array(
+        $this->_contexts[$index] = [
             'isTopLevel'     => $isTopLevel,
             'isSystem'       => $isSystem,
             'isOverwritable' => $isOverwritable,
             'normalName'     => $normalName,
             'context'        => $context
-            );
+            ];
 
         return $this;
     }

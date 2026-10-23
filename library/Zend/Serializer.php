@@ -51,7 +51,7 @@ class Zend_Serializer
      * @param array |Zend_Config $opts Serializer options
      * @return Zend_Serializer_Adapter_AdapterInterface
      */
-    public static function factory($adapterName, $opts = array())
+    public static function factory($adapterName, $opts = [])
     {
         if ($adapterName instanceof Zend_Serializer_Adapter_AdapterInterface) {
             return $adapterName; // $adapterName is already an adapter object
@@ -82,9 +82,7 @@ class Zend_Serializer
      */
     public static function getAdapterLoader()
     {
-        if (self::$_adapterLoader === null) {
-            self::$_adapterLoader = self::_getDefaultAdapterLoader();
-        }
+        self::$_adapterLoader ??= self::_getDefaultAdapterLoader();
         return self::$_adapterLoader;
     }
 
@@ -118,7 +116,7 @@ class Zend_Serializer
     protected static function _getDefaultAdapterLoader()
     {
         $loader = new Zend_Loader_PluginLoader();
-        $loader->addPrefixPath('Zend_Serializer_Adapter', dirname(__FILE__).'/Serializer/Adapter');
+        $loader->addPrefixPath('Zend_Serializer_Adapter', __DIR__.'/Serializer/Adapter');
         return $loader;
     }
 
@@ -128,7 +126,7 @@ class Zend_Serializer
      * @param string|Zend_Serializer_Adapter_AdapterInterface $adapter
      * @param array|Zend_Config $options
      */
-    public static function setDefaultAdapter($adapter, $options = array())
+    public static function setDefaultAdapter($adapter, $options = [])
     {
         self::$_defaultAdapter = self::factory($adapter, $options);
     }
@@ -154,7 +152,7 @@ class Zend_Serializer
      * @return string
      * @throws Zend_Serializer_Exception
      */
-    public static function serialize($value, array $options = array())
+    public static function serialize($value, array $options = [])
     {
         if (isset($options['adapter'])) {
             $adapter = self::factory($options['adapter']);
@@ -174,7 +172,7 @@ class Zend_Serializer
      * @return mixed
      * @throws Zend_Serializer_Exception
      */
-    public static function unserialize($serialized, array $options = array())
+    public static function unserialize($serialized, array $options = [])
     {
         if (isset($options['adapter'])) {
             $adapter = self::factory($options['adapter']);

@@ -124,11 +124,11 @@ class Zend_Gdata_AuthSub
 
         // Parse Google's response
         if ($response->isSuccessful()) {
-            $goog_resp = array();
+            $goog_resp = [];
             foreach (explode("\n", $response->getBody()) as $l) {
-                $l = chop($l);
+                $l = rtrim($l);
                 if ($l) {
-                    list($key, $val) = explode('=', chop($l), 2);
+                    [$key, $val] = explode('=', rtrim($l), 2);
                     $goog_resp[$key] = $val;
                 }
             }
@@ -236,10 +236,10 @@ class Zend_Gdata_AuthSub
             throw new Zend_Gdata_App_HttpException('Client is not an instance of Zend_Gdata_HttpClient.');
         }
         $useragent = 'Zend_Framework_Gdata/' . Zend_Version::VERSION;
-        $client->setConfig(array(
+        $client->setConfig([
                 'strictredirects' => true,
                 'useragent' => $useragent
-            )
+            ]
         );
         $client->setAuthSubToken($token);
         return $client;

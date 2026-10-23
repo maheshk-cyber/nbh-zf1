@@ -47,7 +47,7 @@ class Zend_Translate_Adapter_Tmx extends Zend_Translate_Adapter {
     private $_tuv     = null;
     private $_seg     = null;
     private $_content = null;
-    private $_data    = array();
+    private $_data    = [];
 
     /**
      * Load translation data (TMX file reader)
@@ -59,9 +59,9 @@ class Zend_Translate_Adapter_Tmx extends Zend_Translate_Adapter {
      * @throws Zend_Translation_Exception
      * @return array
      */
-    protected function _loadTranslationData($filename, $locale, array $options = array())
+    protected function _loadTranslationData($filename, $locale, array $options = [])
     {
-        $this->_data = array();
+        $this->_data = [];
         if (!is_readable($filename)) {
             require_once 'Zend/Translate/Exception.php';
             throw new Zend_Translate_Exception('Translation file \'' . $filename . '\' is not readable.');
@@ -155,9 +155,7 @@ class Zend_Translate_Adapter_Tmx extends Zend_Translate_Adapter {
                             $this->_tuv = $attrib['xml:lang'];
                         }
 
-                        if (!isset($this->_data[$this->_tuv])) {
-                            $this->_data[$this->_tuv] = array();
-                        }
+                        $this->_data[$this->_tuv] ??= [];
                     }
                     break;
                 case 'seg':
@@ -228,7 +226,7 @@ class Zend_Translate_Adapter_Tmx extends Zend_Translate_Adapter {
     protected function _findEncoding($filename)
     {
         $file = file_get_contents($filename, null, null, 0, 100);
-        if (strpos($file, "encoding") !== false) {
+        if (str_contains($file, "encoding")) {
             $encoding = substr($file, strpos($file, "encoding") + 9);
             $encoding = substr($encoding, 1, strpos($encoding, $encoding[0], 1) - 1);
             return $encoding;

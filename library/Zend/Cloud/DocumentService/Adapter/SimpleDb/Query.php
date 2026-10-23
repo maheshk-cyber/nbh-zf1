@@ -80,17 +80,15 @@ class Zend_Cloud_DocumentService_Adapter_SimpleDb_Query
         $order   = null;
         $limit   = null;
         foreach ($this->getClauses() as $clause) {
-            list($name, $args) = $clause;
+            [$name, $args] = $clause;
 
             switch ($name) {
                 case self::QUERY_SELECT:
                     $select = $args[0];
                     break;
                 case self::QUERY_FROM:
-                    if (null === $from) {
-                        // Only allow setting FROM clause once
-                        $from = $adapter->quoteName($args);
-                    }
+                    // Only allow setting FROM clause once
+                    $from ??= $adapter->quoteName($args);
                     break;
                 case self::QUERY_WHERE:
                     $statement = $this->_parseWhere($args[0], $args[1]);
@@ -102,7 +100,7 @@ class Zend_Cloud_DocumentService_Adapter_SimpleDb_Query
                     }
                     break;
                 case self::QUERY_WHEREID:
-                    $statement = $this->_parseWhere('ItemName() = ?', array($args));
+                    $statement = $this->_parseWhere('ItemName() = ?', [$args]);
                     if (null === $where) {
                         $where = $statement;
                     } else {

@@ -201,9 +201,7 @@ class Zend_Loader
      */
     public static function explodeIncludePath($path = null)
     {
-        if (null === $path) {
-            $path = get_include_path();
-        }
+        $path ??= get_include_path();
 
         if (PATH_SEPARATOR == ':') {
             // On *nix systems, include_paths which include paths with a stream
@@ -230,11 +228,11 @@ class Zend_Loader
      */
     public static function autoload($class)
     {
-        trigger_error(__CLASS__ . '::' . __METHOD__ . ' is deprecated as of 1.8.0 and will be removed with 2.0.0; use Zend_Loader_Autoloader instead', E_USER_NOTICE);
+        trigger_error(self::class . '::' . __METHOD__ . ' is deprecated as of 1.8.0 and will be removed with 2.0.0; use Zend_Loader_Autoloader instead', E_USER_NOTICE);
         try {
             @self::loadClass($class);
             return $class;
-        } catch (Exception $e) {
+        } catch (Exception) {
             return false;
         }
     }
@@ -251,7 +249,7 @@ class Zend_Loader
      */
     public static function registerAutoload($class = 'Zend_Loader', $enabled = true)
     {
-        trigger_error(__CLASS__ . '::' . __METHOD__ . ' is deprecated as of 1.8.0 and will be removed with 2.0.0; use Zend_Loader_Autoloader instead', E_USER_NOTICE);
+        trigger_error(self::class . '::' . __METHOD__ . ' is deprecated as of 1.8.0 and will be removed with 2.0.0; use Zend_Loader_Autoloader instead', E_USER_NOTICE);
         require_once 'Zend/Loader/Autoloader.php';
         $autoloader = Zend_Loader_Autoloader::getInstance();
         $autoloader->setFallbackAutoloader(true);
@@ -264,7 +262,7 @@ class Zend_Loader
                 throw new Zend_Exception("The class \"$class\" does not have an autoload() method");
             }
 
-            $callback = array($class, 'autoload');
+            $callback = [$class, 'autoload'];
 
             if ($enabled) {
                 $autoloader->pushAutoloader($callback);

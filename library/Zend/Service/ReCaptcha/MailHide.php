@@ -166,7 +166,7 @@ class Zend_Service_ReCaptcha_MailHide extends Zend_Service_ReCaptcha
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         try {
             $return = $this->getHtml();
@@ -185,13 +185,13 @@ class Zend_Service_ReCaptcha_MailHide extends Zend_Service_ReCaptcha
      */
     public function getDefaultOptions()
     {
-        return array(
+        return [
             'encoding'       => 'UTF-8',
             'linkTitle'      => 'Reveal this e-mail address',
             'linkHiddenText' => '...',
             'popupWidth'     => 500,
             'popupHeight'    => 300,
-        );
+        ];
     }
 
     /**

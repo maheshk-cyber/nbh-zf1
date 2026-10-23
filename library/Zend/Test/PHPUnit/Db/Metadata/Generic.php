@@ -45,30 +45,25 @@ class Zend_Test_PHPUnit_Db_Metadata_Generic implements PHPUnit_Extensions_Databa
     protected $_connection;
 
     /**
-     * Schemaname
-     *
-     * @var string
-     */
-    protected $_schema;
-
-    /**
      * Cached Table metadata
      *
      * @var array
      */
-    protected $_tableMetadata = array();
+    protected $_tableMetadata = [];
 
     /**
      * Creates a new database meta data object using the given pdo connection
      * and schema name.
      *
      * @param Zend_Db_Adapter_Abstract $db
-     * @param string $schema
+     * @param string $_schema
      */
-    public final function __construct(Zend_Db_Adapter_Abstract $db, $schema)
+    public final function __construct(Zend_Db_Adapter_Abstract $db, /**
+     * Schemaname
+     */
+    protected $_schema)
     {
         $this->_connection = $db;
-        $this->_schema     = $schema;
     }
 
     /**
@@ -89,9 +84,7 @@ class Zend_Test_PHPUnit_Db_Metadata_Generic implements PHPUnit_Extensions_Databa
      */
     protected function getTableDescription($tableName)
     {
-        if(!isset($this->_tableMetadata[$tableName])) {
-            $this->_tableMetadata[$tableName] = $this->_connection->describeTable($tableName);
-        }
+        $this->_tableMetadata[$tableName] ??= $this->_connection->describeTable($tableName);
         return $this->_tableMetadata[$tableName];
     }
 
@@ -120,7 +113,7 @@ class Zend_Test_PHPUnit_Db_Metadata_Generic implements PHPUnit_Extensions_Databa
     {
         $tableMeta = $this->getTableDescription($tableName);
 
-        $primaryColumnNames = array();
+        $primaryColumnNames = [];
         foreach($tableMeta AS $column) {
             if($column['PRIMARY'] == true) {
                 $primaryColumnNames[] = $column['COLUMN_NAME'];

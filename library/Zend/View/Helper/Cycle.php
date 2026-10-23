@@ -28,7 +28,7 @@
  * @copyright  Copyright (c) 2005-2015 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_View_Helper_Cycle implements Iterator
+class Zend_View_Helper_Cycle implements Iterator, \Stringable
 {
 
     /**
@@ -42,14 +42,14 @@ class Zend_View_Helper_Cycle implements Iterator
      *
      * @var array
      */
-    protected $_pointers = array(self::DEFAULT_NAME =>-1) ;
+    protected $_pointers = [self::DEFAULT_NAME =>-1] ;
 
     /**
      * Array of values
      *
      * @var array
      */
-    protected $_data = array(self::DEFAULT_NAME=>array());
+    protected $_data = [self::DEFAULT_NAME=>[]];
 
     /**
      * Actual name of cycle
@@ -65,7 +65,7 @@ class Zend_View_Helper_Cycle implements Iterator
      * @param string $name
      * @return Zend_View_Helper_Cycle
      */
-    public function cycle(array $data = array(), $name = self::DEFAULT_NAME)
+    public function cycle(array $data = [], $name = self::DEFAULT_NAME)
     {
         if(!empty($data))
            $this->_data[$name] = $data;
@@ -99,8 +99,7 @@ class Zend_View_Helper_Cycle implements Iterator
     {
        $this->_name = $name;
 
-       if(!isset($this->_data[$this->_name]))
-         $this->_data[$this->_name] = array();
+       $this->_data[$this->_name] ??= [];
 
        if(!isset($this->_pointers[$this->_name]))
          $this->rewind();
@@ -144,7 +143,7 @@ class Zend_View_Helper_Cycle implements Iterator
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->toString();
     }

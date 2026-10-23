@@ -147,16 +147,10 @@ class Zend_Ldap_Collection_Iterator_Default implements Iterator, Countable
             }
         } else {
             $attributeNameTreatment = (int)$attributeNameTreatment;
-            switch ($attributeNameTreatment) {
-                case self::ATTRIBUTE_TO_LOWER:
-                case self::ATTRIBUTE_TO_UPPER:
-                case self::ATTRIBUTE_NATIVE:
-                    $this->_attributeNameTreatment = $attributeNameTreatment;
-                    break;
-                default:
-                    $this->_attributeNameTreatment = self::ATTRIBUTE_TO_LOWER;
-                    break;
-            }
+            $this->_attributeNameTreatment = match ($attributeNameTreatment) {
+                self::ATTRIBUTE_TO_LOWER, self::ATTRIBUTE_TO_UPPER, self::ATTRIBUTE_NATIVE => $attributeNameTreatment,
+                default => self::ATTRIBUTE_TO_LOWER,
+            };
         }
         return $this;
     }
@@ -198,31 +192,21 @@ class Zend_Ldap_Collection_Iterator_Default implements Iterator, Countable
             return null;
         }
 
-        $entry = array('dn' => $this->key());
+        $entry = ['dn' => $this->key()];
         $ber_identifier = null;
-        $name = @ldap_first_attribute($this->_ldap->getResource(), $this->_current,
-            $ber_identifier);
+        $name = @ldap_first_attribute($this->_ldap->getResource(), $this->_current);
         while ($name) {
             $data = @ldap_get_values_len($this->_ldap->getResource(), $this->_current, $name);
             unset($data['count']);
 
-            switch($this->_attributeNameTreatment) {
-                case self::ATTRIBUTE_TO_LOWER:
-                    $attrName = strtolower($name);
-                    break;
-                case self::ATTRIBUTE_TO_UPPER:
-                    $attrName = strtoupper($name);
-                    break;
-                case self::ATTRIBUTE_NATIVE:
-                    $attrName = $name;
-                    break;
-                default:
-                    $attrName = call_user_func($this->_attributeNameTreatment, $name);
-                    break;
-            }
+            $attrName = match ($this->_attributeNameTreatment) {
+                self::ATTRIBUTE_TO_LOWER => strtolower($name),
+                self::ATTRIBUTE_TO_UPPER => strtoupper($name),
+                self::ATTRIBUTE_NATIVE => $name,
+                default => call_user_func($this->_attributeNameTreatment, $name),
+            };
             $entry[$attrName] = $data;
-            $name = @ldap_next_attribute($this->_ldap->getResource(), $this->_current,
-                $ber_identifier);
+            $name = @ldap_next_attribute($this->_ldap->getResource(), $this->_current);
         }
         ksort($entry, SORT_LOCALE_STRING);
         return $entry;

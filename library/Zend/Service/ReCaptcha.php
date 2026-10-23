@@ -38,7 +38,7 @@ require_once 'Zend/Service/ReCaptcha/Response.php';
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  * @version    $Id$
  */
-class Zend_Service_ReCaptcha extends Zend_Service_Abstract
+class Zend_Service_ReCaptcha extends Zend_Service_Abstract implements \Stringable
 {
     /**
      * URI to the regular API
@@ -87,13 +87,13 @@ class Zend_Service_ReCaptcha extends Zend_Service_Abstract
      *
      * @var array
      */
-    protected $_params = array(
+    protected $_params = [
         'ssl' => false, /* Use SSL or not when generating the recaptcha */
         'error' => null, /* The error message to display in the recaptcha */
         'xhtml' => false /* Enable XHTML output (this will not be XHTML Strict
                             compliant since the IFRAME is necessary when
                             Javascript is disabled) */
-    );
+    ];
 
     /**
      * Options for tailoring reCaptcha
@@ -102,11 +102,11 @@ class Zend_Service_ReCaptcha extends Zend_Service_Abstract
      *
      * @var array
      */
-    protected $_options = array(
+    protected $_options = [
         'theme'               => 'red',
         'lang'                => 'en',
-        'custom_translations' => array(),
-    );
+        'custom_translations' => [],
+    ];
 
     /**
      * Response from the verify server
@@ -160,7 +160,7 @@ class Zend_Service_ReCaptcha extends Zend_Service_Abstract
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         try {
             $return = $this->getHtml();
@@ -472,10 +472,10 @@ HTML;
         $httpClient = self::getHttpClient();
         $httpClient->resetParameters(true);
 
-        $postParams = array('privatekey' => $this->_privateKey,
+        $postParams = ['privatekey' => $this->_privateKey,
                             'remoteip'   => $this->_ip,
                             'challenge'  => $challengeField,
-                            'response'   => $responseField);
+                            'response'   => $responseField];
 
         /* Make the POST and return the response */
         return $httpClient->setUri(self::VERIFY_SERVER)

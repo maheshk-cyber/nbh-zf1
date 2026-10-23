@@ -43,13 +43,13 @@ class Zend_Server_Reflection_Class
      * {@link __set()}
      * @var array
      */
-    protected $_config = array();
+    protected $_config = [];
 
     /**
      * Array of {@link Zend_Server_Reflection_Method}s
      * @var array
      */
-    protected $_methods = array();
+    protected $_methods = [];
 
     /**
      * Namespace
@@ -81,7 +81,7 @@ class Zend_Server_Reflection_Class
 
         foreach ($reflection->getMethods() as $method) {
             // Don't aggregate magic methods
-            if ('__' == substr($method->getName(), 0, 2)) {
+            if (str_starts_with($method->getName(), '__')) {
                 continue;
             }
 
@@ -102,7 +102,7 @@ class Zend_Server_Reflection_Class
     public function __call($method, $args)
     {
         if (method_exists($this->_reflection, $method)) {
-            return call_user_func_array(array($this->_reflection, $method), $args);
+            return call_user_func_array([$this->_reflection, $method], $args);
         }
 
         require_once 'Zend/Server/Reflection/Exception.php';
@@ -120,11 +120,7 @@ class Zend_Server_Reflection_Class
      */
     public function __get($key)
     {
-        if (isset($this->_config[$key])) {
-            return $this->_config[$key];
-        }
-
-        return null;
+        return $this->_config[$key] ?? null;
     }
 
     /**

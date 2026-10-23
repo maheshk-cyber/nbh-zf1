@@ -219,7 +219,7 @@ class Zend_Pdf_Outline_Created extends Zend_Pdf_Outline
      * @param array $options
      * @throws Zend_Pdf_Exception
      */
-    public function __construct($options = array())
+    public function __construct($options = [])
     {
         if (!isset($options['title'])) {
             require_once 'Zend/Pdf/Exception.php';
@@ -249,9 +249,7 @@ class Zend_Pdf_Outline_Created extends Zend_Pdf_Outline
                                                  Zend_Pdf_Element $prev = null,
                                                  SplObjectStorage $processedOutlines = null)
     {
-        if ($processedOutlines === null) {
-            $processedOutlines = new SplObjectStorage();
-        }
+        $processedOutlines ??= new SplObjectStorage();
         $processedOutlines->attach($this);
 
         $outlineDictionary = $factory->newObject(new Zend_Pdf_Element_Dictionary());
@@ -273,9 +271,9 @@ class Zend_Pdf_Outline_Created extends Zend_Pdf_Outline
         $color = $this->getColor();
         if ($color !== null) {
             $components = $color->getComponents();
-            $colorComponentElements = array(new Zend_Pdf_Element_Numeric($components[0]),
+            $colorComponentElements = [new Zend_Pdf_Element_Numeric($components[0]),
                                             new Zend_Pdf_Element_Numeric($components[1]),
-                                            new Zend_Pdf_Element_Numeric($components[2]));
+                                            new Zend_Pdf_Element_Numeric($components[2])];
             $outlineDictionary->C = new Zend_Pdf_Element_Array($colorComponentElements);
         }
 

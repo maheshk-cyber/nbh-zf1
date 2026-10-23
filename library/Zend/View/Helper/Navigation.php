@@ -60,7 +60,7 @@ class Zend_View_Helper_Navigation
      *
      * @var array
      */
-    protected $_helpers = array();
+    protected $_helpers = [];
 
     /**
      * Whether container should be injected when proxying
@@ -125,11 +125,11 @@ class Zend_View_Helper_Navigation
      *                                    {@link findHelper()}
      * @throws Zend_Navigation_Exception  if method does not exist in container
      */
-    public function __call($method, array $arguments = array())
+    public function __call($method, array $arguments = [])
     {
         // check if call should proxy to another helper
         if ($helper = $this->findHelper($method, false)) {
-            return call_user_func_array(array($helper, $method), $arguments);
+            return call_user_func_array([$helper, $method], $arguments);
         }
 
         // default behaviour: proxy call to container
@@ -179,7 +179,7 @@ class Zend_View_Helper_Navigation
         } else {
             try {
                 $helper = $this->view->getHelper($proxy);
-            } catch (Zend_Loader_PluginLoader_Exception $e) {
+            } catch (Zend_Loader_PluginLoader_Exception) {
                 return null;
             }
         }
@@ -190,7 +190,7 @@ class Zend_View_Helper_Navigation
                 $e = new Zend_View_Exception(sprintf(
                         'Proxy helper "%s" is not an instance of ' .
                         'Zend_View_Helper_Navigation_Helper',
-                        get_class($helper)));
+                        $helper::class));
                 $e->setView($this->view);
                 throw $e;
             }

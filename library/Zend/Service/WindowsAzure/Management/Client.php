@@ -111,27 +111,6 @@ class Zend_Service_WindowsAzure_Management_Client
 	protected $_apiVersion = '2011-02-25';
 	
 	/**
-	 * Subscription ID
-	 *
-	 * @var string
-	 */
-	protected $_subscriptionId = '';
-	
-	/**
-	 * Management certificate path (.PEM)
-	 *
-	 * @var string
-	 */
-	protected $_certificatePath = '';
-	
-	/**
-	 * Management certificate passphrase
-	 *
-	 * @var string
-	 */
-	protected $_certificatePassphrase = '';
-	
-	/**
 	 * Zend_Http_Client channel used for communication with REST services
 	 * 
 	 * @var Zend_Http_Client
@@ -153,42 +132,47 @@ class Zend_Service_WindowsAzure_Management_Client
 	protected $_lastRequestId = null;
 	
 	/**
-	 * Creates a new Zend_Service_WindowsAzure_Management instance
-	 * 
-	 * @param string $subscriptionId Subscription ID
-	 * @param string $certificatePath Management certificate path (.PEM)
-	 * @param string $certificatePassphrase Management certificate passphrase
+     * Creates a new Zend_Service_WindowsAzure_Management instance
+     *
+     * @param string $_subscriptionId Subscription ID
+     * @param string $_certificatePath Management certificate path (.PEM)
+     * @param string $_certificatePassphrase Management certificate passphrase
      * @param Zend_Service_WindowsAzure_RetryPolicy_RetryPolicyAbstract $retryPolicy Retry policy to use when making requests
-	 */
-	public function __construct(
-		$subscriptionId,
-		$certificatePath,
-		$certificatePassphrase,
+     */
+    public function __construct(
+		/**
+         * Subscription ID
+         */
+        protected $_subscriptionId,
+		/**
+         * Management certificate path (.PEM)
+         */
+        protected $_certificatePath,
+		/**
+         * Management certificate passphrase
+         */
+        protected $_certificatePassphrase,
 		Zend_Service_WindowsAzure_RetryPolicy_RetryPolicyAbstract $retryPolicy = null
 	) {
-		$this->_subscriptionId = $subscriptionId;
-		$this->_certificatePath = $certificatePath;
-		$this->_certificatePassphrase = $certificatePassphrase;
-		
 		$this->_retryPolicy = $retryPolicy;
 		if (is_null($this->_retryPolicy)) {
 		    $this->_retryPolicy = Zend_Service_WindowsAzure_RetryPolicy_RetryPolicyAbstract::noRetry();
 		}
 		
 		// Setup default Zend_Http_Client channel
-		$options = array(
+		$options = [
 		    'adapter'       => 'Zend_Http_Client_Adapter_Socket',
 		    'ssltransport'  => 'ssl',
 			'sslcert'       => $this->_certificatePath,
 			'sslpassphrase' => $this->_certificatePassphrase,
 			'sslusecontext' => true,
-		);
+		];
 		if (function_exists('curl_init')) {
 			// Set cURL options if cURL is used afterwards
-			$options['curloptions'] = array(
+			$options['curloptions'] = [
 					CURLOPT_FOLLOWLOCATION => true,
 					CURLOPT_TIMEOUT => 120,
-			);
+			];
 		}
 		$this->_httpClientChannel = new Zend_Http_Client(null, $options);
 	}
@@ -257,25 +241,21 @@ class Zend_Service_WindowsAzure_Management_Client
 		$path = '/',
 		$queryString = '',
 		$httpVerb = Zend_Http_Client::GET,
-		$headers = array(),
+		$headers = [],
 		$rawData = null
 	) {
 	    // Clean path
-		if (strpos($path, '/') !== 0) {
+		if (!str_starts_with($path, '/')) {
 			$path = '/' . $path;
 		}
 			
 		// Clean headers
-		if (is_null($headers)) {
-		    $headers = array();
-		}
+		$headers ??= [];
 		
 		// Ensure cUrl will also work correctly:
 		//  - disable Content-Type if required
 		//  - disable Expect: 100 Continue
-		if (!isset($headers["Content-Type"])) {
-			$headers["Content-Type"] = '';
-		}
+		$headers["Content-Type"] ??= '';
 		//$headers["Expect"] = '';
 
 		// Add version header
@@ -297,8 +277,8 @@ class Zend_Service_WindowsAzure_Management_Client
 
 		// Execute request
 		$response = $this->_retryPolicy->execute(
-		    array($this->_httpClientChannel, 'request'),
-		    array($httpVerb)
+		    [$this->_httpClientChannel, 'request'],
+		    [$httpVerb]
 		);
 		
 		// Store request id
@@ -445,7 +425,7 @@ class Zend_Service_WindowsAzure_Management_Client
 	    	}
     	}
     	
-    	$parameters = array();
+    	$parameters = [];
     	$parameters[] = 'StartTime=' . $startTime;
     	$parameters[] = 'EndTime=' . $endTime;
     	if ($objectIdFilter != '' && !is_null($objectIdFilter)) {
@@ -468,14 +448,14 @@ class Zend_Service_WindowsAzure_Management_Client
 			$xmlOperations = $result->xpath('//__empty_ns:SubscriptionOperation');
 			
 		    // Create return value
-		    $returnValue = array();		    
+		    $returnValue = [];		    
 		    foreach ($xmlOperations as $xmlOperation) {
 		    	// Create operation instance
 		    	$operation = new Zend_Service_WindowsAzure_Management_SubscriptionOperationInstance(
 		    		$xmlOperation->OperationId,
 		    		$xmlOperation->OperationObjectId,
 		    		$xmlOperation->OperationName,
-		    		array(),
+		    		[],
 		    		(array)$xmlOperation->OperationCaller,
 		    		(array)$xmlOperation->OperationStatus
 		    	);
@@ -623,15 +603,15 @@ class Zend_Service_WindowsAzure_Management_Client
 			$result = $this->_parseResponse($response);
 			
     		if (!$result->StorageService) {
-				return array();
+				return [];
 			}
 		    if (count($result->StorageService) > 1) {
     		    $xmlServices = $result->StorageService;
     		} else {
-    		    $xmlServices = array($result->StorageService);
+    		    $xmlServices = [$result->StorageService];
     		}
     		
-			$services = array();
+			$services = [];
 			if (!is_null($xmlServices)) {				
 				for ($i = 0; $i < count($xmlServices); $i++) {
 					$services[] = new Zend_Service_WindowsAzure_Management_StorageServiceInstance(
@@ -707,12 +687,12 @@ class Zend_Service_WindowsAzure_Management_Client
 			$xmlService = $this->_parseResponse($response);
 
 			if (!is_null($xmlService)) {
-				return array(
+				return [
 					(string)$xmlService->StorageServiceKeys->Primary,
 					(string)$xmlService->StorageServiceKeys->Secondary
-				);
+				];
 			}
-			return array();
+			return [];
 		} else {
 			require_once 'Zend/Service/WindowsAzure/Management/Exception.php';
 			throw new Zend_Service_WindowsAzure_Management_Exception($this->_getErrorMessage($response, 'Resource could not be accessed.'));
@@ -743,7 +723,7 @@ class Zend_Service_WindowsAzure_Management_Client
     	$response = $this->_performRequest(
     		self::OP_STORAGE_ACCOUNTS . '/' . $serviceName . '/keys', '?action=regenerate',
     		Zend_Http_Client::POST,
-    		array('Content-Type' => 'application/xml'),
+    		['Content-Type' => 'application/xml'],
     		'<?xml version="1.0" encoding="utf-8"?>
              <RegenerateKeys xmlns="http://schemas.microsoft.com/windowsazure">
                <KeyType>' . ucfirst($key) . '</KeyType>
@@ -753,12 +733,12 @@ class Zend_Service_WindowsAzure_Management_Client
 			$xmlService = $this->_parseResponse($response);
 
 			if (!is_null($xmlService)) {
-				return array(
+				return [
 					(string)$xmlService->StorageServiceKeys->Primary,
 					(string)$xmlService->StorageServiceKeys->Secondary
-				);
+				];
 			}
-			return array();
+			return [];
 		} else {
 			require_once 'Zend/Service/WindowsAzure/Management/Exception.php';
 			throw new Zend_Service_WindowsAzure_Management_Exception($this->_getErrorMessage($response, 'Resource could not be accessed.'));
@@ -780,15 +760,15 @@ class Zend_Service_WindowsAzure_Management_Client
 			$result = $this->_parseResponse($response);
 			
     		if (!$result->HostedService) {
-				return array();
+				return [];
 			}
 		    if (count($result->HostedService) > 1) {
     		    $xmlServices = $result->HostedService;
     		} else {
-    		    $xmlServices = array($result->HostedService);
+    		    $xmlServices = [$result->HostedService];
     		}
     		
-			$services = array();
+			$services = [];
 			if (!is_null($xmlServices)) {	
 				
 				for ($i = 0; $i < count($xmlServices); $i++) {
@@ -843,7 +823,7 @@ class Zend_Service_WindowsAzure_Management_Client
     	
         $response = $this->_performRequest(self::OP_HOSTED_SERVICES, '',
     		Zend_Http_Client::POST,
-    		array('Content-Type' => 'application/xml; charset=utf-8'),
+    		['Content-Type' => 'application/xml; charset=utf-8'],
     		'<CreateHostedService xmlns="http://schemas.microsoft.com/windowsazure"><ServiceName>' . $serviceName . '</ServiceName><Label>' . base64_encode($label) . '</Label><Description>' . $description . '</Description>' . $locationOrAffinityGroup . '</CreateHostedService>');
  	
     	if (!$response->isSuccessful()) {
@@ -876,7 +856,7 @@ class Zend_Service_WindowsAzure_Management_Client
     	
         $response = $this->_performRequest(self::OP_HOSTED_SERVICES . '/' . $serviceName, '',
     		Zend_Http_Client::PUT,
-    		array('Content-Type' => 'application/xml; charset=utf-8'),
+    		['Content-Type' => 'application/xml; charset=utf-8'],
     		'<UpdateHostedService xmlns="http://schemas.microsoft.com/windowsazure"><Label>' . base64_encode($label) . '</Label><Description>' . $description . '</Description></UpdateHostedService>');
  	
     	if (!$response->isSuccessful()) {
@@ -943,10 +923,10 @@ class Zend_Service_WindowsAzure_Management_Client
 		    	if (count($xmlService->Deployments->Deployment) > 1) {
     		    	$xmlServices = $xmlService->Deployments->Deployment;
     			} else {
-    		    	$xmlServices = array($xmlService->Deployments->Deployment);
+    		    	$xmlServices = [$xmlService->Deployments->Deployment];
     			}
     			
-    			$deployments = array();
+    			$deployments = [];
     			foreach ($xmlServices as $xmlDeployment) {
 					$deployments[] = $this->_convertXmlElementToDeploymentInstance($xmlDeployment);
     			}
@@ -1008,7 +988,7 @@ class Zend_Service_WindowsAzure_Management_Client
     	}
     	
     	if (@file_exists($configuration)) {
-    		$configuration = utf8_decode(file_get_contents($configuration));
+    		$configuration = mb_convert_encoding(file_get_contents($configuration), 'ISO-8859-1');
     	}
     	
     	// Clean up the configuration
@@ -1017,7 +997,7 @@ class Zend_Service_WindowsAzure_Management_Client
     	$operationUrl = self::OP_HOSTED_SERVICES . '/' . $serviceName . '/deploymentslots/' . $deploymentSlot;
         $response = $this->_performRequest($operationUrl, '',
     		Zend_Http_Client::POST,
-    		array('Content-Type' => 'application/xml; charset=utf-8'),
+    		['Content-Type' => 'application/xml; charset=utf-8'],
     		'<CreateDeployment xmlns="http://schemas.microsoft.com/windowsazure"><Name>' . $name . '</Name><PackageUrl>' . $packageUrl . '</PackageUrl><Label>' . base64_encode($label) . '</Label><Configuration>' . base64_encode($conformingConfiguration) . '</Configuration><StartDeployment>' . ($startDeployment ? 'true' : 'false') . '</StartDeployment><TreatWarningsAsError>' . ($treatWarningsAsErrors ? 'true' : 'false') . '</TreatWarningsAsError></CreateDeployment>');
  	
     	if (!$response->isSuccessful()) {
@@ -1127,7 +1107,7 @@ class Zend_Service_WindowsAzure_Management_Client
     	$operationUrl = self::OP_HOSTED_SERVICES . '/' . $serviceName;
         $response = $this->_performRequest($operationUrl, '',
     		Zend_Http_Client::POST,
-    		array('Content-Type' => 'application/xml; charset=utf-8'),
+    		['Content-Type' => 'application/xml; charset=utf-8'],
     		'<Swap xmlns="http://schemas.microsoft.com/windowsazure"><Production>' . $productionDeploymentName . '</Production><SourceDeployment>' . $sourceDeploymentName . '</SourceDeployment></Swap>');
     		
     	if (!$response->isSuccessful()) {
@@ -1265,7 +1245,7 @@ class Zend_Service_WindowsAzure_Management_Client
     {
         $response = $this->_performRequest($operationUrl . '/', '?comp=status',
     		Zend_Http_Client::POST,
-    		array('Content-Type' => 'application/xml; charset=utf-8'),
+    		['Content-Type' => 'application/xml; charset=utf-8'],
     		'<UpdateDeploymentStatus xmlns="http://schemas.microsoft.com/windowsazure"><Status>' . ucfirst($status) . '</Status></UpdateDeploymentStatus>');
     		
     	if (!$response->isSuccessful()) {
@@ -1304,17 +1284,17 @@ class Zend_Service_WindowsAzure_Management_Client
 			if ($xmlService->RoleInstanceList && $xmlService->RoleInstanceList->RoleInstance) {
 				$xmlRoleInstances = $xmlService->RoleInstanceList->RoleInstance;
 				if (count($xmlService->RoleInstanceList->RoleInstance) == 1) {
-		    	    $xmlRoleInstances = array($xmlService->RoleInstanceList->RoleInstance);
+		    	    $xmlRoleInstances = [$xmlService->RoleInstanceList->RoleInstance];
 		    	}
 		    		
-				$roleInstances = array();
+				$roleInstances = [];
 				if (!is_null($xmlRoleInstances)) {				
 					for ($i = 0; $i < count($xmlRoleInstances); $i++) {
-						$roleInstances[] = array(
+						$roleInstances[] = [
 						    'rolename' => (string)$xmlRoleInstances[$i]->RoleName,
 						    'instancename' => (string)$xmlRoleInstances[$i]->InstanceName,
 						    'instancestatus' => (string)$xmlRoleInstances[$i]->InstanceStatus
-						);
+						];
 					}
 				}
 				
@@ -1325,16 +1305,16 @@ class Zend_Service_WindowsAzure_Management_Client
 			if ($xmlService->RoleList && $xmlService->RoleList->Role) {
 				$xmlRoles = $xmlService->RoleList->Role;
 				if (count($xmlService->RoleList->Role) == 1) {
-		    	    $xmlRoles = array($xmlService->RoleList->Role);
+		    	    $xmlRoles = [$xmlService->RoleList->Role];
 		    	}
 	    		
-				$roles = array();
+				$roles = [];
 				if (!is_null($xmlRoles)) {				
 					for ($i = 0; $i < count($xmlRoles); $i++) {
-						$roles[] = array(
+						$roles[] = [
 						    'rolename' => (string)$xmlRoles[$i]->RoleName,
 						    'osversion' => (!is_null($xmlRoles[$i]->OsVersion) ? (string)$xmlRoles[$i]->OsVersion : (string)$xmlRoles[$i]->OperatingSystemVersion)					
-						);
+						];
 					}
 				}
 				$returnValue->RoleList = $roles;
@@ -1422,10 +1402,10 @@ class Zend_Service_WindowsAzure_Management_Client
 	protected function _updateInstanceCountInConfiguration($roleName, $instanceCount, $configuration) {
     	// Change variables
 		if (!is_array($roleName)) {
-			$roleName = array($roleName);
+			$roleName = [$roleName];
 		}
 		if (!is_array($instanceCount)) {
-			$instanceCount = array($instanceCount);
+			$instanceCount = [$instanceCount];
 		}
 
 		$configuration = preg_replace('/(<\?xml[^?]+?)utf-16/i', '$1utf-8', $configuration);
@@ -1479,7 +1459,7 @@ class Zend_Service_WindowsAzure_Management_Client
     	}
     	
         if (@file_exists($configuration)) {
-    		$configuration = utf8_decode(file_get_contents($configuration));
+    		$configuration = mb_convert_encoding(file_get_contents($configuration), 'ISO-8859-1');
     	}
     	
     	$operationUrl = self::OP_HOSTED_SERVICES . '/' . $serviceName . '/deploymentslots/' . $deploymentSlot;
@@ -1512,7 +1492,7 @@ class Zend_Service_WindowsAzure_Management_Client
     	}
     	
         if (@file_exists($configuration)) {
-    		$configuration = utf8_decode(file_get_contents($configuration));
+    		$configuration = mb_convert_encoding(file_get_contents($configuration), 'ISO-8859-1');
     	}
     	
     	$operationUrl = self::OP_HOSTED_SERVICES . '/' . $serviceName . '/deployments/' . $deploymentId;
@@ -1535,7 +1515,7 @@ class Zend_Service_WindowsAzure_Management_Client
 
         $response = $this->_performRequest($operationUrl . '/', '?comp=config',
     		Zend_Http_Client::POST,
-    		array('Content-Type' => 'application/xml; charset=utf-8'),
+    		['Content-Type' => 'application/xml; charset=utf-8'],
     		'<ChangeConfiguration xmlns="http://schemas.microsoft.com/windowsazure" xmlns:i="http://www.w3.org/2001/XMLSchema-instance"><Configuration>' . base64_encode($conformingConfiguration) . '</Configuration></ChangeConfiguration>');
 			 
     	if (!$response->isSuccessful()) {
@@ -1590,7 +1570,7 @@ class Zend_Service_WindowsAzure_Management_Client
     	}
     	
     	if (@file_exists($configuration)) {
-    		$configuration = utf8_decode(file_get_contents($configuration));
+    		$configuration = mb_convert_encoding(file_get_contents($configuration), 'ISO-8859-1');
     	}
     	
 		$operationUrl = self::OP_HOSTED_SERVICES . '/' . $serviceName . '/deploymentslots/' . $deploymentSlot;
@@ -1642,7 +1622,7 @@ class Zend_Service_WindowsAzure_Management_Client
     	}
     	
     	if (@file_exists($configuration)) {
-    		$configuration = utf8_decode(file_get_contents($configuration));
+    		$configuration = mb_convert_encoding(file_get_contents($configuration), 'ISO-8859-1');
     	}
     	
 		$operationUrl = self::OP_HOSTED_SERVICES . '/' . $serviceName . '/deployments/' . $deploymentId;
@@ -1668,7 +1648,7 @@ class Zend_Service_WindowsAzure_Management_Client
     	
         $response = $this->_performRequest($operationUrl . '/', '?comp=upgrade',
     		Zend_Http_Client::POST,
-    		array('Content-Type' => 'application/xml; charset=utf-8'),
+    		['Content-Type' => 'application/xml; charset=utf-8'],
     		'<UpgradeDeployment xmlns="http://schemas.microsoft.com/windowsazure"><Mode>' . ucfirst($mode) . '</Mode><PackageUrl>' . $packageUrl . '</PackageUrl><Configuration>' . base64_encode($conformingConfiguration) . '</Configuration><Label>' . base64_encode($label) . '</Label>' . (!is_null($roleToUpgrade) ? '<RoleToUpgrade>' . $roleToUpgrade . '</RoleToUpgrade>' : '') . '</UpgradeDeployment>');		
     		
     	if (!$response->isSuccessful()) {
@@ -1736,7 +1716,7 @@ class Zend_Service_WindowsAzure_Management_Client
     {
         $response = $this->_performRequest($operationUrl . '/', '?comp=walkupgradedomain',
     		Zend_Http_Client::POST,
-    		array('Content-Type' => 'application/xml; charset=utf-8'),
+    		['Content-Type' => 'application/xml; charset=utf-8'],
     		'<WalkUpgradeDomain xmlns="http://schemas.microsoft.com/windowsazure"><UpgradeDomain>' . $upgradeDomain . '</UpgradeDomain></WalkUpgradeDomain>');		
 
     	if (!$response->isSuccessful()) {
@@ -1898,15 +1878,15 @@ class Zend_Service_WindowsAzure_Management_Client
 			$result = $this->_parseResponse($response);
 
 			if (!$result->Certificate) {
-				return array();
+				return [];
 			}
 		    if (count($result->Certificate) > 1) {
     		    $xmlServices = $result->Certificate;
     		} else {
-    		    $xmlServices = array($result->Certificate);
+    		    $xmlServices = [$result->Certificate];
     		}
 
-			$services = array();
+			$services = [];
 			if (!is_null($xmlServices)) {				
 				
 				for ($i = 0; $i < count($xmlServices); $i++) {
@@ -1940,13 +1920,13 @@ class Zend_Service_WindowsAzure_Management_Client
 			require_once 'Zend/Service/WindowsAzure/Management/Exception.php';
     		throw new Zend_Service_WindowsAzure_Management_Exception('Service name or certificate URL should be specified.');
     	}
-    	if (strpos($serviceName, 'https') === false && ($algorithm == '' || is_null($algorithm)) && ($thumbprint == '' || is_null($thumbprint))) {
+    	if (!str_contains($serviceName, 'https') && ($algorithm == '' || is_null($algorithm)) && ($thumbprint == '' || is_null($thumbprint))) {
 			require_once 'Zend/Service/WindowsAzure/Management/Exception.php';
     		throw new Zend_Service_WindowsAzure_Management_Exception('Algorithm and thumbprint should be specified.');
     	}
     	
     	$operationUrl = str_replace($this->getBaseUrl(), '', $serviceName);
-    	if (strpos($serviceName, 'https') === false) {
+    	if (!str_contains($serviceName, 'https')) {
     		$operationUrl = self::OP_HOSTED_SERVICES . '/' . $serviceName . '/certificates/' . $algorithm . '-' . strtoupper($thumbprint);
     	}
     	
@@ -2002,7 +1982,7 @@ class Zend_Service_WindowsAzure_Management_Client
     	$operationUrl = self::OP_HOSTED_SERVICES . '/' . $serviceName . '/certificates';
         $response = $this->_performRequest($operationUrl, '',
     		Zend_Http_Client::POST,
-    		array('Content-Type' => 'application/xml; charset=utf-8'),
+    		['Content-Type' => 'application/xml; charset=utf-8'],
     		'<CertificateFile xmlns="http://schemas.microsoft.com/windowsazure"><Data>' . base64_encode($certificateData) . '</Data><CertificateFormat>' . $certificateFormat . '</CertificateFormat><Password>' . $certificatePassword . '</Password></CertificateFile>');
 
     	if (!$response->isSuccessful()) {
@@ -2025,13 +2005,13 @@ class Zend_Service_WindowsAzure_Management_Client
 			require_once 'Zend/Service/WindowsAzure/Management/Exception.php';
     		throw new Zend_Service_WindowsAzure_Management_Exception('Service name or certificate URL should be specified.');
     	}
-    	if (strpos($serviceName, 'https') === false && ($algorithm == '' || is_null($algorithm)) && ($thumbprint == '' || is_null($thumbprint))) {
+    	if (!str_contains($serviceName, 'https') && ($algorithm == '' || is_null($algorithm)) && ($thumbprint == '' || is_null($thumbprint))) {
 			require_once 'Zend/Service/WindowsAzure/Management/Exception.php';
     		throw new Zend_Service_WindowsAzure_Management_Exception('Algorithm and thumbprint should be specified.');
     	}
     	
     	$operationUrl = str_replace($this->getBaseUrl(), '', $serviceName);
-    	if (strpos($serviceName, 'https') === false) {
+    	if (!str_contains($serviceName, 'https')) {
     		$operationUrl = self::OP_HOSTED_SERVICES . '/' . $serviceName . '/certificates/' . $algorithm . '-' . strtoupper($thumbprint);
     	}
     	
@@ -2058,15 +2038,15 @@ class Zend_Service_WindowsAzure_Management_Client
 			$result = $this->_parseResponse($response);
 			
     		if (!$result->AffinityGroup) {
-				return array();
+				return [];
 			}
 		    if (count($result->AffinityGroup) > 1) {
     		    $xmlServices = $result->AffinityGroup;
     		} else {
-    		    $xmlServices = array($result->AffinityGroup);
+    		    $xmlServices = [$result->AffinityGroup];
     		}
     		
-			$services = array();
+			$services = [];
 			if (!is_null($xmlServices)) {				
 				
 				for ($i = 0; $i < count($xmlServices); $i++) {
@@ -2118,7 +2098,7 @@ class Zend_Service_WindowsAzure_Management_Client
     	
         $response = $this->_performRequest(self::OP_AFFINITYGROUPS, '',
     		Zend_Http_Client::POST,
-    		array('Content-Type' => 'application/xml; charset=utf-8'),
+    		['Content-Type' => 'application/xml; charset=utf-8'],
     		'<CreateAffinityGroup xmlns="http://schemas.microsoft.com/windowsazure"><Name>' . $name . '</Name><Label>' . base64_encode($label) . '</Label><Description>' . $description . '</Description><Location>' . $location . '</Location></CreateAffinityGroup>');	
     		
     	if (!$response->isSuccessful()) {
@@ -2155,7 +2135,7 @@ class Zend_Service_WindowsAzure_Management_Client
     	
         $response = $this->_performRequest(self::OP_AFFINITYGROUPS . '/' . $name, '',
     		Zend_Http_Client::PUT,
-    		array('Content-Type' => 'application/xml; charset=utf-8'),
+    		['Content-Type' => 'application/xml; charset=utf-8'],
     		'<UpdateAffinityGroup xmlns="http://schemas.microsoft.com/windowsazure"><Label>' . base64_encode($label) . '</Label><Description>' . $description . '</Description></UpdateAffinityGroup>');	
     		
     	if (!$response->isSuccessful()) {
@@ -2216,16 +2196,16 @@ class Zend_Service_WindowsAzure_Management_Client
 			if (count($result->HostedServices->HostedService) > 1) {
 		    	$xmlService = $result->HostedServices->HostedService;
 		    } else {
-		    	$xmlService = array($result->HostedServices->HostedService);
+		    	$xmlService = [$result->HostedServices->HostedService];
 		    }
 		    		
-			$services = array();
+			$services = [];
 			if (!is_null($xmlService)) {				
 				for ($i = 0; $i < count($xmlService); $i++) {
-					$services[] = array(
+					$services[] = [
 						'url' => (string)$xmlService[$i]->Url,
 						'name' => (string)$xmlService[$i]->ServiceName
-					);
+					];
 				}
 			}
 			$affinityGroup->HostedServices = $services;
@@ -2234,16 +2214,16 @@ class Zend_Service_WindowsAzure_Management_Client
 			if (count($result->StorageServices->StorageService) > 1) {
 		    	$xmlService = $result->StorageServices->StorageService;
 		    } else {
-		    	$xmlService = array($result->StorageServices->StorageService);
+		    	$xmlService = [$result->StorageServices->StorageService];
 		    }
 		    		
-			$services = array();
+			$services = [];
 			if (!is_null($xmlService)) {				
 				for ($i = 0; $i < count($xmlService); $i++) {
-					$services[] = array(
+					$services[] = [
 						'url' => (string)$xmlService[$i]->Url,
 						'name' => (string)$xmlService[$i]->ServiceName
-					);
+					];
 				}
 			}
 			$affinityGroup->StorageServices = $services;	
@@ -2270,15 +2250,15 @@ class Zend_Service_WindowsAzure_Management_Client
 			$result = $this->_parseResponse($response);
 			
     		if (!$result->Location) {
-				return array();
+				return [];
 			}
 		    if (count($result->Location) > 1) {
     		    $xmlServices = $result->Location;
     		} else {
-    		    $xmlServices = array($result->Location);
+    		    $xmlServices = [$result->Location];
     		}
     		
-			$services = array();
+			$services = [];
 			if (!is_null($xmlServices)) {				
 				
 				for ($i = 0; $i < count($xmlServices); $i++) {
@@ -2314,15 +2294,15 @@ class Zend_Service_WindowsAzure_Management_Client
 			$result = $this->_parseResponse($response);
 			
     		if (!$result->OperatingSystem) {
-				return array();
+				return [];
 			}
 		    if (count($result->OperatingSystem) > 1) {
     		    $xmlServices = $result->OperatingSystem;
     		} else {
-    		    $xmlServices = array($result->OperatingSystem);
+    		    $xmlServices = [$result->OperatingSystem];
     		}
     		
-			$services = array();
+			$services = [];
 			if (!is_null($xmlServices)) {				
 				
 				for ($i = 0; $i < count($xmlServices); $i++) {
@@ -2363,15 +2343,15 @@ class Zend_Service_WindowsAzure_Management_Client
 			$result = $this->_parseResponse($response);
 			
     		if (!$result->OperatingSystemFamily) {
-				return array();
+				return [];
 			}
 		    if (count($result->OperatingSystemFamily) > 1) {
     		    $xmlServices = $result->OperatingSystemFamily;
     		} else {
-    		    $xmlServices = array($result->OperatingSystemFamily);
+    		    $xmlServices = [$result->OperatingSystemFamily];
     		}
     		
-			$services = array();
+			$services = [];
 			if (!is_null($xmlServices)) {				
 				
 				for ($i = 0; $i < count($xmlServices); $i++) {
@@ -2383,10 +2363,10 @@ class Zend_Service_WindowsAzure_Management_Client
 					if (count($xmlServices[$i]->OperatingSystems->OperatingSystem) > 1) {
 		    		    $xmlOperatingSystems = $xmlServices[$i]->OperatingSystems->OperatingSystem;
 		    		} else {
-		    		    $xmlOperatingSystems = array($xmlServices[$i]->OperatingSystems->OperatingSystem);
+		    		    $xmlOperatingSystems = [$xmlServices[$i]->OperatingSystems->OperatingSystem];
 		    		}
 		    		
-					$operatingSystems = array();
+					$operatingSystems = [];
 					if (!is_null($xmlOperatingSystems)) {				
 						require_once 'Zend/Service/WindowsAzure/Management/OperatingSystemInstance.php';
 						for ($i = 0; $i < count($xmlOperatingSystems); $i++) {

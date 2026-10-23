@@ -34,7 +34,7 @@ class Zend_Queue_Message_Iterator implements Iterator, Countable
      *
      * @var array
      */
-    protected $_data = array();
+    protected $_data = [];
 
      /**
      * Connected is true if we have a reference to a live
@@ -79,11 +79,11 @@ class Zend_Queue_Message_Iterator implements Iterator, Countable
      * @param  array $options ('queue', 'messageClass', 'data'=>array());
      * @return void
      */
-    public function __construct(array $options = array())
+    public function __construct(array $options = [])
     {
         if (isset($options['queue'])) {
             $this->_queue      = $options['queue'];
-            $this->_queueClass = get_class($this->_queue);
+            $this->_queueClass = $this->_queue::class;
             $this->_connected  = true;
         } else {
             $this->_connected = false;
@@ -107,7 +107,7 @@ class Zend_Queue_Message_Iterator implements Iterator, Countable
         // for each of the messages
         foreach ($options['data'] as $data) {
             // construct the message parameters
-            $message = array('data' => $data);
+            $message = ['data' => $data];
 
             // If queue has not been set, then use the default.
             if (empty($message['queue'])) {
@@ -126,7 +126,7 @@ class Zend_Queue_Message_Iterator implements Iterator, Countable
      */
     public function __sleep()
     {
-        return array('_data', '_queueClass', '_messageClass', '_pointer');
+        return ['_data', '_queueClass', '_messageClass', '_pointer'];
     }
 
     /**
@@ -183,7 +183,7 @@ class Zend_Queue_Message_Iterator implements Iterator, Countable
 
         // @todo This works only if we have iterated through
         // the result set once to instantiate the rows.
-        foreach ($this->_data as $i => $message) {
+        foreach ($this->_data as $message) {
             $this->_connected = $this->_connected || $message->setQueue($queue);
         }
 

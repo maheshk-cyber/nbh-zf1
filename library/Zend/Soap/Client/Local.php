@@ -56,7 +56,7 @@ class Zend_Soap_Client_Local extends Zend_Soap_Client
      * @param string $wsdl
      * @param array $options
      */
-    function __construct(Zend_Soap_Server $server, $wsdl, $options = null)
+    public function __construct(Zend_Soap_Server $server, $wsdl, $options = null)
     {
         $this->_server = $server;
 
@@ -84,7 +84,7 @@ class Zend_Soap_Client_Local extends Zend_Soap_Client
         ob_start();
         $this->_server->handle($request);
         $response = ob_get_clean();
- 
+
         if ($response === null || $response === '') {
             $serverResponse = $this->server->getResponse();
             if ($serverResponse !== null) {

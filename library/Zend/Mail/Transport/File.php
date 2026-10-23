@@ -64,16 +64,12 @@ class Zend_Mail_Transport_File extends Zend_Mail_Transport_Abstract
         if ($options instanceof Zend_Config) {
             $options = $options->toArray();
         } elseif (!is_array($options)) {
-            $options = array();
+            $options = [];
         }
 
         // Making sure we have some defaults to work with
-        if (!isset($options['path'])) {
-            $options['path'] = sys_get_temp_dir();
-        }
-        if (!isset($options['callback'])) {
-            $options['callback'] = array($this, 'defaultCallback');
-        }
+        $options['path'] ??= sys_get_temp_dir();
+        $options['callback'] ??= $this->defaultCallback(...);
 
         $this->setOptions($options);
     }

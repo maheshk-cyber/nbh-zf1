@@ -130,7 +130,7 @@ class Zend_Service_LiveDocx
      */
     public function __construct($options = null)
     {
-        $this->_credentials = array();
+        $this->_credentials = [];
         $this->_loggedIn = false;
 
         if ($options instanceof Zend_Config) {
@@ -246,10 +246,10 @@ class Zend_Service_LiveDocx
             }
 
             try {
-                $this->getSoapClient()->LogIn(array(
+                $this->getSoapClient()->LogIn([
                     'username' => $this->getUsername(),
                     'password' => $this->getPassword(),
-                ));
+                ]);
                 $this->_loggedIn = true;
             } catch (Exception $e) {
                 require_once 'Zend/Service/LiveDocx/Exception.php';
@@ -344,11 +344,7 @@ class Zend_Service_LiveDocx
      */
     public function getUsername()
     {
-        if (isset($this->_credentials['username'])) {
-            return $this->_credentials['username'];
-        }
-
-        return null;
+        return $this->_credentials['username'] ?? null;
     }
 
     /**
@@ -359,11 +355,7 @@ class Zend_Service_LiveDocx
      */
     public function getPassword()
     {
-        if (isset($this->_credentials['password'])) {
-            return $this->_credentials['password'];
-        }
-
-        return null;
+        return $this->_credentials['password'] ?? null;
     }
 
     /**

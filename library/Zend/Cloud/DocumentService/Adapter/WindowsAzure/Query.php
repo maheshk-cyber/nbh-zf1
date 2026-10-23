@@ -95,7 +95,7 @@ class Zend_Cloud_DocumentService_Adapter_WindowsAzure_Query
     {
         if (!empty($value) && !is_array($value)) {
             // fix buglet in Azure - numeric values are quoted unless passed as an array
-            $value = array($value);
+            $value = [$value];
         }
         $this->_azureSelect->where($where, $value, $op);
         return $this;
@@ -141,7 +141,7 @@ class Zend_Cloud_DocumentService_Adapter_WindowsAzure_Query
      * @return Zend_Cloud_DocumentService_Adapter_WindowsAzure_Query
      * @throws Zend_Cloud_OperationNotAvailableException
      */
-    public function order($sort, $direction = 'asc')
+    public function order($sort, $direction = 'asc'): never
     {
         require_once 'Zend/Cloud/OperationNotAvailableException.php';
         throw new Zend_Cloud_OperationNotAvailableException('No support for sorting for Azure yet');

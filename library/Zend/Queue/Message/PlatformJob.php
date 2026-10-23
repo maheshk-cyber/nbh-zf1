@@ -37,7 +37,7 @@ require_once 'Zend/Queue/Message.php';
 class Zend_Queue_Message_PlatformJob extends Zend_Queue_Message
 {
     /**
-     * @var ZendApi_Job
+     * @var ZendAPI_Job
      */
     protected $_job;
 
@@ -64,7 +64,7 @@ class Zend_Queue_Message_PlatformJob extends Zend_Queue_Message
      * @return void
      * @throws Zend_Queue_Exception
      */
-    public function __construct(array $options = array())
+    public function __construct(array $options = [])
     {
         if (isset($options['data'])) {
             if (!($options['data'] instanceof ZendApi_Job)) {
@@ -107,7 +107,7 @@ class Zend_Queue_Message_PlatformJob extends Zend_Queue_Message
      */
     public function getJobId()
     {
-        return (($this->_id) ?  $this->_id : $this->_job->getID());
+        return ($this->_id ?: $this->_job->getID());
     }
 
     /**
@@ -127,7 +127,7 @@ class Zend_Queue_Message_PlatformJob extends Zend_Queue_Message
      */
     public function __sleep()
     {
-        return serialize('_job', '_id', '_data');
+        return serialize('_job');
     }
 
     /**
@@ -177,7 +177,7 @@ class Zend_Queue_Message_PlatformJob extends Zend_Queue_Message
         }
 
         if (!empty($this->_data['interval'])) {
-            $endTime = isset($this->_data['end_time']) ? $this->_data['end_time'] : null;
+            $endTime = $this->_data['end_time'] ?? null;
             $this->_job->setRecurrenceData($this->_data['interval'], $endTime);
         } elseif (isset($this->_data['interval']) && ($this->_data['interval'] === '')) {
             $this->_job->setRecurrenceData(0,0);

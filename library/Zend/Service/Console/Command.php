@@ -110,8 +110,8 @@ class Zend_Service_Console_Command
 		}
 
 		// Replace error handler
-		set_error_handler(array('Zend_Service_Console_Command', 'phpstderr'));
-		set_exception_handler(array('Zend_Service_Console_Command', 'phpstdex'));
+		set_error_handler(['Zend_Service_Console_Command', 'phpstderr']);
+		set_exception_handler(['Zend_Service_Console_Command', 'phpstdex']);
 
 		// Build the application model
 		$model = self::_buildModel();
@@ -133,20 +133,20 @@ class Zend_Service_Console_Command
 		// Find a method that matches the command name
 		$command = null;
 		foreach ($handler->commands as $possibleCommand) {
-			if (in_array(strtolower(isset($argv[1]) ? $argv[1] : '<default>'), $possibleCommand->aliases)) {
+			if (in_array(strtolower($argv[1] ?? '<default>'), $possibleCommand->aliases)) {
 				$command = $possibleCommand;
 				break;
 			}
 		}
 		if (is_null($command)) {
-			$commandName = (isset($argv[1]) ? $argv[1] : '<default>');
+			$commandName = ($argv[1] ?? '<default>');
 			self::stderr("No method found that implements command " . $commandName . ". Create a method in class '" . $handler->class . "' that is named '" . strtolower($commandName) . "Command' or is decorated with a docblock comment '@command-name " . $commandName . "'.");
 			die();
 		}
 
 		// Parse parameter values
-		$parameterValues = array();
-		$missingParameterValues = array();
+		$parameterValues = [];
+		$missingParameterValues = [];
 		$parameterInputs = array_splice($argv, 2);
 		foreach ($command->parameters as $parameter) {
 			// Default value: null
@@ -166,9 +166,7 @@ class Zend_Service_Console_Command
 			}
 			if (is_null($value) && $parameter->required) {
 				$missingParameterValues[] = $parameter->aliases[0];
-			} else if (is_null($value)) {
-				$value = $parameter->defaultvalue;
-			}
+			} else $value ??= $parameter->defaultvalue;
 
 			// Set value
 			$parameterValues[] = $value;
@@ -188,7 +186,7 @@ class Zend_Service_Console_Command
 		$className = $handler->class;
 		$classInstance = new $className();
 		$classInstance->setHandler($handler);
-		call_user_func_array(array($classInstance, $command->method), $parameterValues);
+		call_user_func_array([$classInstance, $command->method], $parameterValues);
 
 		// Restore error handler
 		restore_exception_handler();
@@ -202,7 +200,7 @@ class Zend_Service_Console_Command
 	 */
 	protected static function _buildModel()
 	{
-		$model = array();
+		$model = [];
 
 		$classes = get_declared_classes();
 		foreach ($classes as $class) {
@@ -220,23 +218,23 @@ class Zend_Service_Console_Command
 
 			for ($hi = 0; $hi < count($handlers); $hi++) {
 				$handler = $handlers[$hi];
-				$handlerDescription = isset($handlerDescriptions[$hi]) ? $handlerDescriptions[$hi] : isset($handlerDescriptions[0]) ? $handlerDescriptions[0] : '';
+				$handlerDescription = ($handlerDescriptions[$hi] ?? isset($handlerDescriptions[0])) ? $handlerDescriptions[0] : '';
 				$handlerDescription = str_replace('\r\n', "\r\n", $handlerDescription);
 				$handlerDescription = str_replace('\n', "\n", $handlerDescription);
 
-				$handlerModel = (object)array(
+				$handlerModel = (object)[
 					'handler'     => strtolower($handler),
 					'description' => $handlerDescription,
 					'headers'     => $handlerHeaders,
 					'footers'     => $handlerFooters,
 					'class'       => $class,
-					'commands'    => array()
-				);
+					'commands'    => []
+				];
 
 				$methods = $type->getMethods();
 			    foreach ($methods as $method) {
 			       	$commands = self::_findValueForDocComment('@command-name', $method->getDocComment());
-			    	if (substr($method->getName(), -7) == 'Command' && !in_array(substr($method->getName(), 0, -7), $commands)) {
+			    	if (str_ends_with($method->getName(), 'Command') && !in_array(substr($method->getName(), 0, -7), $commands)) {
 						// Fallback: if the method is named <commandname>Command,
 						// register it as a command.
 						$commands[] = substr($method->getName(), 0, -7);
@@ -250,17 +248,17 @@ class Zend_Service_Console_Command
 
 			       	if (count($commands) > 0) {
 						$command = $commands[0];
-						$commandDescription = isset($commandDescriptions[0]) ? $commandDescriptions[0] : '';
+						$commandDescription = $commandDescriptions[0] ?? '';
 
-						$commandModel = (object)array(
+						$commandModel = (object)[
 							'command'     => $command,
 							'aliases'     => $commands,
 							'description' => $commandDescription,
 							'examples'    => $commandExamples,
 							'class'       => $class,
 							'method'      => $method->getName(),
-							'parameters'  => array()
-						);
+							'parameters'  => []
+						];
 
 						$parameters = $method->getParameters();
 						$parametersFor = self::_findValueForDocComment('@command-parameter-for', $method->getDocComment());
@@ -291,14 +289,14 @@ class Zend_Service_Console_Command
 								$parameterForDefaultValue = $parameter->getDefaultValue();
 							}
 
-							$parameterModel = (object)array(
+							$parameterModel = (object)[
 								'name'           => '$' . $parameter->getName(),
 								'defaultvalue'   => $parameterForDefaultValue,
 								'valueproviders' => explode('|', $parameterFor[1]),
 								'aliases'        => explode('|', $parameterFor[2]),
-								'description'    => (isset($parameterFor[3]) ? $parameterFor[3] : ''),
-								'required'       => (isset($parameterFor[3]) ? strpos(strtolower($parameterFor[3]), 'required') !== false && strpos(strtolower($parameterFor[3]), 'required if') === false : false),
-							);
+								'description'    => ($parameterFor[3] ?? ''),
+								'required'       => (isset($parameterFor[3]) ? str_contains(strtolower($parameterFor[3]), 'required') && !str_contains(strtolower($parameterFor[3]), 'required if') : false),
+							];
 
 							// Add to model
 							$commandModel->parameters[] = $parameterModel;
@@ -326,11 +324,11 @@ class Zend_Service_Console_Command
 	 */
 	protected static function _findValueForDocComment($docCommentName, $docComment)
 	{
-		$returnValue = array();
+		$returnValue = [];
 
 		$commentLines = explode("\n", $docComment);
 	    foreach ($commentLines as $commentLine) {
-	        if (strpos($commentLine, $docCommentName . ' ') !== false) {
+	        if (str_contains($commentLine, $docCommentName . ' ')) {
 	            $returnValue[] = trim(substr($commentLine, strpos($commentLine, $docCommentName) + strlen($docCommentName) + 1));
 	        }
 	    }
@@ -344,7 +342,7 @@ class Zend_Service_Console_Command
 	 * @param object $object Object
 	 * @param array $propertiesToDump Property names to display
 	 */
-	protected function _displayObjectInformation($object, $propertiesToDump = array())
+	protected function _displayObjectInformation($object, $propertiesToDump = [])
 	{
 		foreach ($propertiesToDump as $property) {
 			printf('%-16s: %s' . "\r\n", $property, $object->$property);

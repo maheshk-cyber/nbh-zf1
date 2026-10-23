@@ -34,27 +34,22 @@ class Zend_Service_WindowsAzure_Credentials_SharedAccessSignature
     extends Zend_Service_WindowsAzure_Credentials_CredentialsAbstract
 {
     /**
-     * Permission set
-     * 
-     * @var array
+     * Creates a new Zend_Service_WindowsAzure_Credentials_SharedAccessSignature instance
+     *
+     * @param string $accountName Account name for Windows Azure
+     * @param string $accountKey Account key for Windows Azure
+     * @param boolean $usePathStyleUri Use path-style URI's
+     * @param array $_permissionSet Permission set
      */
-    protected $_permissionSet = array();
-    
-	/**
-	 * Creates a new Zend_Service_WindowsAzure_Credentials_SharedAccessSignature instance
-	 *
-	 * @param string $accountName Account name for Windows Azure
-	 * @param string $accountKey Account key for Windows Azure
-	 * @param boolean $usePathStyleUri Use path-style URI's
-	 * @param array $permissionSet Permission set
-	 */
-	public function __construct(
+    public function __construct(
 		$accountName = Zend_Service_WindowsAzure_Credentials_CredentialsAbstract::DEVSTORE_ACCOUNT,
 		$accountKey  = Zend_Service_WindowsAzure_Credentials_CredentialsAbstract::DEVSTORE_KEY,
-		$usePathStyleUri = false, $permissionSet = array()
+		$usePathStyleUri = false, /**
+         * Permission set
+         */
+        protected $_permissionSet = []
 	) {
 	    parent::__construct($accountName, $accountKey, $usePathStyleUri);
-	    $this->_permissionSet = $permissionSet;
 	}
 	
 	/**
@@ -79,10 +74,10 @@ class Zend_Service_WindowsAzure_Credentials_SharedAccessSignature
 	 * @param  array $value Permission set
 	 * @return void
 	 */
-    public function setPermissionSet($value = array())
+    public function setPermissionSet($value = [])
 	{
 		foreach ($value as $url) {
-			if (strpos($url, $this->_accountName) === false) {
+			if (!str_contains($url, $this->_accountName)) {
 				require_once 'Zend/Service/WindowsAzure/Exception.php';
 				throw new Zend_Service_WindowsAzure_Exception('The permission set can only contain URLs for the account name specified in the Zend_Service_WindowsAzure_Credentials_SharedAccessSignature instance.');
 			}
@@ -115,7 +110,7 @@ class Zend_Service_WindowsAzure_Credentials_SharedAccessSignature
 		}
 			
 		// Add trailing slash to $path
-		if (substr($path, 0, 1) !== '/') {
+		if (!str_starts_with($path, '/')) {
 		    $path = '/' . $path;
 		}
 
@@ -127,7 +122,7 @@ class Zend_Service_WindowsAzure_Credentials_SharedAccessSignature
 		$canonicalizedResource .= $path;
 		    
 		// Create string to sign   
-		$stringToSign   = array();
+		$stringToSign   = [];
 		$stringToSign[] = $permissions;
     	$stringToSign[] = $start;
     	$stringToSign[] = $expiry;
@@ -162,7 +157,7 @@ class Zend_Service_WindowsAzure_Credentials_SharedAccessSignature
     	$identifier = ''
     ) {
         // Parts
-        $parts = array();
+        $parts = [];
         if ($start !== '') {
             $parts[] = 'st=' . urlencode($start);
         }
@@ -216,7 +211,7 @@ class Zend_Service_WindowsAzure_Credentials_SharedAccessSignature
 	    // Check if permission matches request
 	    $matches = true;
 	    foreach ($permissionParts as $part) {
-	        list($property, $value) = explode('=', $part, 2);
+	        [$property, $value] = explode('=', $part, 2);
 	        
 	        if ($property == 'sr') {
 	            $matches = $matches && (strpbrk($value, $requiredResourceType) !== false);
@@ -228,7 +223,7 @@ class Zend_Service_WindowsAzure_Credentials_SharedAccessSignature
 	    }
 	    
 	    // Ok, but... does the resource match?
-	    $matches = $matches && (strpos($parsedRequestUrl['path'], $parsedPermissionUrl['path']) !== false);
+	    $matches = $matches && (str_contains($parsedRequestUrl['path'], $parsedPermissionUrl['path']));
 	    
         // Return
 	    return $matches;
@@ -253,7 +248,7 @@ class Zend_Service_WindowsAzure_Credentials_SharedAccessSignature
 	            // This matches, append signature data
 	            $parsedPermittedUrl = parse_url($permittedUrl);
 
-	            if (strpos($requestUrl, '?') === false) {
+	            if (!str_contains($requestUrl, '?')) {
 	                $requestUrl .= '?';
 	            } else {
 	                $requestUrl .= '&';

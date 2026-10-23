@@ -57,12 +57,12 @@ class Zend_XmlRpc_Server_Fault extends Zend_XmlRpc_Fault
     /**
      * @var array Array of exception classes that may define xmlrpc faults
      */
-    protected static $_faultExceptionClasses = array('Zend_XmlRpc_Server_Exception' => true);
+    protected static $_faultExceptionClasses = ['Zend_XmlRpc_Server_Exception' => true];
 
     /**
      * @var array Array of fault observers
      */
-    protected static $_observers = array();
+    protected static $_observers = [];
 
     /**
      * Constructor
@@ -75,7 +75,7 @@ class Zend_XmlRpc_Server_Fault extends Zend_XmlRpc_Fault
         $this->_exception = $e;
         $code             = 404;
         $message          = 'Unknown error';
-        $exceptionClass   = get_class($e);
+        $exceptionClass   = $e::class;
 
         foreach (array_keys(self::$_faultExceptionClasses) as $class) {
             if ($e instanceof $class) {
@@ -90,7 +90,7 @@ class Zend_XmlRpc_Server_Fault extends Zend_XmlRpc_Fault
         // Notify exception observers, if present
         if (!empty(self::$_observers)) {
             foreach (array_keys(self::$_observers) as $observer) {
-                call_user_func(array($observer, 'observe'), $this);
+                call_user_func([$observer, 'observe'], $this);
             }
         }
     }
@@ -160,14 +160,12 @@ class Zend_XmlRpc_Server_Fault extends Zend_XmlRpc_Fault
     {
         if (!is_string($class)
             || !class_exists($class)
-            || !is_callable(array($class, 'observe')))
+            || !is_callable([$class, 'observe']))
         {
             return false;
         }
 
-        if (!isset(self::$_observers[$class])) {
-            self::$_observers[$class] = true;
-        }
+        self::$_observers[$class] ??= true;
 
         return true;
     }

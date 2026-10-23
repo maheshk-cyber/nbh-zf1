@@ -365,7 +365,7 @@ abstract class Zend_View_Helper_Navigation_HelperAbstract
     public function getPrefixForId()
     {
         if (null === $this->_prefixForId) {
-            $prefix             = get_class($this);
+            $prefix             = static::class;
             $this->_prefixForId = strtolower(
                     trim(substr($prefix, strrpos($prefix, '_')), '_')
                 ) . '-';
@@ -609,10 +609,10 @@ abstract class Zend_View_Helper_Navigation_HelperAbstract
      * @return mixed                      returns what the container returns
      * @throws Zend_Navigation_Exception  if method does not exist in container
      */
-    public function __call($method, array $arguments = array())
+    public function __call($method, array $arguments = [])
     {
         return call_user_func_array(
-                array($this->getContainer(), $method),
+                [$this->getContainer(), $method],
                 $arguments);
     }
 
@@ -626,12 +626,12 @@ abstract class Zend_View_Helper_Navigation_HelperAbstract
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         try {
             return $this->render();
         } catch (Exception $e) {
-            $msg = get_class($e) . ': ' . $e->getMessage();
+            $msg = $e::class . ': ' . $e->getMessage();
             trigger_error($msg, E_USER_ERROR);
             return '';
         }
@@ -706,9 +706,9 @@ abstract class Zend_View_Helper_Navigation_HelperAbstract
         }
 
         if ($found) {
-            return array('page' => $found, 'depth' => $foundDepth);
+            return ['page' => $found, 'depth' => $foundDepth];
         } else {
-            return array();
+            return [];
         }
     }
 
@@ -783,13 +783,13 @@ abstract class Zend_View_Helper_Navigation_HelperAbstract
 
         // get attribs for anchor element
         $attribs = array_merge(
-            array(
+            [
                 'id'     => $page->getId(),
                 'title'  => $title,
                 'class'  => $page->getClass(),
                 'href'   => $page->getHref(),
                 'target' => $page->getTarget()
-            ),
+            ],
             $page->getCustomHtmlAttribs()
         );
 

@@ -95,7 +95,7 @@ abstract class Zend_View_Helper_FormElement extends Zend_View_Helper_HtmlElement
         // if an array, it's an element info array that will override
         // these baseline values.  as such, ignore it for the 'name'
         // if it's an array.
-        $info = array(
+        $info = [
             'name'    => is_array($name) ? '' : $name,
             'id'      => is_array($name) ? '' : $name,
             'value'   => $value,
@@ -104,7 +104,7 @@ abstract class Zend_View_Helper_FormElement extends Zend_View_Helper_HtmlElement
             'listsep' => $listsep,
             'disable' => false,
             'escape'  => true,
-        );
+        ];
 
         // override with named args
         if (is_array($name)) {
@@ -117,9 +117,7 @@ abstract class Zend_View_Helper_FormElement extends Zend_View_Helper_HtmlElement
 
             // If all helper options are passed as an array, attribs may have
             // been as well
-            if (null === $attribs) {
-                $attribs = $info['attribs'];
-            }
+            $attribs ??= $info['attribs'];
         }
 
         $attribs = (array)$attribs;
@@ -144,7 +142,7 @@ abstract class Zend_View_Helper_FormElement extends Zend_View_Helper_HtmlElement
             $info['id'] = (string)$attribs['id'];
         } else if ('' !== $info['name']) {
             $info['id'] = trim(strtr($info['name'],
-                                     array('[' => '-', ']' => '')), '-');
+                                     ['[' => '-', ']' => '']), '-');
         }
         
         // Remove NULL name attribute override

@@ -52,7 +52,7 @@ class Zend_Http_UserAgent_Features_Adapter_Browscap
             require_once 'Zend/Http/UserAgent/Features/Exception.php';
             throw new Zend_Http_UserAgent_Features_Exception(sprintf(
                 '%s requires a browscap entry in php.ini pointing to a valid browscap.ini; none present',
-                __CLASS__
+                self::class
             ));
         }
     }
@@ -67,7 +67,7 @@ class Zend_Http_UserAgent_Features_Adapter_Browscap
     public static function getFromRequest($request, array $config)
     {
         $browscap = get_browser($request['http_user_agent'], true);
-        $features = array();
+        $features = [];
 
         if (is_array($browscap)) {
             foreach ($browscap as $key => $value) {

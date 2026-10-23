@@ -211,7 +211,7 @@ class Zend_OpenId
                 $query = $key . '=' . urlencode($value);
             }
         }
-        return isset($query) ? $query : '';
+        return $query ?? '';
     }
 
     /**
@@ -391,11 +391,11 @@ class Zend_OpenId
         }
 
         // 7.2.1
-        if (strpos($id, 'xri://$ip*') === 0) {
+        if (str_starts_with($id, 'xri://$ip*')) {
             $id = substr($id, strlen('xri://$ip*'));
-        } else if (strpos($id, 'xri://$dns*') === 0) {
+        } else if (str_starts_with($id, 'xri://$dns*')) {
             $id = substr($id, strlen('xri://$dns*'));
-        } else if (strpos($id, 'xri://') === 0) {
+        } else if (str_starts_with($id, 'xri://')) {
             $id = substr($id, strlen('xri://'));
         }
 
@@ -409,7 +409,7 @@ class Zend_OpenId
         }
 
         // 7.2.3
-        if (strpos($id, "://") === false) {
+        if (!str_contains($id, "://")) {
             $id = 'http://' . $id;
         }
 
@@ -448,7 +448,7 @@ class Zend_OpenId
             $body .= "<input type=\"submit\" value=\"Continue OpenID transaction\">\n";
             $body .= "</form></body></html>\n";
         } else if (is_array($params) && count($params) > 0) {
-            if (strpos($url, '?') === false) {
+            if (!str_contains($url, '?')) {
                 $url .= '?' . self::paramsToQuery($params);
             } else {
                 $url .= '&' . self::paramsToQuery($params);
@@ -627,20 +627,18 @@ class Zend_OpenId
     static public function createDhKey($p, $g, $priv_key = null)
     {
         if (function_exists('openssl_dh_compute_key')) {
-            $dh_details = array(
+            $dh_details = [
                     'p' => $p,
                     'g' => $g
-                );
+                ];
             if ($priv_key !== null) {
                 $dh_details['priv_key'] = $priv_key;
             }
-            return openssl_pkey_new(array('dh'=>$dh_details));
+            return openssl_pkey_new(['dh'=>$dh_details]);
         } else {
             $bn_p        = self::binToBigNum($p);
             $bn_g        = self::binToBigNum($g);
-            if ($priv_key === null) {
-                $priv_key    = self::randomBytes(Zend_OpenId::strlen($p));
-            }
+            $priv_key ??= self::randomBytes(Zend_OpenId::strlen($p));
             $bn_priv_key = self::binToBigNum($priv_key);
             if (extension_loaded('gmp')) {
                 $bn_pub_key  = gmp_powm($bn_g, $bn_priv_key, $bn_p);
@@ -649,16 +647,16 @@ class Zend_OpenId
             }
             $pub_key     = self::bigNumToBin($bn_pub_key);
 
-            return array(
+            return [
                 'p'        => $bn_p,
                 'g'        => $bn_g,
                 'priv_key' => $bn_priv_key,
                 'pub_key'  => $bn_pub_key,
-                'details'  => array(
+                'details'  => [
                     'p'        => $p,
                     'g'        => $g,
                     'priv_key' => $priv_key,
-                    'pub_key'  => $pub_key));
+                    'pub_key'  => $pub_key]];
         }
     }
 

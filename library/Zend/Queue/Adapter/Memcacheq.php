@@ -161,9 +161,7 @@ class Zend_Queue_Adapter_Memcacheq extends Zend_Queue_Adapter_AdapterAbstract
         if ($this->isExists($name)) {
             return false;
         }
-        if ($timeout === null) {
-            $timeout = self::CREATE_TIMEOUT_DEFAULT;
-        }
+        $timeout ??= self::CREATE_TIMEOUT_DEFAULT;
 
         // MemcacheQ does not have a method to "create" a queue
         // queues are created upon sending a packet.
@@ -188,7 +186,7 @@ class Zend_Queue_Adapter_Memcacheq extends Zend_Queue_Adapter_AdapterAbstract
      */
     public function delete($name)
     {
-        $response = $this->_sendCommand('delete ' . $name, array('DELETED', 'NOT_FOUND'), true);
+        $response = $this->_sendCommand('delete ' . $name, ['DELETED', 'NOT_FOUND'], true);
 
         if (in_array('DELETED', $response)) {
             $key = array_search($name, $this->_queues);
@@ -213,11 +211,11 @@ class Zend_Queue_Adapter_Memcacheq extends Zend_Queue_Adapter_AdapterAbstract
      */
     public function getQueues()
     {
-        $this->_queues = array();
+        $this->_queues = [];
 
-        $response = $this->_sendCommand('stats queue', array('END'));
+        $response = $this->_sendCommand('stats queue', ['END']);
 
-        foreach ($response as $i => $line) {
+        foreach ($response as $line) {
             $this->_queues[] = str_replace('STAT ', '', $line);
         }
 
@@ -231,7 +229,7 @@ class Zend_Queue_Adapter_Memcacheq extends Zend_Queue_Adapter_AdapterAbstract
      * @return integer
      * @throws Zend_Queue_Exception (not supported)
      */
-    public function count(Zend_Queue $queue=null)
+    public function count(Zend_Queue $queue=null): never
     {
         require_once 'Zend/Queue/Exception.php';
         throw new Zend_Queue_Exception('count() is not supported in this adapter');
@@ -251,9 +249,7 @@ class Zend_Queue_Adapter_Memcacheq extends Zend_Queue_Adapter_AdapterAbstract
      */
     public function send($message, Zend_Queue $queue=null)
     {
-        if ($queue === null) {
-            $queue = $this->_queue;
-        }
+        $queue ??= $this->_queue;
 
         if (!$this->isExists($queue->getName())) {
             require_once 'Zend/Queue/Exception.php';
@@ -261,12 +257,12 @@ class Zend_Queue_Adapter_Memcacheq extends Zend_Queue_Adapter_AdapterAbstract
         }
 
         $message = (string) $message;
-        $data    = array(
-            'message_id' => md5(uniqid(rand(), true)),
+        $data    = [
+            'message_id' => md5(uniqid(random_int(0, mt_getrandmax()), true)),
             'handle'     => null,
             'body'       => $message,
             'md5'        => md5($message),
-        );
+        ];
 
         $result = $this->_cache->set($queue->getName(), $message, 0, 0);
         if ($result === false) {
@@ -274,10 +270,10 @@ class Zend_Queue_Adapter_Memcacheq extends Zend_Queue_Adapter_AdapterAbstract
             throw new Zend_Queue_Exception('failed to insert message into queue:' . $queue->getName());
         }
 
-        $options = array(
+        $options = [
             'queue' => $queue,
             'data'  => $data,
-        );
+        ];
 
         $classname = $queue->getMessageClass();
         if (!class_exists($classname)) {
@@ -298,34 +294,28 @@ class Zend_Queue_Adapter_Memcacheq extends Zend_Queue_Adapter_AdapterAbstract
      */
     public function receive($maxMessages=null, $timeout=null, Zend_Queue $queue=null)
     {
-        if ($maxMessages === null) {
-            $maxMessages = 1;
-        }
+        $maxMessages ??= 1;
 
-        if ($timeout === null) {
-            $timeout = self::RECEIVE_TIMEOUT_DEFAULT;
-        }
-        if ($queue === null) {
-            $queue = $this->_queue;
-        }
+        $timeout ??= self::RECEIVE_TIMEOUT_DEFAULT;
+        $queue ??= $this->_queue;
 
-        $msgs = array();
+        $msgs = [];
         if ($maxMessages > 0 ) {
             for ($i = 0; $i < $maxMessages; $i++) {
-                $data = array(
-                    'handle' => md5(uniqid(rand(), true)),
+                $data = [
+                    'handle' => md5(uniqid(random_int(0, mt_getrandmax()), true)),
                     'body'   => $this->_cache->get($queue->getName()),
-                );
+                ];
 
                 $msgs[] = $data;
             }
         }
 
-        $options = array(
+        $options = [
             'queue'        => $queue,
             'data'         => $msgs,
             'messageClass' => $queue->getMessageClass(),
-        );
+        ];
 
         $classname = $queue->getMessageSetClass();
         if (!class_exists($classname)) {
@@ -345,10 +335,10 @@ class Zend_Queue_Adapter_Memcacheq extends Zend_Queue_Adapter_AdapterAbstract
      * @return boolean
      * @throws Zend_Queue_Exception (unsupported)
      */
-    public function deleteMessage(Zend_Queue_Message $message)
+    public function deleteMessage(Zend_Queue_Message $message): never
     {
         require_once 'Zend/Queue/Exception.php';
-        throw new Zend_Queue_Exception('deleteMessage() is not supported in  ' . get_class($this));
+        throw new Zend_Queue_Exception('deleteMessage() is not supported in  ' . static::class);
     }
 
     /********************************************************************
@@ -366,7 +356,7 @@ class Zend_Queue_Adapter_Memcacheq extends Zend_Queue_Adapter_AdapterAbstract
      */
     public function getCapabilities()
     {
-        return array(
+        return [
             'create'        => true,
             'delete'        => true,
             'send'          => true,
@@ -375,7 +365,7 @@ class Zend_Queue_Adapter_Memcacheq extends Zend_Queue_Adapter_AdapterAbstract
             'getQueues'     => true,
             'count'         => false,
             'isExists'      => true,
-        );
+        ];
     }
 
     /********************************************************************
@@ -405,7 +395,7 @@ class Zend_Queue_Adapter_Memcacheq extends Zend_Queue_Adapter_AdapterAbstract
             throw new Zend_Queue_Exception("Could not open a connection to $this->_host:$this->_port errno=$errno : $errstr");
         }
 
-        $response = array();
+        $response = [];
 
         $cmd = $command . self::EOL;
         fwrite($this->_socket, $cmd);

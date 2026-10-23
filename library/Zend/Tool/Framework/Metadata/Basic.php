@@ -37,7 +37,7 @@ require_once 'Zend/Tool/Framework/Metadata/Attributable.php';
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Tool_Framework_Metadata_Basic
-    implements Zend_Tool_Framework_Metadata_Interface, Zend_Tool_Framework_Metadata_Attributable
+    implements Zend_Tool_Framework_Metadata_Interface, Zend_Tool_Framework_Metadata_Attributable, \Stringable
 {
 
     /**#@+
@@ -65,7 +65,7 @@ class Zend_Tool_Framework_Metadata_Basic
      *
      * @param array $options
      */
-    public function __construct(Array $options = array())
+    public function __construct(Array $options = [])
     {
         if ($options) {
             $this->setOptions($options);
@@ -190,7 +190,7 @@ class Zend_Tool_Framework_Metadata_Basic
     {
         $thisReflection = new ReflectionObject($this);
 
-        $metadataPairValues = array();
+        $metadataPairValues = [];
 
         foreach (get_object_vars($this) as $varName => $varValue) {
             if ($type == self::ATTRIBUTES_NO_PARENT && ($thisReflection->getProperty($varName)->getDeclaringClass()->getName() == 'Zend_Tool_Framework_Metadata_Basic')) {
@@ -203,9 +203,7 @@ class Zend_Tool_Framework_Metadata_Basic
                     $varValue = '(object)';
                 }
 
-                if ($varValue === null) {
-                    $varValue = '(null)';
-                }
+                $varValue ??= '(null)';
 
             }
 
@@ -220,7 +218,7 @@ class Zend_Tool_Framework_Metadata_Basic
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return 'Type: ' . $this->_type . ', Name: ' . $this->_name . ', Value: ' . (is_array($this->_value) ? http_build_query($this->_value) : (string) $this->_value);
     }

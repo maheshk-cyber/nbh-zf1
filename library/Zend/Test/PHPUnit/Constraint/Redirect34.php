@@ -50,11 +50,11 @@ class Zend_Test_PHPUnit_Constraint_Redirect34 extends PHPUnit_Framework_Constrai
      * Available assertion types
      * @var array
      */
-    protected $_assertTypes     = array(
+    protected $_assertTypes     = [
         self::ASSERT_REDIRECT,
         self::ASSERT_REDIRECT_TO,
         self::ASSERT_REDIRECT_REGEX,
-    );
+    ];
 
     /**
      * Pattern to match against
@@ -114,7 +114,7 @@ class Zend_Test_PHPUnit_Constraint_Redirect34 extends PHPUnit_Framework_Constrai
 
         if (!in_array($assertType, $this->_assertTypes)) {
             require_once 'Zend/Test/PHPUnit/Constraint/Exception.php';
-            throw new Zend_Test_PHPUnit_Constraint_Exception(sprintf('Invalid assertion type "%s" provided to %s constraint', $assertType, __CLASS__));
+            throw new Zend_Test_PHPUnit_Constraint_Exception(sprintf('Invalid assertion type "%s" provided to %s constraint', $assertType, self::class));
         }
 
         $this->_assertType = $assertType;

@@ -29,13 +29,8 @@
  * @copyright  Copyright (c) 2005-2015 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Feed_Element implements ArrayAccess
+class Zend_Feed_Element implements ArrayAccess, \Stringable
 {
-
-    /**
-     * @var DOMElement
-     */
-    protected $_element;
 
     /**
      * @var string Character encoding to utilize
@@ -56,12 +51,11 @@ class Zend_Feed_Element implements ArrayAccess
     /**
      * Zend_Feed_Element constructor.
      *
-     * @param  DOMElement $element The DOM element we're encapsulating.
+     * @param DOMElement $_element The DOM element we're encapsulating.
      * @return void
      */
-    public function __construct($element = null)
+    public function __construct(protected $_element = null)
     {
-        $this->_element = $element;
     }
 
 
@@ -193,7 +187,7 @@ class Zend_Feed_Element implements ArrayAccess
         if ($length == 1) {
             return new Zend_Feed_Element($nodes[0]);
         } elseif ($length > 1) {
-            return array_map(create_function('$e', 'return new Zend_Feed_Element($e);'), $nodes);
+            return array_map(fn($e) => new Zend_Feed_Element($e), $nodes);
         } else {
             // When creating anonymous nodes for __set chaining, don't
             // call appendChild() on them. Instead we pass the current
@@ -201,8 +195,8 @@ class Zend_Feed_Element implements ArrayAccess
             // then responsible for appending itself when it is
             // actually set. This way "if ($foo->bar)" doesn't create
             // a phantom "bar" element in our tree.
-            if (strpos($var, ':') !== false) {
-                list($ns, $elt) = explode(':', $var, 2);
+            if (str_contains($var, ':')) {
+                [$ns, $elt] = explode(':', $var, 2);
                 $node = $this->_element->ownerDocument->createElementNS(Zend_Feed::lookupNamespace($ns), $elt);
             } else {
                 $node = $this->_element->ownerDocument->createElement($var);
@@ -228,8 +222,8 @@ class Zend_Feed_Element implements ArrayAccess
 
         $nodes = $this->_children($var);
         if (!$nodes) {
-            if (strpos($var, ':') !== false) {
-                list($ns, $elt) = explode(':', $var, 2);
+            if (str_contains($var, ':')) {
+                [$ns, $elt] = explode(':', $var, 2);
                 $node = $this->_element->ownerDocument->createElementNS(Zend_Feed::lookupNamespace($ns),
                     $var, htmlspecialchars($val, ENT_NOQUOTES, $this->getEncoding()));
                 $this->_element->appendChild($node);
@@ -261,8 +255,8 @@ class Zend_Feed_Element implements ArrayAccess
         // Look for access of the form {ns:var}. We don't use
         // _children() here because we can break out of the loop
         // immediately once we find something.
-        if (strpos($var, ':') !== false) {
-            list($ns, $elt) = explode(':', $var, 2);
+        if (str_contains($var, ':')) {
+            [$ns, $elt] = explode(':', $var, 2);
             foreach ($this->_element->childNodes as $child) {
                 if ($child->localName == $elt && $child->prefix == $ns) {
                     return true;
@@ -325,9 +319,9 @@ class Zend_Feed_Element implements ArrayAccess
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
-        return $this->_element->nodeValue;
+        return (string) $this->_element->nodeValue;
     }
 
 
@@ -341,11 +335,11 @@ class Zend_Feed_Element implements ArrayAccess
      */
     protected function _children($var)
     {
-        $found = array();
+        $found = [];
 
         // Look for access of the form {ns:var}.
-        if (strpos($var, ':') !== false) {
-            list($ns, $elt) = explode(':', $var, 2);
+        if (str_contains($var, ':')) {
+            [$ns, $elt] = explode(':', $var, 2);
             foreach ($this->_element->childNodes as $child) {
                 if ($child->localName == $elt && $child->prefix == $ns) {
                     $found[] = $child;
@@ -371,8 +365,8 @@ class Zend_Feed_Element implements ArrayAccess
      */
     public function offsetExists($offset)
     {
-        if (strpos($offset, ':') !== false) {
-            list($ns, $attr) = explode(':', $offset, 2);
+        if (str_contains($offset, ':')) {
+            [$ns, $attr] = explode(':', $offset, 2);
             return $this->_element->hasAttributeNS(Zend_Feed::lookupNamespace($ns), $attr);
         } else {
             return $this->_element->hasAttribute($offset);
@@ -388,8 +382,8 @@ class Zend_Feed_Element implements ArrayAccess
      */
     public function offsetGet($offset)
     {
-        if (strpos($offset, ':') !== false) {
-            list($ns, $attr) = explode(':', $offset, 2);
+        if (str_contains($offset, ':')) {
+            [$ns, $attr] = explode(':', $offset, 2);
             return $this->_element->getAttributeNS(Zend_Feed::lookupNamespace($ns), $attr);
         } else {
             return $this->_element->getAttribute($offset);
@@ -408,8 +402,8 @@ class Zend_Feed_Element implements ArrayAccess
     {
         $this->ensureAppended();
 
-        if (strpos($offset, ':') !== false) {
-            list($ns, $attr) = explode(':', $offset, 2);
+        if (str_contains($offset, ':')) {
+            [$ns, $attr] = explode(':', $offset, 2);
             // DOMElement::setAttributeNS() requires $qualifiedName to have a prefix
             return $this->_element->setAttributeNS(Zend_Feed::lookupNamespace($ns), $offset, $value);
         } else {
@@ -426,8 +420,8 @@ class Zend_Feed_Element implements ArrayAccess
      */
     public function offsetUnset($offset)
     {
-        if (strpos($offset, ':') !== false) {
-            list($ns, $attr) = explode(':', $offset, 2);
+        if (str_contains($offset, ':')) {
+            [$ns, $attr] = explode(':', $offset, 2);
             return $this->_element->removeAttributeNS(Zend_Feed::lookupNamespace($ns), $attr);
         } else {
             return $this->_element->removeAttribute($offset);

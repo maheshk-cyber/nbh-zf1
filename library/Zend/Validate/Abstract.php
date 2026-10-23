@@ -44,21 +44,21 @@ abstract class Zend_Validate_Abstract implements Zend_Validate_Interface
      *
      * @var array
      */
-    protected $_messageVariables = array();
+    protected $_messageVariables = [];
 
     /**
      * Validation failure message template definitions
      *
      * @var array
      */
-    protected $_messageTemplates = array();
+    protected $_messageTemplates = [];
 
     /**
      * Array of validation failure messages
      *
      * @var array
      */
-    protected $_messages = array();
+    protected $_messages = [];
 
     /**
      * Flag indidcating whether or not value should be obfuscated in error
@@ -73,7 +73,7 @@ abstract class Zend_Validate_Abstract implements Zend_Validate_Interface
      * @var array
      * @deprecated Since 1.5.0
      */
-    protected $_errors = array();
+    protected $_errors = [];
 
     /**
      * Translation object
@@ -225,14 +225,14 @@ abstract class Zend_Validate_Abstract implements Zend_Validate_Interface
 
         if (is_object($value)) {
             if (!in_array('__toString', get_class_methods($value))) {
-                $value = get_class($value) . ' object';
+                $value = $value::class . ' object';
             } else {
                 $value = $value->__toString();
             }
         } elseif (is_array($value)) {
             $value = $this->_implodeRecursive($value);
         } else {
-            $value = implode((array) $value);
+            $value = implode('', (array) $value);
         }
 
         if ($this->getObscureValue()) {
@@ -264,7 +264,7 @@ abstract class Zend_Validate_Abstract implements Zend_Validate_Interface
      */
     protected function _implodeRecursive(array $pieces)
     {
-        $values = array();
+        $values = [];
         foreach ($pieces as $item) {
             if (is_array($item)) {
                 $values[] = $this->_implodeRecursive($item);
@@ -287,9 +287,7 @@ abstract class Zend_Validate_Abstract implements Zend_Validate_Interface
             $keys = array_keys($this->_messageTemplates);
             $messageKey = current($keys);
         }
-        if ($value === null) {
-            $value = $this->_value;
-        }
+        $value ??= $this->_value;
         $this->_errors[]              = $messageKey;
         $this->_messages[$messageKey] = $this->_createMessage($messageKey, $value);
     }
@@ -303,8 +301,8 @@ abstract class Zend_Validate_Abstract implements Zend_Validate_Interface
     protected function _setValue($value)
     {
         $this->_value    = $value;
-        $this->_messages = array();
-        $this->_errors   = array();
+        $this->_messages = [];
+        $this->_errors   = [];
     }
 
     /**

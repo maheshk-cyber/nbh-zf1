@@ -29,25 +29,20 @@
  */
 class Zend_Service_Amazon_SimpleDb_Attribute
 {
-    protected $_itemName;
-    protected $_name;
     protected $_values;
 
     /**
      * Constructor
      *
-     * @param  string $itemName
-     * @param  string $name
+     * @param string $_itemName
+     * @param string $_name
      * @param  array $values
      * @return void
      */
-    function __construct($itemName, $name, $values)
+    public function __construct(protected $_itemName, protected $_name, $values)
     {
-        $this->_itemName = $itemName;
-        $this->_name     = $name;
-
         if (!is_array($values)) {
-            $this->_values = array($values);
+            $this->_values = [$values];
         } else {
             $this->_values = $values;
         }
@@ -101,7 +96,7 @@ class Zend_Service_Amazon_SimpleDb_Attribute
     public function setValues($values)
     {
         if (!is_array($values)) {
-            $values = array($values);
+            $values = [$values];
         }
         $this->_values = $values;
     }

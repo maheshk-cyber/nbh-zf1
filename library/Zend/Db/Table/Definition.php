@@ -35,7 +35,7 @@ class Zend_Db_Table_Definition
     /**
      * @var array
      */
-    protected $_tableConfigs = array();
+    protected $_tableConfigs = [];
 
     /**
      * __construct()
@@ -88,9 +88,7 @@ class Zend_Db_Table_Definition
         $tableConfig[Zend_Db_Table::DEFINITION_CONFIG_NAME] = $tableName;
         $tableConfig[Zend_Db_Table::DEFINITION] = $this;
 
-        if (!isset($tableConfig[Zend_Db_Table::NAME])) {
-            $tableConfig[Zend_Db_Table::NAME] = $tableName;
-        }
+        $tableConfig[Zend_Db_Table::NAME] ??= $tableName;
 
         $this->_tableConfigs[$tableName] = $tableConfig;
         return $this;

@@ -100,7 +100,7 @@ class Zend_Queue_Adapter_PlatformJobQueue extends Zend_Queue_Adapter_AdapterAbst
      * @return boolean
      * @throws Zend_Queue_Exception (not supported)
      */
-    public function isExists($name)
+    public function isExists($name): never
     {
         require_once 'Zend/Queue/Exception.php';
         throw new Zend_Queue_Exception('isExists() is not supported in this adapter');
@@ -114,10 +114,10 @@ class Zend_Queue_Adapter_PlatformJobQueue extends Zend_Queue_Adapter_AdapterAbst
      * @return void
      * @throws Zend_Queue_Exception
      */
-    public function create($name, $timeout=null)
+    public function create($name, $timeout=null): never
     {
         require_once 'Zend/Queue/Exception.php';
-        throw new Zend_Queue_Exception('create() is not supported in ' . get_class($this));
+        throw new Zend_Queue_Exception('create() is not supported in ' . static::class);
     }
 
     /**
@@ -127,10 +127,10 @@ class Zend_Queue_Adapter_PlatformJobQueue extends Zend_Queue_Adapter_AdapterAbst
      * @return void
      * @throws Zend_Queue_Exception
      */
-    public function delete($name)
+    public function delete($name): never
     {
         require_once 'Zend/Queue/Exception.php';
-        throw new Zend_Queue_Exception('delete() is not supported in ' . get_class($this));
+        throw new Zend_Queue_Exception('delete() is not supported in ' . static::class);
     }
 
     /**
@@ -139,7 +139,7 @@ class Zend_Queue_Adapter_PlatformJobQueue extends Zend_Queue_Adapter_AdapterAbst
      * @return void
      * @throws Zend_Queue_Exception
      */
-    public function getQueues()
+    public function getQueues(): never
     {
         require_once 'Zend/Queue/Exception.php';
         throw new Zend_Queue_Exception('getQueues() is not supported in this adapter');
@@ -188,7 +188,7 @@ class Zend_Queue_Adapter_PlatformJobQueue extends Zend_Queue_Adapter_AdapterAbst
         }
 
         if ($message instanceof ZendAPI_Job) {
-            $message = array('data' => $message);
+            $message = ['data' => $message];
         }
 
         $zendApiJob = new $classname($message);
@@ -219,9 +219,7 @@ class Zend_Queue_Adapter_PlatformJobQueue extends Zend_Queue_Adapter_AdapterAbst
      */
     public function receive($maxMessages = null, $timeout = null, Zend_Queue $queue = null)
     {
-        if ($maxMessages === null) {
-            $maxMessages = 1;
-        }
+        $maxMessages ??= 1;
 
         if ($queue !== null) {
             require_once 'Zend/Queue/Exception.php';
@@ -236,11 +234,11 @@ class Zend_Queue_Adapter_PlatformJobQueue extends Zend_Queue_Adapter_AdapterAbst
             Zend_Loader::loadClass($classname);
         }
 
-        $options = array(
+        $options = [
             'queue'        => $this->_queue,
             'data'         => $jobs,
             'messageClass' => $this->_queue->getMessageClass(),
-        );
+        ];
 
         $classname = $this->_queue->getMessageSetClass();
 
@@ -263,7 +261,7 @@ class Zend_Queue_Adapter_PlatformJobQueue extends Zend_Queue_Adapter_AdapterAbst
      */
     public function deleteMessage(Zend_Queue_Message $message)
     {
-        if (get_class($message) != $this->_queue->getMessageClass()) {
+        if ($message::class != $this->_queue->getMessageClass()) {
             require_once 'Zend/Queue/Exception.php';
             throw new Zend_Queue_Exception(
                 'Failed to remove job from the queue; only messages of type '
@@ -294,7 +292,7 @@ class Zend_Queue_Adapter_PlatformJobQueue extends Zend_Queue_Adapter_AdapterAbst
      */
     public function getCapabilities()
     {
-         return array(
+         return [
             'create'                => false,
             'delete'                => false,
             'getQueues'             => false,
@@ -303,7 +301,7 @@ class Zend_Queue_Adapter_PlatformJobQueue extends Zend_Queue_Adapter_AdapterAbst
             'send'                  => true,
             'receive'               => true,
             'deleteMessage'         => true,
-        );
+        ];
     }
 
     /********************************************************************
@@ -317,7 +315,7 @@ class Zend_Queue_Adapter_PlatformJobQueue extends Zend_Queue_Adapter_AdapterAbst
      */
     public function __sleep()
     {
-        return array('_options');
+        return ['_options'];
     }
 
     /**

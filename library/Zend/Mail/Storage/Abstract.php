@@ -34,12 +34,12 @@ abstract class Zend_Mail_Storage_Abstract implements Countable, ArrayAccess, See
      * class capabilities with default values
      * @var array
      */
-    protected $_has = array('uniqueid'  => true,
+    protected $_has = ['uniqueid'  => true,
                             'delete'    => false,
                             'create'    => false,
                             'top'       => false,
                             'fetchPart' => true,
-                            'flags'     => false);
+                            'flags'     => false];
 
     /**
      * current iteration position
@@ -74,9 +74,9 @@ abstract class Zend_Mail_Storage_Abstract implements Countable, ArrayAccess, See
      */
     public function __get($var)
     {
-        if (strpos($var, 'has') === 0) {
+        if (str_starts_with($var, 'has')) {
             $var = strtolower(substr($var, 3));
-            return isset($this->_has[$var]) ? $this->_has[$var] : null;
+            return $this->_has[$var] ?? null;
         }
 
         /**
@@ -233,7 +233,7 @@ abstract class Zend_Mail_Storage_Abstract implements Countable, ArrayAccess, See
             if ($this->getMessage($id)) {
                 return true;
             }
-        } catch(Zend_Mail_Storage_Exception $e) {}
+        } catch(Zend_Mail_Storage_Exception) {}
 
         return false;
      }
@@ -337,9 +337,7 @@ abstract class Zend_Mail_Storage_Abstract implements Countable, ArrayAccess, See
       */
      public function valid()
      {
-        if ($this->_iterationMax === null) {
-          $this->_iterationMax = $this->countMessages();
-        }
+        $this->_iterationMax ??= $this->countMessages();
         return $this->_iterationPos && $this->_iterationPos <= $this->_iterationMax;
      }
 
@@ -353,9 +351,7 @@ abstract class Zend_Mail_Storage_Abstract implements Countable, ArrayAccess, See
       */
      public function seek($pos)
      {
-        if ($this->_iterationMax === null) {
-          $this->_iterationMax = $this->countMessages();
-        }
+        $this->_iterationMax ??= $this->countMessages();
 
         if ($pos > $this->_iterationMax) {
             throw new OutOfBoundsException('this position does not exist');

@@ -39,39 +39,27 @@ require_once 'Zend/Search/Lucene/Search/Query/Preprocessing.php';
 class Zend_Search_Lucene_Search_Query_Preprocessing_Term extends Zend_Search_Lucene_Search_Query_Preprocessing
 {
     /**
-     * word (query parser lexeme) to find.
-     *
-     * @var string
-     */
-    private $_word;
-
-    /**
-     * Word encoding (field name is always provided using UTF-8 encoding since it may be retrieved from index).
-     *
-     * @var string
-     */
-    private $_encoding;
-
-
-    /**
-     * Field name.
-     *
-     * @var string
-     */
-    private $_field;
-
-    /**
      * Class constructor.  Create a new preprocessing object for prase query.
      *
-     * @param string $word       Non-tokenized word (query parser lexeme) to search.
-     * @param string $encoding   Word encoding.
-     * @param string $fieldName  Field name.
+     * @param string $_word Non-tokenized word (query parser lexeme) to search.
+     * @param string $_encoding Word encoding.
+     * @param string $_field Field name.
      */
-    public function __construct($word, $encoding, $fieldName)
+    public function __construct(
+        /**
+         * word (query parser lexeme) to find.
+         */
+        private $_word,
+        /**
+         * Word encoding (field name is always provided using UTF-8 encoding since it may be retrieved from index).
+         */
+        private $_encoding,
+        /**
+         * Field name.
+         */
+        private $_field
+    )
     {
-        $this->_word     = $word;
-        $this->_encoding = $encoding;
-        $this->_field    = $fieldName;
     }
 
     /**
@@ -93,7 +81,7 @@ class Zend_Search_Lucene_Search_Query_Preprocessing_Term extends Zend_Search_Luc
             if (Zend_Search_Lucene::getDefaultSearchField() === null) {
                 $searchFields = $index->getFieldNames(true);
             } else {
-                $searchFields = array(Zend_Search_Lucene::getDefaultSearchField());
+                $searchFields = [Zend_Search_Lucene::getDefaultSearchField()];
             }
 
             require_once 'Zend/Search/Lucene/Search/Query/Preprocessing/Term.php';
@@ -112,7 +100,7 @@ class Zend_Search_Lucene_Search_Query_Preprocessing_Term extends Zend_Search_Luc
             }
 
             if (count($query->getTerms()) == 0) {
-                $this->_matches = array();
+                $this->_matches = [];
                 if ($hasInsignificantSubqueries) {
                     require_once 'Zend/Search/Lucene/Search/Query/Insignificant.php';
                     return new Zend_Search_Lucene_Search_Query_Insignificant();
@@ -200,7 +188,7 @@ class Zend_Search_Lucene_Search_Query_Preprocessing_Term extends Zend_Search_Luc
         $tokens = Zend_Search_Lucene_Analysis_Analyzer::getDefault()->tokenize($this->_word, $this->_encoding);
 
         if (count($tokens) == 0) {
-            $this->_matches = array();
+            $this->_matches = [];
             require_once 'Zend/Search/Lucene/Search/Query/Insignificant.php';
             return new Zend_Search_Lucene_Search_Query_Insignificant();
         }
@@ -309,7 +297,7 @@ class Zend_Search_Lucene_Search_Query_Preprocessing_Term extends Zend_Search_Luc
         }
 
         //It's not insignificant or one term query
-        $words = array();
+        $words = [];
         foreach ($tokens as $token) {
             $words[] = $token->getTermText();
         }
@@ -321,7 +309,7 @@ class Zend_Search_Lucene_Search_Query_Preprocessing_Term extends Zend_Search_Luc
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         // It's used only for query visualisation, so we don't care about characters escaping
         if ($this->_field !== null) {

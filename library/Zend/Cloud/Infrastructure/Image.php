@@ -33,26 +33,19 @@ class Zend_Cloud_Infrastructure_Image
      * 
      * @var array
      */
-    protected $attributes = array();
-
-    /**
-     * The Image adapter (if exists)
-     * 
-     * @var object
-     */
-    protected $adapter;
+    protected $attributes = [];
 
     /**
      * Required attributes
      * 
      * @var array
      */
-    protected $attributeRequired = array(
+    protected $attributeRequired = [
         self::IMAGE_ID, 
         self::IMAGE_DESCRIPTION, 
         self::IMAGE_PLATFORM, 
         self::IMAGE_ARCHITECTURE,
-    );
+    ];
 
     /**
      * Constructor
@@ -60,7 +53,10 @@ class Zend_Cloud_Infrastructure_Image
      * @param array $data
      * @param object $adapter 
      */
-    public function __construct($data, $adapter = null) 
+    public function __construct($data, /**
+     * The Image adapter (if exists)
+     */
+    protected $adapter = null) 
     {
         if (is_object($data)) {
             if (method_exists($data, 'toArray')) {
@@ -81,13 +77,12 @@ class Zend_Cloud_Infrastructure_Image
                 throw new Zend_Cloud_Infrastructure_Exception(sprintf(
                     'The param "%s" is a required parameter for class %s',
                     $key,
-                    __CLASS__
+                    self::class
                 ));
             }
         }
 
         $this->attributes = $data;
-        $this->adapter    = $adapter;
     }
 
     /**

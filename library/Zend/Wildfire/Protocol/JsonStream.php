@@ -49,13 +49,13 @@ class Zend_Wildfire_Protocol_JsonStream
      * All messages to be sent.
      * @var array
      */
-    protected $_messages = array();
+    protected $_messages = [];
 
     /**
      * Plugins that are using this protocol
      * @var array
      */
-    protected $_plugins = array();
+    protected $_plugins = [];
 
     /**
      * Register a plugin that uses this protocol
@@ -82,15 +82,11 @@ class Zend_Wildfire_Protocol_JsonStream
      */
     public function recordMessage(Zend_Wildfire_Plugin_Interface $plugin, $structure, $data)
     {
-        if(!isset($this->_messages[$structure])) {
-            $this->_messages[$structure] = array();
-        }
+        $this->_messages[$structure] ??= [];
 
         $uri = $plugin->getUri();
 
-        if(!isset($this->_messages[$structure][$uri])) {
-            $this->_messages[$structure][$uri] = array();
-        }
+        $this->_messages[$structure][$uri] ??= [];
 
         $this->_messages[$structure][$uri][] = $this->_encode($data);
         return true;
@@ -145,7 +141,7 @@ class Zend_Wildfire_Protocol_JsonStream
      */
     protected function _encode($value)
     {
-        return Zend_Json::encode($value, true, array('silenceCyclicalExceptions'=>true));
+        return Zend_Json::encode($value, true, ['silenceCyclicalExceptions'=>true]);
     }
 
     /**
@@ -159,7 +155,7 @@ class Zend_Wildfire_Protocol_JsonStream
     {
         if (!$channel instanceof Zend_Wildfire_Channel_HttpHeaders) {
             require_once 'Zend/Wildfire/Exception.php';
-            throw new Zend_Wildfire_Exception('The '.get_class($channel).' channel is not supported by the '.get_class($this).' protocol.');
+            throw new Zend_Wildfire_Exception('The '.$channel::class.' channel is not supported by the '.static::class.' protocol.');
         }
 
         if ($this->_plugins) {
@@ -177,17 +173,17 @@ class Zend_Wildfire_Protocol_JsonStream
         $plugin_index = 1;
         $message_index = 1;
 
-        $payload = array();
+        $payload = [];
 
-        $payload[] = array('Protocol-'.$protocol_index, self::PROTOCOL_URI);
+        $payload[] = ['Protocol-'.$protocol_index, self::PROTOCOL_URI];
 
         foreach ($this->_messages as $structure_uri => $plugin_messages ) {
 
-            $payload[] = array($protocol_index.'-Structure-'.$structure_index, $structure_uri);
+            $payload[] = [$protocol_index.'-Structure-'.$structure_index, $structure_uri];
 
             foreach ($plugin_messages as $plugin_uri => $messages ) {
 
-                $payload[] = array($protocol_index.'-Plugin-'.$plugin_index, $plugin_uri);
+                $payload[] = [$protocol_index.'-Plugin-'.$plugin_index, $plugin_uri];
 
                 foreach ($messages as $message) {
 
@@ -208,11 +204,11 @@ class Zend_Wildfire_Protocol_JsonStream
                                 $msg = strlen($part) . '|' . $part . '|';
                             }
 
-                            $payload[] = array($protocol_index . '-'
+                            $payload[] = [$protocol_index . '-'
                                                . $structure_index . '-'
                                                . $plugin_index . '-'
                                                . $message_index,
-                                               $msg);
+                                               $msg];
 
                             $message_index++;
 

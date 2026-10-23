@@ -51,9 +51,7 @@ class Zend_Filter_Digits implements Zend_Filter_Interface
      */
     public function __construct()
     {
-        if (null === self::$_unicodeEnabled) {
-            self::$_unicodeEnabled = (@preg_match('/\pL/u', 'a')) ? true : false;
-        }
+        self::$_unicodeEnabled ??= (@preg_match('/\pL/u', 'a')) ? true : false;
     }
 
     /**

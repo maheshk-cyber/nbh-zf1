@@ -64,7 +64,7 @@ class Zend_Queue_Stomp_Client_Connection
      * @return true;
      * @throws Zend_Queue_Exception
      */
-    public function open($scheme, $host, $port, array $options = array())
+    public function open($scheme, $host, $port, array $options = [])
     {
         $str = $scheme . '://' . $host;
         $this->_socket = fsockopen($str, $port, $errno, $errstr);
@@ -78,12 +78,8 @@ class Zend_Queue_Stomp_Client_Connection
 
         stream_set_blocking($this->_socket, 0); // non blocking
 
-        if (!isset($options['timeout_sec'])) {
-            $options['timeout_sec'] = self::READ_TIMEOUT_DEFAULT_SEC;
-        }
-        if (! isset($options['timeout_usec'])) {
-            $options['timeout_usec'] = self::READ_TIMEOUT_DEFAULT_USEC;
-        }
+        $options['timeout_sec'] ??= self::READ_TIMEOUT_DEFAULT_SEC;
+        $options['timeout_usec'] ??= self::READ_TIMEOUT_DEFAULT_USEC;
 
         $this->_options = $options;
 
@@ -171,7 +167,7 @@ class Zend_Queue_Stomp_Client_Connection
      */
     public function canRead()
     {
-        $read   = array($this->_socket);
+        $read   = [$this->_socket];
         $write  = null;
         $except = null;
 
@@ -249,9 +245,7 @@ class Zend_Queue_Stomp_Client_Connection
      */
     public function getFrameClass()
     {
-        return isset($this->_options['frameClass'])
-            ? $this->_options['frameClass']
-            : 'Zend_Queue_Stomp_Frame';
+        return $this->_options['frameClass'] ?? 'Zend_Queue_Stomp_Frame';
     }
 
     /**

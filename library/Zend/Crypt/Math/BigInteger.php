@@ -61,7 +61,7 @@ class Zend_Crypt_Math_BigInteger
      */
     public function __construct($extension = null)
     {
-        if ($extension !== null && !in_array($extension, array('bcmath', 'gmp', 'bigint'))) {
+        if ($extension !== null && !in_array($extension, ['bcmath', 'gmp', 'bigint'])) {
             require_once('Zend/Crypt/Math/BigInteger/Exception.php');
             throw new Zend_Crypt_Math_BigInteger_Exception('Invalid extension type; please use one of bcmath, gmp or bigint');
         }
@@ -80,9 +80,9 @@ class Zend_Crypt_Math_BigInteger
     {
         if(!method_exists($this->_math, $methodName)) {
             require_once 'Zend/Crypt/Math/BigInteger/Exception.php';
-            throw new Zend_Crypt_Math_BigInteger_Exception('invalid method call: ' . get_class($this->_math) . '::' . $methodName . '() does not exist');
+            throw new Zend_Crypt_Math_BigInteger_Exception('invalid method call: ' . $this->_math::class . '::' . $methodName . '() does not exist');
         }
-        return call_user_func_array(array($this->_math, $methodName), $args);
+        return call_user_func_array([$this->_math, $methodName], $args);
     }
 
     /**

@@ -57,13 +57,6 @@ class Zend_Search_Lucene_Search_Query_Range extends Zend_Search_Lucene_Search_Qu
     private $_field;
 
     /**
-     * Inclusive
-     *
-     * @var boolean
-     */
-    private $_inclusive;
-
-    /**
      * Matched terms.
      *
      * Matched terms list.
@@ -82,10 +75,13 @@ class Zend_Search_Lucene_Search_Query_Range extends Zend_Search_Lucene_Search_Qu
      *
      * @param Zend_Search_Lucene_Index_Term|null $lowerTerm
      * @param Zend_Search_Lucene_Index_Term|null $upperTerm
-     * @param boolean $inclusive
+     * @param boolean $_inclusive
      * @throws Zend_Search_Lucene_Exception
      */
-    public function __construct($lowerTerm, $upperTerm, $inclusive)
+    public function __construct($lowerTerm, $upperTerm, /**
+     * Inclusive
+     */
+    private $_inclusive)
     {
         if ($lowerTerm === null  &&  $upperTerm === null) {
             require_once 'Zend/Search/Lucene/Exception.php';
@@ -96,10 +92,9 @@ class Zend_Search_Lucene_Search_Query_Range extends Zend_Search_Lucene_Search_Qu
             throw new Zend_Search_Lucene_Exception('Both terms must be for the same field');
         }
 
-        $this->_field     = ($lowerTerm !== null)? $lowerTerm->field : $upperTerm->field;
+        $this->_field     = $lowerTerm?->field ?? $upperTerm->field;
         $this->_lowerTerm = $lowerTerm;
         $this->_upperTerm = $upperTerm;
-        $this->_inclusive = $inclusive;
     }
 
     /**
@@ -150,13 +145,13 @@ class Zend_Search_Lucene_Search_Query_Range extends Zend_Search_Lucene_Search_Qu
      */
     public function rewrite(Zend_Search_Lucene_Interface $index)
     {
-        $this->_matches = array();
+        $this->_matches = [];
 
         if ($this->_field === null) {
             // Search through all fields
             $fields = $index->getFieldNames(true /* indexed fields list */);
         } else {
-            $fields = array($this->_field);
+            $fields = [$this->_field];
         }
 
         require_once 'Zend/Search/Lucene.php';
@@ -242,7 +237,7 @@ class Zend_Search_Lucene_Search_Query_Range extends Zend_Search_Lucene_Search_Qu
      * @param Zend_Search_Lucene_Interface $index
      * @return Zend_Search_Lucene_Search_Query
      */
-    public function optimize(Zend_Search_Lucene_Interface $index)
+    public function optimize(Zend_Search_Lucene_Interface $index): never
     {
         require_once 'Zend/Search/Lucene/Exception.php';
         throw new Zend_Search_Lucene_Exception('Range query should not be directly used for search. Use $query->rewrite($index)');
@@ -271,7 +266,7 @@ class Zend_Search_Lucene_Search_Query_Range extends Zend_Search_Lucene_Search_Qu
      * @return Zend_Search_Lucene_Search_Weight
      * @throws Zend_Search_Lucene_Exception
      */
-    public function createWeight(Zend_Search_Lucene_Interface $reader)
+    public function createWeight(Zend_Search_Lucene_Interface $reader): never
     {
         require_once 'Zend/Search/Lucene/Exception.php';
         throw new Zend_Search_Lucene_Exception('Range query should not be directly used for search. Use $query->rewrite($index)');
@@ -286,7 +281,7 @@ class Zend_Search_Lucene_Search_Query_Range extends Zend_Search_Lucene_Search_Qu
      * @param Zend_Search_Lucene_Index_DocsFilter|null $docsFilter
      * @throws Zend_Search_Lucene_Exception
      */
-    public function execute(Zend_Search_Lucene_Interface $reader, $docsFilter = null)
+    public function execute(Zend_Search_Lucene_Interface $reader, $docsFilter = null): never
     {
         require_once 'Zend/Search/Lucene/Exception.php';
         throw new Zend_Search_Lucene_Exception('Range query should not be directly used for search. Use $query->rewrite($index)');
@@ -300,7 +295,7 @@ class Zend_Search_Lucene_Search_Query_Range extends Zend_Search_Lucene_Search_Qu
      * @return array
      * @throws Zend_Search_Lucene_Exception
      */
-    public function matchedDocs()
+    public function matchedDocs(): never
     {
         require_once 'Zend/Search/Lucene/Exception.php';
         throw new Zend_Search_Lucene_Exception('Range query should not be directly used for search. Use $query->rewrite($index)');
@@ -314,7 +309,7 @@ class Zend_Search_Lucene_Search_Query_Range extends Zend_Search_Lucene_Search_Qu
      * @return float
      * @throws Zend_Search_Lucene_Exception
      */
-    public function score($docId, Zend_Search_Lucene_Interface $reader)
+    public function score($docId, Zend_Search_Lucene_Interface $reader): never
     {
         require_once 'Zend/Search/Lucene/Exception.php';
         throw new Zend_Search_Lucene_Exception('Range query should not be directly used for search. Use $query->rewrite($index)');
@@ -327,14 +322,14 @@ class Zend_Search_Lucene_Search_Query_Range extends Zend_Search_Lucene_Search_Qu
      */
     protected function _highlightMatches(Zend_Search_Lucene_Search_Highlighter_Interface $highlighter)
     {
-        $words = array();
+        $words = [];
 
         $docBody = $highlighter->getDocument()->getFieldUtf8Value('body');
         require_once 'Zend/Search/Lucene/Analysis/Analyzer.php';
         $tokens = Zend_Search_Lucene_Analysis_Analyzer::getDefault()->tokenize($docBody, 'UTF-8');
 
-        $lowerTermText = ($this->_lowerTerm !== null)? $this->_lowerTerm->text : null;
-        $upperTermText = ($this->_upperTerm !== null)? $this->_upperTerm->text : null;
+        $lowerTermText = $this->_lowerTerm?->text;
+        $upperTermText = $this->_upperTerm?->text;
 
         if ($this->_inclusive) {
             foreach ($tokens as $token) {
@@ -362,14 +357,14 @@ class Zend_Search_Lucene_Search_Query_Range extends Zend_Search_Lucene_Search_Qu
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         // It's used only for query visualisation, so we don't care about characters escaping
         return (($this->_field === null)? '' : $this->_field . ':')
              . (($this->_inclusive)? '[' : '{')
-             . (($this->_lowerTerm !== null)?  $this->_lowerTerm->text : 'null')
+             . ($this->_lowerTerm?->text ?? 'null')
              . ' TO '
-             . (($this->_upperTerm !== null)?  $this->_upperTerm->text : 'null')
+             . ($this->_upperTerm?->text ?? 'null')
              . (($this->_inclusive)? ']' : '}')
              . (($this->getBoost() != 1)? '^' . round($this->getBoost(), 4) : '');
     }

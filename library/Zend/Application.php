@@ -53,14 +53,14 @@ class Zend_Application
      *
      * @var array
      */
-    protected $_optionKeys = array();
+    protected $_optionKeys = [];
 
     /**
      * Options for Zend_Application
      *
      * @var array
      */
-    protected $_options = array();
+    protected $_options = [];
 
     /**
      * Constructor
@@ -130,7 +130,7 @@ class Zend_Application
     {
         if (!empty($options['config'])) {
             if (is_array($options['config'])) {
-                $_options = array();
+                $_options = [];
                 foreach ($options['config'] as $tmp) {
                     $_options = $this->mergeOptions(
                         $_options, $this->_loadConfig($tmp)
@@ -325,9 +325,7 @@ class Zend_Application
     {
         // setOptions() can potentially send a null value; specify default
         // here
-        if (null === $class) {
-            $class = 'Bootstrap';
-        }
+        $class ??= 'Bootstrap';
 
         if (!class_exists($class, false)) {
             require_once $path;

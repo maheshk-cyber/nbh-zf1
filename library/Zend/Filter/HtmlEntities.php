@@ -60,7 +60,7 @@ class Zend_Filter_HtmlEntities implements Zend_Filter_Interface
      * @param  string  $charSet
      * @return void
      */
-    public function __construct($options = array())
+    public function __construct($options = [])
     {
         if ($options instanceof Zend_Config) {
             $options = $options->toArray();
@@ -74,20 +74,14 @@ class Zend_Filter_HtmlEntities implements Zend_Filter_Interface
             $options = $temp;
         }
 
-        if (!isset($options['quotestyle'])) {
-            $options['quotestyle'] = ENT_COMPAT;
-        }
+        $options['quotestyle'] ??= ENT_COMPAT;
 
-        if (!isset($options['encoding'])) {
-            $options['encoding'] = 'UTF-8';
-        }
+        $options['encoding'] ??= 'UTF-8';
         if (isset($options['charset'])) {
             $options['encoding'] = $options['charset'];
         }
 
-        if (!isset($options['doublequote'])) {
-            $options['doublequote'] = true;
-        }
+        $options['doublequote'] ??= true;
 
         $this->setQuoteStyle($options['quotestyle']);
         $this->setEncoding($options['encoding']);

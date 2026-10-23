@@ -32,7 +32,7 @@ class Zend_Feed_Writer_Extension_ITunes_Feed
      *
      * @var array
      */
-    protected $_data = array();
+    protected $_data = [];
 
     /**
      * Encoding of all text values
@@ -112,9 +112,7 @@ class Zend_Feed_Writer_Extension_ITunes_Feed
             throw new Zend_Feed_Exception('invalid parameter: any "author" may only'
             . ' contain a maximum of 255 characters each');
         }
-        if (!isset($this->_data['authors'])) {
-            $this->_data['authors'] = array();
-        }
+        $this->_data['authors'] ??= [];
         $this->_data['authors'][] = $value;
         return $this;
     }
@@ -127,9 +125,7 @@ class Zend_Feed_Writer_Extension_ITunes_Feed
      */
     public function setItunesCategories(array $values)
     {
-        if (!isset($this->_data['categories'])) {
-            $this->_data['categories'] = array();
-        }
+        $this->_data['categories'] ??= [];
         foreach ($values as $key=>$value) {
             if (!is_array($value)) {
                 if (iconv_strlen($value, $this->getEncoding()) > 255) {
@@ -144,7 +140,7 @@ class Zend_Feed_Writer_Extension_ITunes_Feed
                     throw new Zend_Feed_Exception('invalid parameter: any "category" may only'
                     . ' contain a maximum of 255 characters each');
                 }
-                $this->_data['categories'][$key] = array();
+                $this->_data['categories'][$key] = [];
                 foreach ($value as $val) {
                     if (iconv_strlen($val, $this->getEncoding()) > 255) {
                         require_once 'Zend/Feed/Exception.php';
@@ -171,7 +167,7 @@ class Zend_Feed_Writer_Extension_ITunes_Feed
             throw new Zend_Feed_Exception('invalid parameter: "image" may only'
             . ' be a valid URI/IRI');
         }
-        if (!in_array(substr($value, -3), array('jpg','png'))) {
+        if (!in_array(substr($value, -3), ['jpg','png'])) {
             require_once 'Zend/Feed/Exception.php';
             throw new Zend_Feed_Exception('invalid parameter: "image" may only'
             . ' use file extension "jpg" or "png" which must be the last three'
@@ -210,7 +206,7 @@ class Zend_Feed_Writer_Extension_ITunes_Feed
      */
     public function setItunesExplicit($value)
     {
-        if (!in_array($value, array('yes','no','clean'))) {
+        if (!in_array($value, ['yes','no','clean'])) {
             require_once 'Zend/Feed/Exception.php';
             throw new Zend_Feed_Exception('invalid parameter: "explicit" may only'
             . ' be one of "yes", "no" or "clean"');
@@ -294,9 +290,7 @@ class Zend_Feed_Writer_Extension_ITunes_Feed
             throw new Zend_Feed_Exception('invalid parameter: any "owner" may only'
             . ' contain a maximum of 255 characters each for "name" and "email"');
         }
-        if (!isset($this->_data['owners'])) {
-            $this->_data['owners'] = array();
-        }
+        $this->_data['owners'] ??= [];
         $this->_data['owners'][] = $value;
         return $this;
     }

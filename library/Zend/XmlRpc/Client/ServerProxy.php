@@ -35,32 +35,19 @@
 class Zend_XmlRpc_Client_ServerProxy
 {
     /**
-     * @var Zend_XmlRpc_Client
-     */
-    private $_client = null;
-
-    /**
-     * @var string
-     */
-    private $_namespace = '';
-
-
-    /**
      * @var array of Zend_XmlRpc_Client_ServerProxy
      */
-    private $_cache = array();
+    private $_cache = [];
 
 
     /**
      * Class constructor
      *
-     * @param string             $namespace
-     * @param Zend_XmlRpc_Client $client
+     * @param string $_namespace
+     * @param Zend_XmlRpc_Client $_client
      */
-    public function __construct($client, $namespace = '')
+    public function __construct(private $_client, private $_namespace = '')
     {
-        $this->_namespace = $namespace;
-        $this->_client    = $client;
     }
 
 
@@ -73,9 +60,7 @@ class Zend_XmlRpc_Client_ServerProxy
     public function __get($namespace)
     {
         $namespace = ltrim("$this->_namespace.$namespace", '.');
-        if (!isset($this->_cache[$namespace])) {
-            $this->_cache[$namespace] = new $this($this->_client, $namespace);
-        }
+        $this->_cache[$namespace] ??= new $this($this->_client, $namespace);
         return $this->_cache[$namespace];
     }
 

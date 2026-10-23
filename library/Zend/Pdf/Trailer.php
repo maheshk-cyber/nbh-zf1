@@ -29,14 +29,7 @@
  */
 abstract class Zend_Pdf_Trailer
 {
-    private static $_allowedKeys = array('Size', 'Prev', 'Root', 'Encrypt', 'Info', 'ID', 'Index', 'W', 'XRefStm', 'DocChecksum');
-
-    /**
-     * Trailer dictionary.
-     *
-     * @var Zend_Pdf_Element_Dictionary
-     */
-    private $_dict;
+    private static $_allowedKeys = ['Size', 'Prev', 'Root', 'Encrypt', 'Info', 'ID', 'Index', 'W', 'XRefStm', 'DocChecksum'];
 
     /**
      * Check if key is correct
@@ -57,12 +50,13 @@ abstract class Zend_Pdf_Trailer
     /**
      * Object constructor
      *
-     * @param Zend_Pdf_Element_Dictionary $dict
+     * @param Zend_Pdf_Element_Dictionary $_dict
      */
-    public function __construct(Zend_Pdf_Element_Dictionary $dict)
+    public function __construct(/**
+     * Trailer dictionary.
+     */
+    private readonly Zend_Pdf_Element_Dictionary $_dict)
     {
-        $this->_dict   = $dict;
-
         foreach ($this->_dict->getKeys() as $dictKey) {
             $this->_checkDictKey($dictKey);
         }

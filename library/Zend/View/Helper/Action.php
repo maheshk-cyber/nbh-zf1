@@ -115,12 +115,10 @@ class Zend_View_Helper_Action extends Zend_View_Helper_Abstract
      * @param  array $params
      * @return string
      */
-    public function action($action, $controller, $module = null, array $params = array())
+    public function action($action, $controller, $module = null, array $params = [])
     {
         $this->resetObjects();
-        if (null === $module) {
-            $module = $this->defaultModule;
-        }
+        $module ??= $this->defaultModule;
 
         // clone the view object to prevent over-writing of view variables
         $viewRendererObj = Zend_Controller_Action_HelperBroker::getStaticHelper('viewRenderer');

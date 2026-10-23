@@ -55,14 +55,14 @@ class Zend_Tool_Framework_System_Provider_Config extends Zend_Tool_Framework_Pro
     /**
      * @var array
      */
-    protected $_levelCompleted = array();
+    protected $_levelCompleted = [];
 
     /**
      * array of specialties handled by this provider
      *
      * @var array
      */
-    protected $_specialties = array('Manifest', 'Provider');
+    protected $_specialties = ['Manifest', 'Provider'];
 
     /**
      * @param string $type
@@ -85,11 +85,11 @@ class Zend_Tool_Framework_System_Provider_Config extends Zend_Tool_Framework_Pro
         $writer->setRenderWithoutSections();
         $filename = $homeDirectory."/.zf.ini";
 
-        $config = array(
-            'php' => array(
+        $config = [
+            'php' => [
                 'include_path' => get_include_path(),
-            ),
-        );
+            ],
+        ];
         $writer->write($filename, new Zend_Config($config));
 
         $resp = $this->_registry->getResponse();
@@ -102,7 +102,7 @@ class Zend_Tool_Framework_System_Provider_Config extends Zend_Tool_Framework_Pro
      */
     protected function _detectHomeDirectory()
     {
-        $envVars = array("ZF_HOME", "HOME", "HOMEPATH");
+        $envVars = ["ZF_HOME", "HOME", "HOMEPATH"];
         foreach($envVars AS $env) {
             $homeDirectory = getenv($env);
             if ($homeDirectory != false && file_exists($homeDirectory)) {
@@ -131,8 +131,8 @@ class Zend_Tool_Framework_System_Provider_Config extends Zend_Tool_Framework_Pro
             $i++;
             $tree .= $this->_printTree($k, $v, 1, count($configArray)==$i);
         }
-        $resp->appendContent("User Configuration: ".$userConfig->getConfigFilepath(), array("color" => "green"));
-        $resp->appendContent($tree, array("indention" => 2));
+        $resp->appendContent("User Configuration: ".$userConfig->getConfigFilepath(), ["color" => "green"]);
+        $resp->appendContent($tree, ["indention" => 2]);
     }
 
     /**
@@ -211,12 +211,8 @@ class Zend_Tool_Framework_System_Provider_Config extends Zend_Tool_Framework_Pro
 
         $userConfig = $this->_loadUserConfigIfExists();
 
-        if (!isset($userConfig->basicloader)) {
-            $userConfig->basicloader = array();
-        }
-        if (!isset($userConfig->basicloader->classes)) {
-            $userConfig->basicloader->classes = array();
-        }
+        $userConfig->basicloader ??= [];
+        $userConfig->basicloader->classes ??= [];
 
         $providerClasses = $userConfig->basicloader->classes->toArray();
         if (!in_array($className, $providerClasses)) {
@@ -230,7 +226,7 @@ class Zend_Tool_Framework_System_Provider_Config extends Zend_Tool_Framework_Pro
             if ($userConfig->save()) {
                 $this->_registry->getResponse()->appendContent(
                     "Provider/Manifest '".$className."' was enabled for usage with Zend Tool.",
-                    array("color" => "green", "aligncenter" => true)
+                    ["color" => "green", "aligncenter" => true]
                 );
             } else {
                 require_once "Zend/Tool/Framework/Exception.php";
@@ -275,12 +271,8 @@ class Zend_Tool_Framework_System_Provider_Config extends Zend_Tool_Framework_Pro
     {
         $userConfig = $this->_loadUserConfigIfExists();
 
-        if (!isset($userConfig->basicloader)) {
-            $userConfig->basicloader = array();
-        }
-        if (!isset($userConfig->basicloader->classes)) {
-            $userConfig->basicloader->classes = array();
-        }
+        $userConfig->basicloader ??= [];
+        $userConfig->basicloader->classes ??= [];
 
         $providerClasses = $userConfig->basicloader->classes->toArray();
         if (($key = array_search($className, $providerClasses)) !== false) {
@@ -289,7 +281,7 @@ class Zend_Tool_Framework_System_Provider_Config extends Zend_Tool_Framework_Pro
             if ($userConfig->save()) {
                 $this->_registry->getResponse()->appendContent(
                     "Provider/Manifest '".$className."' was disabled.",
-                    array("color" => "green", "aligncenter" => true)
+                    ["color" => "green", "aligncenter" => true]
                 );
             } else {
                 require_once "Zend/Tool/Framework/Exception.php";
@@ -315,7 +307,7 @@ class Zend_Tool_Framework_System_Provider_Config extends Zend_Tool_Framework_Pro
 
         $resp = $this->_registry->getResponse();
         if (!$userConfig->exists()) {
-            $resp->appendContent("User has no config file.", array("aligncenter" => true, "color" => array('hiWhite', 'bgRed')));
+            $resp->appendContent("User has no config file.", ["aligncenter" => true, "color" => ['hiWhite', 'bgRed']]);
         }
 
         return $userConfig;

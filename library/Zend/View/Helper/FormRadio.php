@@ -76,13 +76,13 @@ class Zend_View_Helper_FormRadio extends Zend_View_Helper_FormElement
         extract($info); // name, value, attribs, options, listsep, disable
 
         // retrieve attributes for labels (prefixed with 'label_' or 'label')
-        $label_attribs = array();
+        $label_attribs = [];
         foreach ($attribs as $key => $val) {
             $tmp    = false;
             $keyLen = strlen($key);
-            if ((6 < $keyLen) && (substr($key, 0, 6) == 'label_')) {
+            if ((6 < $keyLen) && (str_starts_with($key, 'label_'))) {
                 $tmp = substr($key, 6);
-            } elseif ((5 < $keyLen) && (substr($key, 0, 5) == 'label')) {
+            } elseif ((5 < $keyLen) && (str_starts_with($key, 'label'))) {
                 $tmp = substr($key, 5);
             }
 
@@ -100,7 +100,7 @@ class Zend_View_Helper_FormRadio extends Zend_View_Helper_FormElement
                 case 'placement':
                     unset($label_attribs[$key]);
                     $val = strtolower($val);
-                    if (in_array($val, array('prepend', 'append'))) {
+                    if (in_array($val, ['prepend', 'append'])) {
                         $labelPlacement = $val;
                     }
                     break;
@@ -112,11 +112,11 @@ class Zend_View_Helper_FormRadio extends Zend_View_Helper_FormElement
 
         // build the element
         $xhtml = '';
-        $list  = array();
+        $list  = [];
 
         // should the name affect an array collection?
         $name = $this->view->escape($name);
-        if ($this->_isArray && ('[]' != substr($name, -2))) {
+        if ($this->_isArray && (!str_ends_with($name, '[]'))) {
             $name .= '[]';
         }
 
@@ -175,7 +175,7 @@ class Zend_View_Helper_FormRadio extends Zend_View_Helper_FormElement
         }
         
         // XHTML or HTML for standard list separator?
-        if (!$this->_isXhtml() && false !== strpos($listsep, '<br />')) {
+        if (!$this->_isXhtml() && str_contains($listsep, '<br />')) {
             $listsep = str_replace('<br />', '<br>', $listsep);
         }
 

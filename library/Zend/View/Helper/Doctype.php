@@ -34,7 +34,7 @@ require_once 'Zend/View/Helper/Abstract.php';
  * @copyright  Copyright (c) 2005-2015 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_View_Helper_Doctype extends Zend_View_Helper_Abstract
+class Zend_View_Helper_Doctype extends Zend_View_Helper_Abstract implements \Stringable
 {
     /**#@+
      * DocType constants
@@ -83,8 +83,8 @@ class Zend_View_Helper_Doctype extends Zend_View_Helper_Abstract
     public function __construct()
     {
         if (!Zend_Registry::isRegistered($this->_regKey)) {
-            $this->_registry = new ArrayObject(array(
-                'doctypes' => array(
+            $this->_registry = new ArrayObject([
+                'doctypes' => [
                     self::XHTML11             => '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">',
                     self::XHTML1_STRICT       => '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">',
                     self::XHTML1_TRANSITIONAL => '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">',
@@ -97,8 +97,8 @@ class Zend_View_Helper_Doctype extends Zend_View_Helper_Abstract
                     self::HTML4_LOOSE         => '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">',
                     self::HTML4_FRAMESET      => '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd">',
                     self::HTML5               => '<!DOCTYPE html>',
-                )
-            ));
+                ]
+            ]);
             Zend_Registry::set($this->_regKey, $this->_registry);
             $this->setDoctype($this->_defaultDoctype);
         } else {
@@ -131,7 +131,7 @@ class Zend_View_Helper_Doctype extends Zend_View_Helper_Abstract
                     $this->setDoctype($doctype);
                     break;
                 default:
-                    if (substr($doctype, 0, 9) != '<!DOCTYPE') {
+                    if (!str_starts_with($doctype, '<!DOCTYPE')) {
                         require_once 'Zend/View/Exception.php';
                         $e = new Zend_View_Exception('The specified doctype is malformed');
                         $e->setView($this->view);
@@ -200,15 +200,10 @@ class Zend_View_Helper_Doctype extends Zend_View_Helper_Abstract
      */
     public function isStrict()
     {
-        switch ( $this->getDoctype() )
-        {
-            case self::XHTML1_STRICT:
-            case self::XHTML11:
-            case self::HTML4_STRICT:
-                return true;
-            default: 
-                return false;
-        }
+        return match ($this->getDoctype()) {
+            self::XHTML1_STRICT, self::XHTML11, self::HTML4_STRICT => true,
+            default => false,
+        };
     }
     
     /**
@@ -234,9 +229,9 @@ class Zend_View_Helper_Doctype extends Zend_View_Helper_Abstract
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         $doctypes = $this->getDoctypes();
-        return $doctypes[$this->getDoctype()];
+        return (string) $doctypes[$this->getDoctype()];
     }
 }

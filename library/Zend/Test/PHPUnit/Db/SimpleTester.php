@@ -51,14 +51,14 @@ class Zend_Test_PHPUnit_Db_SimpleTester extends PHPUnit_Extensions_Database_Defa
     {
         if(!($connection instanceof Zend_Test_PHPUnit_Db_Connection)) {
             require_once "Zend/Test/PHPUnit/Db/Exception.php";
-            throw new Zend_Test_PHPUnit_Db_Exception("Not a valid Zend_Test_PHPUnit_Db_Connection instance, ".get_class($connection)." given!");
+            throw new Zend_Test_PHPUnit_Db_Exception("Not a valid Zend_Test_PHPUnit_Db_Connection instance, ".$connection::class." given!");
         }
 
         $this->connection = $connection;
-        $this->setUpOperation = new PHPUnit_Extensions_Database_Operation_Composite(array(
+        $this->setUpOperation = new PHPUnit_Extensions_Database_Operation_Composite([
             new Zend_Test_PHPUnit_Db_Operation_Truncate(),
             new Zend_Test_PHPUnit_Db_Operation_Insert(),
-        ));
+        ]);
         $this->tearDownOperation = PHPUnit_Extensions_Database_Operation_Factory::NONE();
     }
 

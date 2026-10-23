@@ -32,7 +32,7 @@ abstract class Zend_Feed_Reader_EntryAbstract
      *
      * @var array
      */
-    protected $_data = array();
+    protected $_data = [];
 
     /**
      * DOM document object
@@ -49,13 +49,6 @@ abstract class Zend_Feed_Reader_EntryAbstract
     protected $_entry = null;
 
     /**
-     * Pointer to the current entry
-     *
-     * @var int
-     */
-    protected $_entryKey = 0;
-
-    /**
      * XPath object
      *
      * @var DOMXPath
@@ -67,20 +60,22 @@ abstract class Zend_Feed_Reader_EntryAbstract
      *
      * @var array
      */
-    protected $_extensions = array();
+    protected $_extensions = [];
 
     /**
      * Constructor
      *
      * @param  DOMElement  $entry
-     * @param  int         $entryKey
+     * @param int $_entryKey
      * @param  string|null $type
      * @return void
      */
-    public function __construct(DOMElement $entry, $entryKey, $type = null)
+    public function __construct(DOMElement $entry, /**
+     * Pointer to the current entry
+     */
+    protected $_entryKey, $type = null)
     {
         $this->_entry       = $entry;
-        $this->_entryKey    = $entryKey;
         $this->_domDocument = $entry->ownerDocument;
         if ($type !== null) {
             $this->_data['type'] = $type;
@@ -210,7 +205,7 @@ abstract class Zend_Feed_Reader_EntryAbstract
     {
         foreach ($this->_extensions as $extension) {
             if (method_exists($extension, $method)) {
-                return call_user_func_array(array($extension, $method), $args);
+                return call_user_func_array([$extension, $method], $args);
             }
         }
         require_once 'Zend/Feed/Exception.php';

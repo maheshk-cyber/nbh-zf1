@@ -38,36 +38,29 @@ class Zend_Pdf_Canvas extends Zend_Pdf_Canvas_Abstract
      *
      * @var array
      */
-    protected $_procSet = array();
+    protected $_procSet = [];
 
-    /**
-     * Canvas width expressed in default user space units (1/72 inch)
-     *
-     * @var float
-     */
-    protected $_width;
-
-    /**
-     * Canvas height expressed in default user space units (1/72 inch)
-     *
-     * @var float
-     */
-    protected $_height;
-
-    protected $_resources = array('Font'      => array(),
-                                  'XObject'   => array(),
-                                  'ExtGState' => array());
+    protected $_resources = ['Font'      => [],
+                                  'XObject'   => [],
+                                  'ExtGState' => []];
 
     /**
      * Object constructor
      *
-     * @param float $width
-     * @param float $height
+     * @param float $_width
+     * @param float $_height
      */
-    public function __construct($width, $height)
+    public function __construct(
+        /**
+         * Canvas width expressed in default user space units (1/72 inch)
+         */
+        protected $_width,
+        /**
+         * Canvas height expressed in default user space units (1/72 inch)
+         */
+        protected $_height
+    )
     {
-        $this->_width  = $width;
-        $this->_height = $height;
     }
 
     /**

@@ -39,7 +39,7 @@ require_once 'Zend/XmlRpc/Value.php';
  * @copyright  Copyright (c) 2005-2015 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_XmlRpc_Fault
+class Zend_XmlRpc_Fault implements \Stringable
 {
     /**
      * Fault code
@@ -63,7 +63,7 @@ class Zend_XmlRpc_Fault
      * Internal fault codes => messages
      * @var array
      */
-    protected $_internal = array(
+    protected $_internal = [
         404 => 'Unknown Error',
 
         // 610 - 619 reflection errors
@@ -95,7 +95,7 @@ class Zend_XmlRpc_Fault
         651 => 'Failed to parse response',
         652 => 'Invalid response',
         653 => 'Invalid XMLRPC value in response',
-    );
+    ];
 
     /**
      * Constructor
@@ -264,7 +264,7 @@ class Zend_XmlRpc_Fault
         require_once 'Zend/XmlRpc/Exception.php';
         try {
             $isFault = $fault->loadXml($xml);
-        } catch (Zend_XmlRpc_Exception $e) {
+        } catch (Zend_XmlRpc_Exception) {
             $isFault = false;
         }
 
@@ -279,10 +279,10 @@ class Zend_XmlRpc_Fault
     public function saveXml()
     {
         // Create fault value
-        $faultStruct = array(
+        $faultStruct = [
             'faultCode'   => $this->getCode(),
             'faultString' => $this->getMessage()
-        );
+        ];
         $value = Zend_XmlRpc_Value::getXmlRpcValue($faultStruct);
 
         $generator = Zend_XmlRpc_Value::getGenerator();
@@ -300,7 +300,7 @@ class Zend_XmlRpc_Fault
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->saveXML();
     }

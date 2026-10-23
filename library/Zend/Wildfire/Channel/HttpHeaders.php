@@ -146,9 +146,7 @@ class Zend_Wildfire_Channel_HttpHeaders extends Zend_Controller_Plugin_Abstract 
      */
     public function getProtocol($uri)
     {
-        if (!isset($this->_protocols[$uri])) {
-            $this->_protocols[$uri] = $this->_initProtocol($uri);
-        }
+        $this->_protocols[$uri] ??= $this->_initProtocol($uri);
 
         $this->_registerControllerPlugin();
 
@@ -220,7 +218,7 @@ class Zend_Wildfire_Channel_HttpHeaders extends Zend_Controller_Plugin_Abstract 
     protected function _registerControllerPlugin()
     {
         $controller = Zend_Controller_Front::getInstance();
-        if (!$controller->hasPlugin(get_class($this))) {
+        if (!$controller->hasPlugin(static::class)) {
             $controller->registerPlugin($this, self::$_controllerPluginStackIndex);
         }
     }

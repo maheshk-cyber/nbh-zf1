@@ -56,14 +56,14 @@ class Zend_Test_PHPUnit_Constraint_DomQuery37 extends PHPUnit_Framework_Constrai
      * Available assertion types
      * @var array
      */
-    protected $_assertTypes       = array(
+    protected $_assertTypes       = [
         self::ASSERT_QUERY,
         self::ASSERT_CONTENT_CONTAINS,
         self::ASSERT_CONTENT_REGEX,
         self::ASSERT_CONTENT_COUNT,
         self::ASSERT_CONTENT_COUNT_MIN,
         self::ASSERT_CONTENT_COUNT_MAX,
-    );
+    ];
 
     /**
      * Content being matched
@@ -78,12 +78,6 @@ class Zend_Test_PHPUnit_Constraint_DomQuery37 extends PHPUnit_Framework_Constrai
     protected $_negate            = false;
 
     /**
-     * CSS selector or XPath path to select against
-     * @var string
-     */
-    protected $_path              = null;
-
-    /**
      * Whether or not to use XPath when querying
      * @var bool
      */
@@ -93,17 +87,21 @@ class Zend_Test_PHPUnit_Constraint_DomQuery37 extends PHPUnit_Framework_Constrai
      * XPath namespaces
      * @var array
      */
-    protected $_xpathNamespaces = array();
+    protected $_xpathNamespaces = [];
 
     /**
      * Constructor; setup constraint state
      *
-     * @param  string $path CSS selector path
+     * @param string $_path CSS selector path
      * @return void
      */
-    public function __construct($path)
+    public function __construct(
+        /**
+         * CSS selector or XPath path to select against
+         */
+        protected $_path
+    )
     {
-        $this->_path = $path;
     }
 
     /**
@@ -158,7 +156,7 @@ class Zend_Test_PHPUnit_Constraint_DomQuery37 extends PHPUnit_Framework_Constrai
 
         if (!in_array($assertType, $this->_assertTypes)) {
             require_once 'Zend/Test/PHPUnit/Constraint/Exception.php';
-            throw new Zend_Test_PHPUnit_Constraint_Exception(sprintf('Invalid assertion type "%s" provided to %s constraint', $assertType, __CLASS__));
+            throw new Zend_Test_PHPUnit_Constraint_Exception(sprintf('Invalid assertion type "%s" provided to %s constraint', $assertType, self::class));
         }
 
         $this->_assertType = $assertType;
@@ -399,18 +397,14 @@ class Zend_Test_PHPUnit_Constraint_DomQuery37 extends PHPUnit_Framework_Constrai
     {
         $count = count($result);
 
-        switch ($type) {
-            case self::ASSERT_CONTENT_COUNT:
-                return ($this->_negate)
-                    ? ($test != $count)
-                    : ($test == $count);
-            case self::ASSERT_CONTENT_COUNT_MIN:
-                return ($count >= $test);
-            case self::ASSERT_CONTENT_COUNT_MAX:
-                return ($count <= $test);
-            default:
-                return false;
-        }
+        return match ($type) {
+            self::ASSERT_CONTENT_COUNT => ($this->_negate)
+                ? ($test != $count)
+                : ($test == $count),
+            self::ASSERT_CONTENT_COUNT_MIN => $count >= $test,
+            self::ASSERT_CONTENT_COUNT_MAX => $count <= $test,
+            default => false,
+        };
     }
 
     /**

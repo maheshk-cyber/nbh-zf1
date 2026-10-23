@@ -26,7 +26,7 @@
  * @copyright  Copyright (c) 2005-2015 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Tool_Framework_Client_Response
+class Zend_Tool_Framework_Client_Response implements \Stringable
 {
     /**
      * @var callback|null
@@ -36,7 +36,7 @@ class Zend_Tool_Framework_Client_Response
     /**
      * @var array
      */
-    protected $_content = array();
+    protected $_content = [];
 
     /**
      * @var Zend_Tool_Framework_Exception
@@ -46,12 +46,12 @@ class Zend_Tool_Framework_Client_Response
     /**
      * @var array
      */
-    protected $_decorators = array();
+    protected $_decorators = [];
 
     /**
      * @var array
      */
-    protected $_defaultDecoratorOptions = array();
+    protected $_defaultDecoratorOptions = [];
 
     /**
      * setContentCallback()
@@ -75,11 +75,11 @@ class Zend_Tool_Framework_Client_Response
      * @param string $content
      * @return Zend_Tool_Framework_Client_Response
      */
-    public function setContent($content, Array $decoratorOptions = array())
+    public function setContent($content, Array $decoratorOptions = [])
     {
         $content = $this->_applyDecorators($content, $decoratorOptions);
 
-        $this->_content = array();
+        $this->_content = [];
         $this->appendContent($content);
         return $this;
     }
@@ -90,7 +90,7 @@ class Zend_Tool_Framework_Client_Response
      * @param string $content
      * @return Zend_Tool_Framework_Client_Response
      */
-    public function appendContent($content, Array $decoratorOptions = array())
+    public function appendContent($content, Array $decoratorOptions = [])
     {
         $content = $this->_applyDecorators($content, $decoratorOptions);
 
@@ -113,7 +113,7 @@ class Zend_Tool_Framework_Client_Response
     public function setDefaultDecoratorOptions(Array $decoratorOptions, $mergeIntoExisting = false)
     {
         if ($mergeIntoExisting == false) {
-            $this->_defaultDecoratorOptions = array();
+            $this->_defaultDecoratorOptions = [];
         }
 
         $this->_defaultDecoratorOptions = array_merge($this->_defaultDecoratorOptions, $decoratorOptions);
@@ -190,7 +190,7 @@ class Zend_Tool_Framework_Client_Response
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return (string) implode('', $this->_content);
     }

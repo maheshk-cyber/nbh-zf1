@@ -193,43 +193,23 @@ class Zend_Pdf_Resource_Image_Tiff extends Zend_Pdf_Resource_Image
                 $fieldType   = $this->unpackBytes(Zend_Pdf_Resource_Image_Tiff::UNPACK_TYPE_SHORT, fread($imageFile, 2));
                 $valueCount  = $this->unpackBytes(Zend_Pdf_Resource_Image_Tiff::UNPACK_TYPE_LONG, fread($imageFile, 4));
 
-                switch($fieldType) {
-                    case Zend_Pdf_Resource_Image_Tiff::TIFF_FIELD_TYPE_BYTE:
-                        $fieldLength = $valueCount;
-                        break;
-                    case Zend_Pdf_Resource_Image_Tiff::TIFF_FIELD_TYPE_ASCII:
-                        $fieldLength = $valueCount;
-                        break;
-                    case Zend_Pdf_Resource_Image_Tiff::TIFF_FIELD_TYPE_SHORT:
-                        $fieldLength = $valueCount * 2;
-                        break;
-                    case Zend_Pdf_Resource_Image_Tiff::TIFF_FIELD_TYPE_LONG:
-                        $fieldLength = $valueCount * 4;
-                        break;
-                    case Zend_Pdf_Resource_Image_Tiff::TIFF_FIELD_TYPE_RATIONAL:
-                        $fieldLength = $valueCount * 8;
-                        break;
-                    default:
-                        $fieldLength = $valueCount;
-                }
+                $fieldLength = match ($fieldType) {
+                    Zend_Pdf_Resource_Image_Tiff::TIFF_FIELD_TYPE_BYTE => $valueCount,
+                    Zend_Pdf_Resource_Image_Tiff::TIFF_FIELD_TYPE_ASCII => $valueCount,
+                    Zend_Pdf_Resource_Image_Tiff::TIFF_FIELD_TYPE_SHORT => $valueCount * 2,
+                    Zend_Pdf_Resource_Image_Tiff::TIFF_FIELD_TYPE_LONG => $valueCount * 4,
+                    Zend_Pdf_Resource_Image_Tiff::TIFF_FIELD_TYPE_RATIONAL => $valueCount * 8,
+                    default => $valueCount,
+                };
 
                 $offsetBytes = fread($imageFile, 4);
 
                 if($fieldLength <= 4) {
-                    switch($fieldType) {
-                        case Zend_Pdf_Resource_Image_Tiff::TIFF_FIELD_TYPE_BYTE:
-                            $value = $this->unpackBytes(Zend_Pdf_Resource_Image_Tiff::UNPACK_TYPE_BYTE, $offsetBytes);
-                            break;
-                        case Zend_Pdf_Resource_Image_Tiff::TIFF_FIELD_TYPE_ASCII:
-                            //Fall through to next case
-                        case Zend_Pdf_Resource_Image_Tiff::TIFF_FIELD_TYPE_LONG:
-                            $value = $this->unpackBytes(Zend_Pdf_Resource_Image_Tiff::UNPACK_TYPE_LONG, $offsetBytes);
-                            break;
-                        case Zend_Pdf_Resource_Image_Tiff::TIFF_FIELD_TYPE_SHORT:
-                            //Fall through to next case
-                        default:
-                            $value = $this->unpackBytes(Zend_Pdf_Resource_Image_Tiff::UNPACK_TYPE_SHORT, $offsetBytes);
-                    }
+                    $value = match ($fieldType) {
+                        Zend_Pdf_Resource_Image_Tiff::TIFF_FIELD_TYPE_BYTE => $this->unpackBytes(Zend_Pdf_Resource_Image_Tiff::UNPACK_TYPE_BYTE, $offsetBytes),
+                        Zend_Pdf_Resource_Image_Tiff::TIFF_FIELD_TYPE_ASCII, Zend_Pdf_Resource_Image_Tiff::TIFF_FIELD_TYPE_LONG => $this->unpackBytes(Zend_Pdf_Resource_Image_Tiff::UNPACK_TYPE_LONG, $offsetBytes),
+                        default => $this->unpackBytes(Zend_Pdf_Resource_Image_Tiff::UNPACK_TYPE_SHORT, $offsetBytes),
+                    };
                 } else {
                     $refOffset = $this->unpackBytes(Zend_Pdf_Resource_Image_Tiff::UNPACK_TYPE_LONG, $offsetBytes);
                 }
@@ -391,7 +371,7 @@ class Zend_Pdf_Resource_Image_Tiff extends Zend_Pdf_Resource_Image
             throw new Zend_Pdf_Exception("Problem reading tiff file. Tiff is probably corrupt.");
         }
 
-        $this->_imageProperties = array();
+        $this->_imageProperties = [];
         $this->_imageProperties['bitDepth'] = $this->_bitsPerSample;
         $this->_imageProperties['fileSize'] = $this->_fileSize;
         $this->_imageProperties['TIFFendianType'] = $this->_endianType;
@@ -406,7 +386,7 @@ class Zend_Pdf_Resource_Image_Tiff extends Zend_Pdf_Resource_Image
 
         $imageDictionary->Width            = new Zend_Pdf_Element_Numeric($this->_width);
         if($this->_whiteIsZero === true) {
-            $imageDictionary->Decode       = new Zend_Pdf_Element_Array(array(new Zend_Pdf_Element_Numeric(1), new Zend_Pdf_Element_Numeric(0)));
+            $imageDictionary->Decode       = new Zend_Pdf_Element_Array([new Zend_Pdf_Element_Numeric(1), new Zend_Pdf_Element_Numeric(0)]);
         }
         $imageDictionary->Height           = new Zend_Pdf_Element_Numeric($this->_height);
         $imageDictionary->ColorSpace       = new Zend_Pdf_Element_Name($this->_colorSpace);

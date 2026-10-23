@@ -90,7 +90,7 @@ class Zend_Filter_PregReplace implements Zend_Filter_Interface
             $options = $options->toArray();
         } else if (!is_array($options)) {
             $options = func_get_args();
-            $temp    = array();
+            $temp    = [];
             if (!empty($options)) {
                 $temp['match'] = array_shift($options);
             }
@@ -165,7 +165,7 @@ class Zend_Filter_PregReplace implements Zend_Filter_Interface
     {
         if ($this->_matchPattern == null) {
             require_once 'Zend/Filter/Exception.php';
-            throw new Zend_Filter_Exception(get_class($this) . ' does not have a valid MatchPattern set.');
+            throw new Zend_Filter_Exception(static::class . ' does not have a valid MatchPattern set.');
         }
 
         return preg_replace($this->_matchPattern, $this->_replacement, $value);

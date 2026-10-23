@@ -65,7 +65,7 @@ class Zend_Soap_Wsdl
      *
      * @var array
      */
-    private $_includedTypes = array();
+    private $_includedTypes = [];
 
     /**
      * Strategy for detection of complex types
@@ -194,7 +194,7 @@ class Zend_Soap_Wsdl
 
         $message->setAttribute('name', $name);
 
-        if (sizeof($parts) > 0) {
+        if (count($parts) > 0) {
             foreach ($parts as $name => $type) {
                 $part = $this->_dom->createElement('part');
                 $part->setAttribute('name', $name);
@@ -432,7 +432,7 @@ class Zend_Soap_Wsdl
         }
 
         $doc = $this->_dom->createElement('documentation');
-        $doc_cdata = $this->_dom->createTextNode(str_replace(array("\r\n", "\r"), "\n", $documentation));
+        $doc_cdata = $this->_dom->createTextNode(str_replace(["\r\n", "\r"], "\n", $documentation));
         $doc->appendChild($doc_cdata);
 
         if($node->hasChildNodes()) {
@@ -541,34 +541,20 @@ class Zend_Soap_Wsdl
      */
     public function getType($type)
     {
-        switch (strtolower($type)) {
-            case 'string':
-            case 'str':
-                return 'xsd:string';
-            case 'long':
-                return 'xsd:long';
-            case 'int':
-            case 'integer':
-                return 'xsd:int';
-            case 'float':
-                return 'xsd:float';
-            case 'double':
-                return 'xsd:double';
-            case 'boolean':
-            case 'bool':
-                return 'xsd:boolean';
-            case 'array':
-                return 'soap-enc:Array';
-            case 'object':
-                return 'xsd:struct';
-            case 'mixed':
-                return 'xsd:anyType';
-            case 'void':
-                return '';
-            default:
-                // delegate retrieval of complex type to current strategy
-                return $this->addComplexType($type);
-            }
+        return match (strtolower($type)) {
+            'string', 'str' => 'xsd:string',
+            'long' => 'xsd:long',
+            'int', 'integer' => 'xsd:int',
+            'float' => 'xsd:float',
+            'double' => 'xsd:double',
+            'boolean', 'bool' => 'xsd:boolean',
+            'array' => 'soap-enc:Array',
+            'object' => 'xsd:struct',
+            'mixed' => 'xsd:anyType',
+            'void' => '',
+            // delegate retrieval of complex type to current strategy
+            default => $this->addComplexType($type),
+        };
     }
 
     /**
@@ -622,7 +608,7 @@ class Zend_Soap_Wsdl
 
         $elementXml = $this->_dom->createElement('xsd:element');
         foreach ($element as $key => $value) {
-            if (in_array($key, array('sequence', 'all', 'choice'))) {
+            if (in_array($key, ['sequence', 'all', 'choice'])) {
                 if (is_array($value)) {
                     $complexType = $this->_dom->createElement('xsd:complexType');
                     if (count($value) > 0) {

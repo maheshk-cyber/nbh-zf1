@@ -46,12 +46,6 @@ abstract class Zend_Oauth_Signature_SignatureAbstract
     protected $_key = null;
 
     /**
-     * Consumer secret
-     * @var string
-     */
-    protected $_consumerSecret = null;
-
-    /**
      * Token secret
      * @var string
      */
@@ -60,14 +54,16 @@ abstract class Zend_Oauth_Signature_SignatureAbstract
     /**
      * Constructor
      *
-     * @param  string $consumerSecret
+     * @param string $_consumerSecret
      * @param  null|string $tokenSecret
      * @param  null|string $hashAlgo
      * @return void
      */
-    public function __construct($consumerSecret, $tokenSecret = null, $hashAlgo = null)
+    public function __construct(/**
+     * Consumer secret
+     */
+    protected $_consumerSecret, $tokenSecret = null, $hashAlgo = null)
     {
-        $this->_consumerSecret = $consumerSecret;
         if (isset($tokenSecret)) {
             $this->_tokenSecret = $tokenSecret;
         }
@@ -104,7 +100,7 @@ abstract class Zend_Oauth_Signature_SignatureAbstract
         $uri->setQuery('');
         $uri->setFragment('');
         $uri->setHost(strtolower($uri->getHost()));
-        return $uri->getUri(true);
+        return $uri->getUri();
     }
 
     /**
@@ -114,7 +110,7 @@ abstract class Zend_Oauth_Signature_SignatureAbstract
      */
     protected function _assembleKey()
     {
-        $parts = array($this->_consumerSecret);
+        $parts = [$this->_consumerSecret];
         if ($this->_tokenSecret !== null) {
             $parts[] = $this->_tokenSecret;
         }
@@ -134,12 +130,12 @@ abstract class Zend_Oauth_Signature_SignatureAbstract
      */
     protected function _getBaseSignatureString(array $params, $method = null, $url = null)
     {
-        $encodedParams = array();
+        $encodedParams = [];
         foreach ($params as $key => $value) {
             $encodedParams[Zend_Oauth_Http_Utility::urlEncode($key)] =
                 Zend_Oauth_Http_Utility::urlEncode($value);
         }
-        $baseStrings = array();
+        $baseStrings = [];
         if (isset($method)) {
             $baseStrings[] = strtoupper($method);
         }
@@ -166,8 +162,8 @@ abstract class Zend_Oauth_Signature_SignatureAbstract
      */
     protected function _toByteValueOrderedQueryString(array $params)
     {
-        $return = array();
-        uksort($params, 'strnatcmp');
+        $return = [];
+        uksort($params, strnatcmp(...));
         foreach ($params as $key => $value) {
             if (is_array($value)) {
                 natsort($value);

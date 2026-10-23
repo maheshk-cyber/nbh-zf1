@@ -32,7 +32,7 @@ abstract class Zend_Feed_Reader_Extension_EntryAbstract
      *
      * @var array
      */
-    protected $_data = array();
+    protected $_data = [];
 
     /**
      * DOM document object
@@ -47,13 +47,6 @@ abstract class Zend_Feed_Reader_Extension_EntryAbstract
      * @var Zend_Feed_Entry_Abstract
      */
     protected $_entry = null;
-
-    /**
-     * Pointer to the current entry
-     *
-     * @var int
-     */
-    protected $_entryKey = 0;
 
     /**
      * XPath object
@@ -73,14 +66,16 @@ abstract class Zend_Feed_Reader_Extension_EntryAbstract
      * Constructor
      *
      * @param  Zend_Feed_Entry_Abstract $entry
-     * @param  int $entryKey
+     * @param int $_entryKey
      * @param  string $type
      * @return void
      */
-    public function __construct(DOMElement $entry, $entryKey, $type = null)
+    public function __construct(DOMElement $entry, /**
+     * Pointer to the current entry
+     */
+    protected $_entryKey, $type = null)
     {
         $this->_entry       = $entry;
-        $this->_entryKey    = $entryKey;
         $this->_domDocument = $entry->ownerDocument;
 
         if ($type !== null) {

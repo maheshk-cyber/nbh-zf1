@@ -234,14 +234,14 @@ class Zend_Service_Akismet extends Zend_Service_Abstract
         $uri    = 'http://' . $host . ':' . $this->getPort() . $path;
         $client = self::getHttpClient();
         $client->setUri($uri);
-        $client->setConfig(array(
+        $client->setConfig([
             'useragent'    => $this->getUserAgent(),
-        ));
+        ]);
 
-        $client->setHeaders(array(
+        $client->setHeaders([
             'Host'         => $host,
             'Content-Type' => 'application/x-www-form-urlencoded; charset=' . $this->getCharset()
-        ));
+        ]);
         $client->setParameterPost($params);
 
         $client->setMethod(Zend_Http_Client::POST);
@@ -257,18 +257,14 @@ class Zend_Service_Akismet extends Zend_Service_Abstract
      */
     public function verifyKey($key = null, $blog = null)
     {
-        if (null === $key) {
-            $key = $this->getApiKey();
-        }
+        $key ??= $this->getApiKey();
 
-        if (null === $blog) {
-            $blog = $this->getBlogUrl();
-        }
+        $blog ??= $this->getBlogUrl();
 
-        $response = $this->_post('rest.akismet.com', '/1.1/verify-key', array(
+        $response = $this->_post('rest.akismet.com', '/1.1/verify-key', [
             'key'  => $key,
             'blog' => $blog
-        ));
+        ]);
 
         return ('valid' == $response->getBody());
     }
@@ -288,9 +284,7 @@ class Zend_Service_Akismet extends Zend_Service_Abstract
             throw new Zend_Service_Exception('Missing required Akismet fields (user_ip and user_agent are required)');
         }
 
-        if (!isset($params['blog'])) {
-            $params['blog'] = $this->getBlogUrl();
-        }
+        $params['blog'] ??= $this->getBlogUrl();
 
         return $this->_post($this->getApiKey() . '.rest.akismet.com', $path, $params);
     }

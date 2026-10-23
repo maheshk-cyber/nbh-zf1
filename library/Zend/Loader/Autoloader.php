@@ -42,12 +42,12 @@ class Zend_Loader_Autoloader
     /**
      * @var array Concrete autoloader callback implementations
      */
-    protected $_autoloaders = array();
+    protected $_autoloaders = [];
 
     /**
      * @var array Default autoloader callback
      */
-    protected $_defaultAutoloader = array('Zend_Loader', 'loadClass');
+    protected $_defaultAutoloader = ['Zend_Loader', 'loadClass'];
 
     /**
      * @var bool Whether or not to act as a fallback autoloader
@@ -62,15 +62,15 @@ class Zend_Loader_Autoloader
     /**
      * @var array Supported namespaces 'Zend' and 'ZendX' by default.
      */
-    protected $_namespaces = array(
+    protected $_namespaces = [
         'Zend_'  => true,
         'ZendX_' => true,
-    );
+    ];
 
     /**
      * @var array Namespace-specific autoloaders
      */
-    protected $_namespaceAutoloaders = array();
+    protected $_namespaceAutoloaders = [];
 
     /**
      * @var bool Whether or not to suppress file not found warnings
@@ -192,7 +192,7 @@ class Zend_Loader_Autoloader
     {
         $namespace = (string) $namespace;
         if (!array_key_exists($namespace, $this->_namespaceAutoloaders)) {
-            return array();
+            return [];
         }
         return $this->_namespaceAutoloaders[$namespace];
     }
@@ -212,9 +212,7 @@ class Zend_Loader_Autoloader
         }
 
         foreach ($namespace as $ns) {
-            if (!isset($this->_namespaces[$ns])) {
-                $this->_namespaces[$ns] = true;
-            }
+            $this->_namespaces[$ns] ??= true;
         }
         return $this;
     }
@@ -265,10 +263,10 @@ class Zend_Loader_Autoloader
         }
 
         $this->_zfPath = $this->_getVersionPath($path, $version);
-        set_include_path(implode(PATH_SEPARATOR, array(
+        set_include_path(implode(PATH_SEPARATOR, [
             $this->_zfPath,
             get_include_path(),
-        )));
+        ]));
         return $this;
     }
 
@@ -327,14 +325,14 @@ class Zend_Loader_Autoloader
     public function getClassAutoloaders($class)
     {
         $namespace   = false;
-        $autoloaders = array();
+        $autoloaders = [];
 
         // Add concrete namespaced autoloaders
         foreach (array_keys($this->_namespaceAutoloaders) as $ns) {
             if ('' == $ns) {
                 continue;
             }
-            if (0 === strpos($class, $ns)) {
+            if (str_starts_with($class, $ns)) {
                 if ((false === $namespace) || (strlen($ns) > strlen($namespace))) {
                     $namespace = $ns;
                     $autoloaders = $this->getNamespaceAutoloaders($ns);
@@ -344,7 +342,7 @@ class Zend_Loader_Autoloader
 
         // Add internal namespaced autoloader
         foreach ($this->getRegisteredNamespaces() as $ns) {
-            if (0 === strpos($class, $ns)) {
+            if (str_starts_with($class, $ns)) {
                 $namespace     = $ns;
                 $autoloaders[] = $this->_internalAutoloader;
                 break;
@@ -459,8 +457,8 @@ class Zend_Loader_Autoloader
      */
     protected function __construct()
     {
-        spl_autoload_register(array(__CLASS__, 'autoload'));
-        $this->_internalAutoloader = array($this, '_autoload');
+        spl_autoload_register(self::autoload(...));
+        $this->_internalAutoloader = $this->_autoload(...);
     }
 
     /**
@@ -479,7 +477,7 @@ class Zend_Loader_Autoloader
                 call_user_func($callback, $class);
             }
             return $class;
-        } catch (Zend_Exception $e) {
+        } catch (Zend_Exception) {
             return false;
         }
     }
@@ -565,7 +563,7 @@ class Zend_Loader_Autoloader
         $path       = rtrim($path, '/');
         $path       = rtrim($path, '\\');
         $versionLen = strlen($version);
-        $versions   = array();
+        $versions   = [];
         $dirs       = glob("$path/*", GLOB_ONLYDIR);
         foreach ((array) $dirs as $dir) {
             $dirName = substr($dir, strlen($path) + 1);
@@ -577,13 +575,13 @@ class Zend_Loader_Autoloader
 
             if (('latest' == $version)
                 || ((strlen($matchedVersion) >= $versionLen)
-                    && (0 === strpos($matchedVersion, $version)))
+                    && (str_starts_with($matchedVersion, $version)))
             ) {
                 $versions[$matchedVersion] = $dir . '/library';
             }
         }
 
-        uksort($versions, 'version_compare');
+        uksort($versions, version_compare(...));
         return $versions;
     }
 }

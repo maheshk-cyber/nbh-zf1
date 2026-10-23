@@ -75,13 +75,6 @@ abstract class Zend_Mail_Protocol_Abstract
 
 
     /**
-     * Port number of connection
-     * @var integer
-     */
-    protected $_port;
-
-
-    /**
      * Instance of Zend_Validate to check hostnames
      * @var Zend_Validate
      */
@@ -121,18 +114,21 @@ abstract class Zend_Mail_Protocol_Abstract
      * Log of mail requests and server responses for a session
      * @var array
      */
-    private $_log = array();
+    private $_log = [];
 
 
     /**
      * Constructor.
      *
      * @param  string  $host OPTIONAL Hostname of remote connection (default: 127.0.0.1)
-     * @param  integer $port OPTIONAL Port number (default: null)
+     * @param integer $_port OPTIONAL Port number (default: null)
      * @throws Zend_Mail_Protocol_Exception
      * @return void
      */
-    public function __construct($host = '127.0.0.1', $port = null)
+    public function __construct($host = '127.0.0.1', /**
+     * Port number of connection
+     */
+    protected $_port = null)
     {
         $this->_validHost = new Zend_Validate();
         $this->_validHost->addValidator(new Zend_Validate_Hostname(Zend_Validate_Hostname::ALLOW_ALL));
@@ -142,11 +138,10 @@ abstract class Zend_Mail_Protocol_Abstract
              * @see Zend_Mail_Protocol_Exception
              */
             require_once 'Zend/Mail/Protocol/Exception.php';
-            throw new Zend_Mail_Protocol_Exception(join(', ', $this->_validHost->getMessages()));
+            throw new Zend_Mail_Protocol_Exception(implode(', ', $this->_validHost->getMessages()));
         }
 
         $this->_host = $host;
-        $this->_port = $port;
     }
 
 
@@ -231,7 +226,7 @@ abstract class Zend_Mail_Protocol_Abstract
      */
     public function resetLog()
     {
-        $this->_log = array();
+        $this->_log = [];
     }
 
     /**
@@ -401,19 +396,19 @@ abstract class Zend_Mail_Protocol_Abstract
      */
     protected function _expect($code, $timeout = null)
     {
-        $this->_response = array();
+        $this->_response = [];
         $cmd  = '';
         $more = '';
         $msg  = '';
         $errMsg = '';
 
         if (!is_array($code)) {
-            $code = array($code);
+            $code = [$code];
         }
 
         do {
             $this->_response[] = $result = $this->_receive($timeout);
-            list($cmd, $more, $msg) = preg_split('/([\s-]+)/', $result, 2, PREG_SPLIT_DELIM_CAPTURE);
+            [$cmd, $more, $msg] = preg_split('/([\s-]+)/', $result, 2, PREG_SPLIT_DELIM_CAPTURE);
 
             if ($errMsg !== '') {
                 $errMsg .= ' ' . $msg;
@@ -421,7 +416,7 @@ abstract class Zend_Mail_Protocol_Abstract
                 $errMsg =  $msg;
             }
 
-        } while (strpos($more, '-') === 0); // The '-' message prefix indicates an information string instead of a response string.
+        } while (str_starts_with($more, '-')); // The '-' message prefix indicates an information string instead of a response string.
 
         if ($errMsg !== '') {
             /**

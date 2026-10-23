@@ -58,28 +58,28 @@ class Zend_Measure_Number extends Zend_Measure_Abstract
      *
      * @var array
      */
-    protected $_units = array(
-        'BINARY'      => array(2,  '⑵'),
-        'TERNARY'     => array(3,  '⑶'),
-        'QUATERNARY'  => array(4,  '⑷'),
-        'QUINARY'     => array(5,  '⑸'),
-        'SENARY'      => array(6,  '⑹'),
-        'SEPTENARY'   => array(7,  '⑺'),
-        'OCTAL'       => array(8,  '⑻'),
-        'NONARY'      => array(9,  '⑼'),
-        'DECIMAL'     => array(10, '⑽'),
-        'DUODECIMAL'  => array(12, '⑿'),
-        'HEXADECIMAL' => array(16, '⒃'),
-        'ROMAN'       => array(99, ''),
+    protected $_units = [
+        'BINARY'      => [2,  '⑵'],
+        'TERNARY'     => [3,  '⑶'],
+        'QUATERNARY'  => [4,  '⑷'],
+        'QUINARY'     => [5,  '⑸'],
+        'SENARY'      => [6,  '⑹'],
+        'SEPTENARY'   => [7,  '⑺'],
+        'OCTAL'       => [8,  '⑻'],
+        'NONARY'      => [9,  '⑼'],
+        'DECIMAL'     => [10, '⑽'],
+        'DUODECIMAL'  => [12, '⑿'],
+        'HEXADECIMAL' => [16, '⒃'],
+        'ROMAN'       => [99, ''],
         'STANDARD'    => 'DECIMAL'
-    );
+    ];
 
     /**
      * Definition of all roman signs
      *
      * @var array $_roman
      */
-    private static $_roman = array(
+    private static $_roman = [
         'I' => 1,
         'A' => 4,
         'V' => 5,
@@ -105,14 +105,14 @@ class Zend_Measure_Number extends Zend_Measure_Abstract
         'T' => 500000,
         'Z' => 900000,
         'U' => 1000000
-    );
+    ];
 
     /**
      * Convertion table for roman signs
      *
      * @var array $_romanconvert
      */
-    private static $_romanconvert = array(
+    private static $_romanconvert = [
         '/_V/' => '/P/',
         '/_X/' => '/Q/',
         '/_L/' => '/R/',
@@ -131,7 +131,7 @@ class Zend_Measure_Number extends Zend_Measure_Abstract
         '/QS/' => '/W/',
         '/ST/' => '/Y/',
         '/SU/' => '/Z/'
-    );
+    ];
 
     /**
      * Zend_Measure_Abstract is an abstract class for the different measurement types
@@ -149,9 +149,7 @@ class Zend_Measure_Number extends Zend_Measure_Abstract
             $type = null;
         }
 
-        if ($locale === null) {
-            $locale = new Zend_Locale();
-        }
+        $locale ??= new Zend_Locale();
 
         if (!Zend_Locale::isLocale($locale, true, false)) {
             if (!Zend_Locale::isLocale($locale, true, false)) {
@@ -164,9 +162,7 @@ class Zend_Measure_Number extends Zend_Measure_Abstract
 
         $this->_locale = (string) $locale;
 
-        if ($type === null) {
-            $type = $this->_units['STANDARD'];
-        }
+        $type ??= $this->_units['STANDARD'];
 
         if (isset($this->_units[$type]) === false) {
             require_once 'Zend/Measure/Exception.php';
@@ -253,7 +249,7 @@ class Zend_Measure_Number extends Zend_Measure_Abstract
 
             default:
                 try {
-                    $value = Zend_Locale_Format::getInteger($value, array('locale' => $locale));
+                    $value = Zend_Locale_Format::getInteger($value, ['locale' => $locale]);
                 } catch (Exception $e) {
                     require_once 'Zend/Measure/Exception.php';
                     throw new Zend_Measure_Exception($e->getMessage(), $e->getCode(), $e);
@@ -297,7 +293,7 @@ class Zend_Measure_Number extends Zend_Measure_Abstract
 
             $split = preg_split('//', strrev($input), -1, PREG_SPLIT_NO_EMPTY);
 
-            for ($x =0; $x < sizeof($split); $x++) {
+            for ($x =0; $x < count($split); $x++) {
                 if ($split[$x] == '/') {
                     continue;
                 }
@@ -397,7 +393,7 @@ class Zend_Measure_Number extends Zend_Measure_Abstract
             throw new Zend_Measure_Exception('Unknown type of number:' . $type);
         }
 
-        $value = $this->_toDecimal($this->getValue(-1), $this->getType(-1));
+        $value = $this->_toDecimal($this->getValue(-1), $this->getType());
         $value = $this->_fromDecimal($value, $type);
 
         $this->_value = $value;

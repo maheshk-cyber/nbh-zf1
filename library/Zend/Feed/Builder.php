@@ -50,13 +50,6 @@ require_once 'Zend/Feed/Builder/Entry.php';
 class Zend_Feed_Builder implements Zend_Feed_Builder_Interface
 {
     /**
-     * The data of the feed
-     *
-     * @var $_data array
-     */
-    private $_data;
-
-    /**
      * Header of the feed
      *
      * @var $_header Zend_Feed_Builder_Header
@@ -68,7 +61,7 @@ class Zend_Feed_Builder implements Zend_Feed_Builder_Interface
      *
      * @var $_entries array
      */
-    private $_entries = array();
+    private $_entries = [];
 
     /**
      * Constructor. The $data array must conform to the following format:
@@ -171,15 +164,14 @@ class Zend_Feed_Builder implements Zend_Feed_Builder_Interface
      * );
      * </code>
      *
-     * @param  array $data
+     * @param array $_data
      * @return void
      */
-    public function __construct(array $data)
+    public function __construct(private array $_data)
     {
-        $this->_data = $data;
-        $this->_createHeader($data);
-        if (isset($data['entries'])) {
-            $this->_createEntries($data['entries']);
+        $this->_createHeader($this->_data);
+        if (isset($this->_data['entries'])) {
+            $this->_createEntries($this->_data['entries']);
         }
     }
 
@@ -214,7 +206,7 @@ class Zend_Feed_Builder implements Zend_Feed_Builder_Interface
      */
     protected function _createHeader(array $data)
     {
-        $mandatories = array('title', 'link', 'charset');
+        $mandatories = ['title', 'link', 'charset'];
         foreach ($mandatories as $mandatory) {
             if (!isset($data[$mandatory])) {
                 /**
@@ -262,7 +254,7 @@ class Zend_Feed_Builder implements Zend_Feed_Builder_Interface
             $this->_header->setRating($data['rating']);
         }
         if (isset($data['cloud'])) {
-            $mandatories = array('domain', 'path', 'registerProcedure', 'protocol');
+            $mandatories = ['domain', 'path', 'registerProcedure', 'protocol'];
             foreach ($mandatories as $mandatory) {
                 if (!isset($data['cloud'][$mandatory])) {
                     /**
@@ -276,7 +268,7 @@ class Zend_Feed_Builder implements Zend_Feed_Builder_Interface
             $this->_header->setCloud($uri_str, $data['cloud']['registerProcedure'], $data['cloud']['protocol']);
         }
         if (isset($data['textInput'])) {
-            $mandatories = array('title', 'description', 'name', 'link');
+            $mandatories = ['title', 'description', 'name', 'link'];
             foreach ($mandatories as $mandatory) {
                 if (!isset($data['textInput'][$mandatory])) {
                     /**
@@ -303,8 +295,8 @@ class Zend_Feed_Builder implements Zend_Feed_Builder_Interface
                 $itunes->setAuthor($data['itunes']['author']);
             }
             if (isset($data['itunes']['owner'])) {
-                $name = isset($data['itunes']['owner']['name']) ? $data['itunes']['owner']['name'] : '';
-                $email = isset($data['itunes']['owner']['email']) ? $data['itunes']['owner']['email'] : '';
+                $name = $data['itunes']['owner']['name'] ?? '';
+                $email = $data['itunes']['owner']['email'] ?? '';
                 $itunes->setOwner($name, $email);
             }
             if (isset($data['itunes']['image'])) {
@@ -343,7 +335,7 @@ class Zend_Feed_Builder implements Zend_Feed_Builder_Interface
     protected function _createEntries(array $data)
     {
         foreach ($data as $row) {
-            $mandatories = array('title', 'link', 'description');
+            $mandatories = ['title', 'link', 'description'];
             foreach ($mandatories as $mandatory) {
                 if (!isset($row[$mandatory])) {
                     /**
@@ -373,7 +365,7 @@ class Zend_Feed_Builder implements Zend_Feed_Builder_Interface
                 $entry->setCommentsRssUrl($row['commentRss']);
             }
             if (isset($row['source'])) {
-                $mandatories = array('title', 'url');
+                $mandatories = ['title', 'url'];
                 foreach ($mandatories as $mandatory) {
                     if (!isset($row['source'][$mandatory])) {
                         /**

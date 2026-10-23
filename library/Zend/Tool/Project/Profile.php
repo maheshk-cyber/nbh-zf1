@@ -41,7 +41,7 @@ require_once 'Zend/Tool/Project/Profile/Resource/Container.php';
  * @copyright  Copyright (c) 2005-2015 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Tool_Project_Profile extends Zend_Tool_Project_Profile_Resource_Container
+class Zend_Tool_Project_Profile extends Zend_Tool_Project_Profile_Resource_Container implements \Stringable
 {
 
     /**
@@ -220,7 +220,7 @@ class Zend_Tool_Project_Profile extends Zend_Tool_Project_Profile_Resource_Conta
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         $string = '';
         foreach ($this as $resource) {

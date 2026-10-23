@@ -56,7 +56,7 @@ class Zend_Pdf_Outline_Loaded extends Zend_Pdf_Outline
      *
      * @var array
      */
-    protected $_originalChildOutlines = array();
+    protected $_originalChildOutlines = [];
 
     /**
      * Get outline title.
@@ -98,7 +98,7 @@ class Zend_Pdf_Outline_Loaded extends Zend_Pdf_Outline
 
         if ($this->_outlineDictionary->Count === null) {
             // Do Nothing.
-            return this;
+            return \THIS;
         }
 
         $childrenCount = $this->_outlineDictionary->Count->value;
@@ -214,9 +214,9 @@ class Zend_Pdf_Outline_Loaded extends Zend_Pdf_Outline
             $this->_outlineDictionary->C = null;
         } else {
             $components = $color->getComponents();
-            $colorComponentElements = array(new Zend_Pdf_Element_Numeric($components[0]),
+            $colorComponentElements = [new Zend_Pdf_Element_Numeric($components[0]),
                                             new Zend_Pdf_Element_Numeric($components[1]),
-                                            new Zend_Pdf_Element_Numeric($components[2]));
+                                            new Zend_Pdf_Element_Numeric($components[2])];
             $this->_outlineDictionary->C = new Zend_Pdf_Element_Array($colorComponentElements);
         }
 
@@ -315,9 +315,7 @@ class Zend_Pdf_Outline_Loaded extends Zend_Pdf_Outline
             throw new Zend_Pdf_Exception('$dictionary mast be an indirect dictionary object.');
         }
 
-        if ($processedDictionaries === null) {
-            $processedDictionaries = new SplObjectStorage();
-        }
+        $processedDictionaries ??= new SplObjectStorage();
         $processedDictionaries->attach($dictionary);
 
         $this->_outlineDictionary = $dictionary;
@@ -375,9 +373,7 @@ class Zend_Pdf_Outline_Loaded extends Zend_Pdf_Outline
                                                  Zend_Pdf_Element $prev = null,
                                                  SplObjectStorage $processedOutlines = null)
     {
-        if ($processedOutlines === null) {
-            $processedOutlines = new SplObjectStorage();
-        }
+        $processedOutlines ??= new SplObjectStorage();
         $processedOutlines->attach($this);
 
         if ($updateNavigation) {

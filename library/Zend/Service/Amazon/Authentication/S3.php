@@ -50,7 +50,7 @@ class Zend_Service_Amazon_Authentication_S3 extends Zend_Service_Amazon_Authenti
     public function generateSignature($method, $path, &$headers)
     {
         if (! is_array($headers)) {
-            $headers = array($headers);
+            $headers = [$headers];
         }
 
         $type = $md5 = $date = '';
@@ -75,10 +75,10 @@ class Zend_Service_Amazon_Authentication_S3 extends Zend_Service_Amazon_Authenti
 
         // For x-amz- headers, combine like keys, lowercase them, sort them
         // alphabetically and remove excess spaces around values
-        $amz_headers = array();
+        $amz_headers = [];
         foreach ($headers as $key => $val) {
             $key = strtolower($key);
-            if (substr($key, 0, 6) == 'x-amz-') {
+            if (str_starts_with($key, 'x-amz-')) {
                 if (is_array($val)) {
                     $amz_headers[$key] = $val;
                 } else {
@@ -94,17 +94,17 @@ class Zend_Service_Amazon_Authentication_S3 extends Zend_Service_Amazon_Authenti
         }
 
         $sig_str .= '/'.parse_url($path, PHP_URL_PATH);
-        if (strpos($path, '?location') !== false) {
+        if (str_contains($path, '?location')) {
             $sig_str .= '?location';
         } else
-            if (strpos($path, '?acl') !== false) {
+            if (str_contains($path, '?acl')) {
                 $sig_str .= '?acl';
             } else
-                if (strpos($path, '?torrent') !== false) {
+                if (str_contains($path, '?torrent')) {
                     $sig_str .= '?torrent';
                 }
 
-        $signature = base64_encode(Zend_Crypt_Hmac::compute($this->_secretKey, 'sha1', utf8_encode($sig_str), Zend_Crypt_Hmac::BINARY));
+        $signature = base64_encode(Zend_Crypt_Hmac::compute($this->_secretKey, 'sha1', mb_convert_encoding($sig_str, 'UTF-8', 'ISO-8859-1'), Zend_Crypt_Hmac::BINARY));
         $headers['Authorization'] = 'AWS ' . $this->_accessKey . ':' . $signature;
 
         return $sig_str;

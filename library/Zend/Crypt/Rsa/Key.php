@@ -26,7 +26,7 @@
  * @copyright  Copyright (c) 2005-2015 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Crypt_Rsa_Key implements Countable
+class Zend_Crypt_Rsa_Key implements Countable, \Stringable
 {
     /**
      * @var string
@@ -38,7 +38,7 @@ class Zend_Crypt_Rsa_Key implements Countable
      *
      * @var array
      */
-    protected $_details = array();
+    protected $_details = [];
 
     /**
      * Key Resource
@@ -78,7 +78,7 @@ class Zend_Crypt_Rsa_Key implements Countable
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->toString();
     }

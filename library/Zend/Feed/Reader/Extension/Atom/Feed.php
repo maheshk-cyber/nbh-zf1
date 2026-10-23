@@ -58,11 +58,7 @@ class Zend_Feed_Reader_Extension_Atom_Feed
     {
         $authors = $this->getAuthors();
 
-        if (isset($authors[$index])) {
-            return $authors[$index];
-        }
-
-        return null;
+        return $authors[$index] ?? null;
     }
 
     /**
@@ -78,7 +74,7 @@ class Zend_Feed_Reader_Extension_Atom_Feed
 
         $list = $this->_xpath->query('//atom:author');
 
-        $authors = array();
+        $authors = [];
 
         if ($list->length) {
             foreach ($list as $author) {
@@ -308,7 +304,7 @@ class Zend_Feed_Reader_Extension_Atom_Feed
         if (!$imageUrl) {
             $image = null;
         } else {
-            $image = array('uri'=>$imageUrl);
+            $image = ['uri'=>$imageUrl];
         }
 
         $this->_data['image'] = $image;
@@ -332,7 +328,7 @@ class Zend_Feed_Reader_Extension_Atom_Feed
         if (!$imageUrl) {
             $image = null;
         } else {
-            $image = array('uri'=>$imageUrl);
+            $image = ['uri'=>$imageUrl];
         }
 
         $this->_data['icon'] = $image;
@@ -419,7 +415,7 @@ class Zend_Feed_Reader_Extension_Atom_Feed
         if (array_key_exists('hubs', $this->_data)) {
             return $this->_data['hubs'];
         }
-        $hubs = array();
+        $hubs = [];
 
         $list = $this->_xpath->query($this->getXpathPrefix()
             . '//atom:link[@rel="hub"]/@href');
@@ -485,11 +481,11 @@ class Zend_Feed_Reader_Extension_Atom_Feed
         if ($list->length) {
             $categoryCollection = new Zend_Feed_Reader_Collection_Category;
             foreach ($list as $category) {
-                $categoryCollection[] = array(
+                $categoryCollection[] = [
                     'term' => $category->getAttribute('term'),
                     'scheme' => $category->getAttribute('scheme'),
                     'label' => $category->getAttribute('label')
-                );
+                ];
             }
         } else {
             return new Zend_Feed_Reader_Collection_Category;
@@ -508,7 +504,7 @@ class Zend_Feed_Reader_Extension_Atom_Feed
      */
     protected function _getAuthor(DOMElement $element)
     {
-        $author = array();
+        $author = [];
 
         $emailNode = $element->getElementsByTagName('email');
         $nameNode  = $element->getElementsByTagName('name');
@@ -560,14 +556,10 @@ class Zend_Feed_Reader_Extension_Atom_Feed
             return; // pre-registered at Feed level
         }
         $atomDetected = $this->_getAtomType();
-        switch ($atomDetected) {
-            case Zend_Feed_Reader::TYPE_ATOM_03:
-                $this->_xpath->registerNamespace('atom', Zend_Feed_Reader::NAMESPACE_ATOM_03);
-                break;
-            default:
-                $this->_xpath->registerNamespace('atom', Zend_Feed_Reader::NAMESPACE_ATOM_10);
-                break;
-        }
+        match ($atomDetected) {
+            Zend_Feed_Reader::TYPE_ATOM_03 => $this->_xpath->registerNamespace('atom', Zend_Feed_Reader::NAMESPACE_ATOM_03),
+            default => $this->_xpath->registerNamespace('atom', Zend_Feed_Reader::NAMESPACE_ATOM_10),
+        };
     }
 
     /**

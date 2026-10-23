@@ -27,7 +27,7 @@
  * @copyright  Copyright (c) 2005-2015 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Service_WindowsAzure_Storage_TableEntityQuery
+class Zend_Service_WindowsAzure_Storage_TableEntityQuery implements \Stringable
 {
     /**
      * From
@@ -41,14 +41,14 @@ class Zend_Service_WindowsAzure_Storage_TableEntityQuery
 	 * 
 	 * @var array
 	 */
-	protected $_where = array();
+	protected $_where = [];
 	
 	/**
 	 * Order by
 	 * 
 	 * @var array
 	 */
-	protected $_orderBy = array();
+	protected $_orderBy = [];
 	
 	/**
 	 * Top
@@ -200,7 +200,7 @@ class Zend_Service_WindowsAzure_Storage_TableEntityQuery
      */
 	public function assembleQueryString($urlEncode = false)
 	{
-		$query = array();
+		$query = [];
 		if (count($this->_where) != 0) {
 		    $filter = implode('', $this->_where);
 			$query[] = '$filter=' . ($urlEncode ? self::encodeQuery($filter) : $filter);
@@ -281,7 +281,7 @@ class Zend_Service_WindowsAzure_Storage_TableEntityQuery
 	        $text = str_replace('?', '\'' . addslashes($value) . '\'', $text);
 	    } else {
 	        $i = 0;
-	        while(strpos($text, '?') !== false) {
+	        while(str_contains($text, '?')) {
 	            if (is_numeric($value[$i])) {
 	                $text = substr_replace($text, $value[$i++], strpos($text, '?'), 1);
 	            } else {
@@ -344,7 +344,7 @@ class Zend_Service_WindowsAzure_Storage_TableEntityQuery
 	 * 
 	 * @return string
 	 */
-	public function __toString()
+	public function __toString(): string
 	{
 		return $this->assembleQuery();
 	}

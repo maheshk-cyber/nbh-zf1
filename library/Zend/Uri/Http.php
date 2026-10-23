@@ -103,7 +103,7 @@ class Zend_Uri_Http extends Zend_Uri
      *
      * @var array
      */
-    protected $_regex = array();
+    protected $_regex = [];
 
     /**
      * Constructor accepts a string $scheme (e.g., http, https) and a scheme-specific part of the URI
@@ -178,7 +178,7 @@ class Zend_Uri_Http extends Zend_Uri
         $scheme         = strtolower($uri[0]);
         $schemeSpecific = isset($uri[1]) === true ? $uri[1] : '';
 
-        if (in_array($scheme, array('http', 'https')) === false) {
+        if (in_array($scheme, ['http', 'https']) === false) {
             require_once 'Zend/Uri/Exception.php';
             throw new Zend_Uri_Exception("Invalid scheme: '$scheme'");
         }
@@ -302,9 +302,7 @@ class Zend_Uri_Http extends Zend_Uri
      */
     public function validateUsername($username = null)
     {
-        if ($username === null) {
-            $username = $this->_username;
-        }
+        $username ??= $this->_username;
 
         // If the username is empty, then it is considered valid
         if (strlen($username) === 0) {
@@ -364,9 +362,7 @@ class Zend_Uri_Http extends Zend_Uri
      */
     public function validatePassword($password = null)
     {
-        if ($password === null) {
-            $password = $this->_password;
-        }
+        $password ??= $this->_password;
 
         // If the password is empty, then it is considered valid
         if (strlen($password) === 0) {
@@ -430,9 +426,7 @@ class Zend_Uri_Http extends Zend_Uri
      */
     public function validateHost($host = null)
     {
-        if ($host === null) {
-            $host = $this->_host;
-        }
+        $host ??= $this->_host;
 
         // If the host is empty, then it is considered invalid
         if (strlen($host) === 0) {
@@ -484,9 +478,7 @@ class Zend_Uri_Http extends Zend_Uri
      */
     public function validatePort($port = null)
     {
-        if ($port === null) {
-            $port = $this->_port;
-        }
+        $port ??= $this->_port;
 
         // If the port is empty, then it is considered valid
         if (strlen($port) === 0) {
@@ -537,9 +529,7 @@ class Zend_Uri_Http extends Zend_Uri
      */
     public function validatePath($path = null)
     {
-        if ($path === null) {
-            $path = $this->_path;
-        }
+        $path ??= $this->_path;
 
         // If the path is empty, then it is considered valid
         if (strlen($path) === 0) {
@@ -597,7 +587,7 @@ class Zend_Uri_Http extends Zend_Uri
     public function getQueryAsArray()
     {
         $query = $this->getQuery();
-        $querryArray = array();
+        $querryArray = [];
         if ($query !== false) {
             parse_str($query, $querryArray);
         }
@@ -615,9 +605,7 @@ class Zend_Uri_Http extends Zend_Uri
      */
     public function validateQuery($query = null)
     {
-        if ($query === null) {
-            $query = $this->_query;
-        }
+        $query ??= $this->_query;
 
         // If query is empty, it is considered to be valid
         if (strlen($query) === 0) {
@@ -723,9 +711,7 @@ class Zend_Uri_Http extends Zend_Uri
      */
     public function validateFragment($fragment = null)
     {
-        if ($fragment === null) {
-            $fragment = $this->_fragment;
-        }
+        $fragment ??= $this->_fragment;
 
         // If fragment is empty, it is considered to be valid
         if (strlen($fragment) === 0) {

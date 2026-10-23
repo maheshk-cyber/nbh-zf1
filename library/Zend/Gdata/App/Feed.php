@@ -56,7 +56,7 @@ class Zend_Gdata_App_Feed extends Zend_Gdata_App_FeedSourceParent
      *
      * @var array
      */
-    protected $_entry = array();
+    protected $_entry = [];
 
     /**
      * Current location in $_entry array
@@ -78,12 +78,10 @@ class Zend_Gdata_App_Feed extends Zend_Gdata_App_FeedSourceParent
      */
     public function __get($var)
     {
-        switch ($var) {
-            case 'entries':
-                return $this;
-            default:
-                return parent::__get($var);
-        }
+        return match ($var) {
+            'entries' => $this,
+            default => parent::__get($var),
+        };
     }
 
     /**
@@ -288,7 +286,7 @@ class Zend_Gdata_App_Feed extends Zend_Gdata_App_FeedSourceParent
         $nextLinkHref = $nextLink->getHref();
         $service = new Zend_Gdata_App($this->getHttpClient());
 
-        return $service->getFeed($nextLinkHref, get_class($this));
+        return $service->getFeed($nextLinkHref, static::class);
     }
 
    /**
@@ -309,7 +307,7 @@ class Zend_Gdata_App_Feed extends Zend_Gdata_App_FeedSourceParent
         $previousLinkHref = $previousLink->getHref();
         $service = new Zend_Gdata_App($this->getHttpClient());
 
-        return $service->getFeed($previousLinkHref, get_class($this));
+        return $service->getFeed($previousLinkHref, static::class);
     }
 
     /**

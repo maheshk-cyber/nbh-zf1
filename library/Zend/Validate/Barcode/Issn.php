@@ -36,7 +36,7 @@ class Zend_Validate_Barcode_Issn extends Zend_Validate_Barcode_AdapterAbstract
      * Allowed barcode lengths
      * @var integer
      */
-    protected $_length = array(8, 13);
+    protected $_length = [8, 13];
 
     /**
      * Allowed barcode characters
@@ -59,7 +59,7 @@ class Zend_Validate_Barcode_Issn extends Zend_Validate_Barcode_AdapterAbstract
     public function checkChars($value)
     {
         if (strlen($value) != 8) {
-            if (strpos($value, 'X') !== false) {
+            if (str_contains($value, 'X')) {
                 return false;
             }
         }

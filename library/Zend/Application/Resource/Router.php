@@ -67,9 +67,7 @@ class Zend_Application_Resource_Router
             $this->_router = $bootstrap->getContainer()->frontcontroller->getRouter();
 
             $options = $this->getOptions();
-            if (!isset($options['routes'])) {
-                $options['routes'] = array();
-            }
+            $options['routes'] ??= [];
 
             if (isset($options['chainNameSeparator'])) {
                 $this->_router->setChainNameSeparator($options['chainNameSeparator']);

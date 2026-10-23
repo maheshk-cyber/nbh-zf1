@@ -86,7 +86,7 @@ class Zend_Controller_Action_Helper_ActionStack extends Zend_Controller_Action_H
      * @throws Zend_Controller_Action_Exception
      * @return Zend_Controller_Action_Helper_ActionStack
      */
-    public function actionToStack($action, $controller = null, $module = null, array $params = array())
+    public function actionToStack($action, $controller = null, $module = null, array $params = [])
     {
         if ($action instanceof Zend_Controller_Request_Abstract) {
             return $this->pushStack($action);
@@ -108,8 +108,8 @@ class Zend_Controller_Action_Helper_ActionStack extends Zend_Controller_Action_H
             throw new Zend_Controller_Action_Exception('Request object not set yet');
         }
 
-        $controller = (null === $controller) ? $request->getControllerName() : $controller;
-        $module = (null === $module) ? $request->getModuleName() : $module;
+        $controller ??= $request->getControllerName();
+        $module ??= $request->getModuleName();
 
         /**
          * @see Zend_Controller_Request_Simple
@@ -131,7 +131,7 @@ class Zend_Controller_Action_Helper_ActionStack extends Zend_Controller_Action_H
      * @param  array $params
      * @return boolean
      */
-    public function direct($action, $controller = null, $module = null, array $params = array())
+    public function direct($action, $controller = null, $module = null, array $params = [])
     {
         return $this->actionToStack($action, $controller, $module, $params);
     }

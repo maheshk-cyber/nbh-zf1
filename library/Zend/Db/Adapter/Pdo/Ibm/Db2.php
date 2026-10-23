@@ -38,21 +38,15 @@ require_once 'Zend/Db/Statement/Pdo/Ibm.php';
 class Zend_Db_Adapter_Pdo_Ibm_Db2
 {
     /**
-     * @var Zend_Db_Adapter_Abstract
-     */
-    protected $_adapter = null;
-
-    /**
      * Construct the data server class.
      *
      * It will be used to generate non-generic SQL
      * for a particular data server
      *
-     * @param Zend_Db_Adapter_Abstract $adapter
+     * @param Zend_Db_Adapter_Abstract $_adapter
      */
-    public function __construct($adapter)
+    public function __construct(protected $_adapter)
     {
-        $this->_adapter = $adapter;
     }
 
     /**
@@ -94,7 +88,7 @@ class Zend_Db_Adapter_Pdo_Ibm_Db2
         }
         $sql .= " ORDER BY c.colno";
 
-        $desc = array();
+        $desc = [];
         $stmt = $this->_adapter->query($sql);
 
         /**
@@ -119,8 +113,8 @@ class Zend_Db_Adapter_Pdo_Ibm_Db2
         $tabconstype    = 10;
         $colseq         = 11;
 
-        foreach ($result as $key => $row) {
-            list ($primary, $primaryPosition, $identity) = array(false, null, false);
+        foreach ($result as $row) {
+            [$primary, $primaryPosition, $identity] = [false, null, false];
             if ($row[$tabconstype] == 'P') {
                 $primary = true;
                 $primaryPosition = $row[$colseq];
@@ -133,7 +127,7 @@ class Zend_Db_Adapter_Pdo_Ibm_Db2
                 $identity = true;
             }
 
-            $desc[$this->_adapter->foldCase($row[$colname])] = array(
+            $desc[$this->_adapter->foldCase($row[$colname])] = [
             'SCHEMA_NAME'      => $this->_adapter->foldCase($row[$tabschema]),
             'TABLE_NAME'       => $this->_adapter->foldCase($row[$tabname]),
             'COLUMN_NAME'      => $this->_adapter->foldCase($row[$colname]),
@@ -148,7 +142,7 @@ class Zend_Db_Adapter_Pdo_Ibm_Db2
             'PRIMARY'          => $primary,
             'PRIMARY_POSITION' => $primaryPosition,
             'IDENTITY'         => $identity
-            );
+            ];
         }
 
         return $desc;

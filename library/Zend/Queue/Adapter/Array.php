@@ -39,7 +39,7 @@ class Zend_Queue_Adapter_Array extends Zend_Queue_Adapter_AdapterAbstract
     /**
      * @var array
      */
-    protected $_data = array();
+    protected $_data = [];
 
     /**
      * Constructor
@@ -89,10 +89,8 @@ class Zend_Queue_Adapter_Array extends Zend_Queue_Adapter_AdapterAbstract
         if ($this->isExists($name)) {
             return false;
         }
-        if ($timeout === null) {
-            $timeout = self::CREATE_TIMEOUT_DEFAULT;
-        }
-        $this->_data[$name] = array();
+        $timeout ??= self::CREATE_TIMEOUT_DEFAULT;
+        $this->_data[$name] = [];
 
         return true;
     }
@@ -138,9 +136,7 @@ class Zend_Queue_Adapter_Array extends Zend_Queue_Adapter_AdapterAbstract
      */
     public function count(Zend_Queue $queue=null)
     {
-        if ($queue === null) {
-            $queue = $this->_queue;
-        }
+        $queue ??= $this->_queue;
 
         if (!isset($this->_data[$queue->getName()])) {
             /**
@@ -167,9 +163,7 @@ class Zend_Queue_Adapter_Array extends Zend_Queue_Adapter_AdapterAbstract
      */
     public function send($message, Zend_Queue $queue=null)
     {
-        if ($queue === null) {
-            $queue = $this->_queue;
-        }
+        $queue ??= $this->_queue;
 
         if (!$this->isExists($queue->getName())) {
             require_once 'Zend/Queue/Exception.php';
@@ -177,22 +171,22 @@ class Zend_Queue_Adapter_Array extends Zend_Queue_Adapter_AdapterAbstract
         }
 
         // create the message
-        $data = array(
-            'message_id' => md5(uniqid(rand(), true)),
+        $data = [
+            'message_id' => md5(uniqid(random_int(0, mt_getrandmax()), true)),
             'body'       => $message,
             'md5'        => md5($message),
             'handle'     => null,
             'created'    => time(),
             'queue_name' => $queue->getName(),
-        );
+        ];
 
         // add $data to the "queue"
         $this->_data[$queue->getName()][] = $data;
 
-        $options = array(
+        $options = [
             'queue' => $queue,
             'data'  => $data,
-        );
+        ];
 
         $classname = $queue->getMessageClass();
         if (!class_exists($classname)) {
@@ -212,23 +206,17 @@ class Zend_Queue_Adapter_Array extends Zend_Queue_Adapter_AdapterAbstract
      */
     public function receive($maxMessages = null, $timeout = null, Zend_Queue $queue = null)
     {
-        if ($maxMessages === null) {
-            $maxMessages = 1;
-        }
-        if ($timeout === null) {
-            $timeout = self::RECEIVE_TIMEOUT_DEFAULT;
-        }
-        if ($queue === null) {
-            $queue = $this->_queue;
-        }
+        $maxMessages ??= 1;
+        $timeout ??= self::RECEIVE_TIMEOUT_DEFAULT;
+        $queue ??= $this->_queue;
 
-        $data       = array();
+        $data       = [];
         if ($maxMessages > 0) {
             $start_time = microtime(true);
 
             $count = 0;
             $temp = &$this->_data[$queue->getName()];
-            foreach ($temp as $key=>&$msg) {
+            foreach ($temp as &$msg) {
                 // count check has to be first, as someone can ask for 0 messages
                 // ZF-7650
                 if ($count >= $maxMessages) {
@@ -238,7 +226,7 @@ class Zend_Queue_Adapter_Array extends Zend_Queue_Adapter_AdapterAbstract
                 if (($msg['handle'] === null)
                     || ($msg['timeout'] + $timeout < $start_time)
                 ) {
-                    $msg['handle']  = md5(uniqid(rand(), true));
+                    $msg['handle']  = md5(uniqid(random_int(0, mt_getrandmax()), true));
                     $msg['timeout'] = microtime(true);
                     $data[] = $msg;
                     $count++;
@@ -247,11 +235,11 @@ class Zend_Queue_Adapter_Array extends Zend_Queue_Adapter_AdapterAbstract
             }
         }
 
-        $options = array(
+        $options = [
             'queue'        => $queue,
             'data'         => $data,
             'messageClass' => $queue->getMessageClass(),
-        );
+        ];
 
         $classname = $queue->getMessageSetClass();
         if (!class_exists($classname)) {
@@ -301,7 +289,7 @@ class Zend_Queue_Adapter_Array extends Zend_Queue_Adapter_AdapterAbstract
      */
     public function getCapabilities()
     {
-        return array(
+        return [
             'create'        => true,
             'delete'        => true,
             'send'          => true,
@@ -310,7 +298,7 @@ class Zend_Queue_Adapter_Array extends Zend_Queue_Adapter_AdapterAbstract
             'getQueues'     => true,
             'count'         => true,
             'isExists'      => true,
-        );
+        ];
     }
 
     /********************************************************************
@@ -322,7 +310,7 @@ class Zend_Queue_Adapter_Array extends Zend_Queue_Adapter_AdapterAbstract
      */
     public function __sleep()
     {
-        return array('_data');
+        return ['_data'];
     }
 
     /*

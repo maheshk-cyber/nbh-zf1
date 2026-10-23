@@ -67,7 +67,6 @@ class Zend_Tool_Project_Context_Zf_ApplicationConfigFile extends Zend_Tool_Proje
     public function init()
     {
         $this->_type = $this->_resource->getAttribute('type');
-        parent::init();
         return $this;
     }
 
@@ -78,7 +77,7 @@ class Zend_Tool_Project_Context_Zf_ApplicationConfigFile extends Zend_Tool_Proje
      */
     public function getPersistentAttributes()
     {
-        return array('type' => $this->_type);
+        return ['type' => $this->_type];
     }
 
     /**
@@ -117,9 +116,7 @@ class Zend_Tool_Project_Context_Zf_ApplicationConfigFile extends Zend_Tool_Proje
     public function addStringItem($key, $value, $section = 'production', $quoteValue = true)
     {
         // null quote value means to auto-detect
-        if ($quoteValue === null) {
-            $quoteValue = preg_match('#[\"\']#', $value) ? false : true;
-        }
+        $quoteValue ??= preg_match('#[\"\']#', $value) ? false : true;
 
         if ($quoteValue == true) {
             $value = '"' . $value . '"';
@@ -127,7 +124,7 @@ class Zend_Tool_Project_Context_Zf_ApplicationConfigFile extends Zend_Tool_Proje
 
         $contentLines = preg_split('#[\n\r]#', $this->getContents());
 
-        $newLines = array();
+        $newLines = [];
         $insideSection = false;
 
         foreach ($contentLines as $contentLineIndex => $contentLine) {
@@ -139,7 +136,7 @@ class Zend_Tool_Project_Context_Zf_ApplicationConfigFile extends Zend_Tool_Proje
             $newLines[] = $contentLine;
             if ($insideSection) {
                 // if its blank, or a section heading
-                if (isset($contentLines[$contentLineIndex + 1]{0}) && $contentLines[$contentLineIndex + 1]{0} == '[') {
+                if (isset($contentLines[$contentLineIndex + 1][0]) && $contentLines[$contentLineIndex + 1][0] == '[') {
                     $newLines[] = $key . ' = ' . $value;
                     $insideSection = null;
                 } else if (!isset($contentLines[$contentLineIndex + 1])){
@@ -162,9 +159,9 @@ class Zend_Tool_Project_Context_Zf_ApplicationConfigFile extends Zend_Tool_Proje
      */
     public function addItem($item, $section = 'production', $quoteValue = true)
     {
-        $stringItems = array();
-        $stringValues = array();
-        $configKeyNames = array();
+        $stringItems = [];
+        $stringValues = [];
+        $configKeyNames = [];
 
         $rii = new RecursiveIteratorIterator(
             new RecursiveArrayIterator($item),
@@ -196,7 +193,7 @@ class Zend_Tool_Project_Context_Zf_ApplicationConfigFile extends Zend_Tool_Proje
     {
         $contentLines = file($this->getPath());
 
-        $newLines = array();
+        $newLines = [];
         $insideSection = false;
 
         foreach ($contentLines as $contentLineIndex => $contentLine) {
@@ -222,9 +219,9 @@ class Zend_Tool_Project_Context_Zf_ApplicationConfigFile extends Zend_Tool_Proje
 
     public function removeItem($item, $section = 'production')
     {
-        $stringItems = array();
-        $stringValues = array();
-        $configKeyNames = array();
+        $stringItems = [];
+        $stringValues = [];
+        $configKeyNames = [];
 
         $rii = new RecursiveIteratorIterator(
             new RecursiveArrayIterator($item),
@@ -245,7 +242,7 @@ class Zend_Tool_Project_Context_Zf_ApplicationConfigFile extends Zend_Tool_Proje
             }
         }
 
-        foreach ($stringItems as $stringItemIndex => $stringItem) {
+        foreach ($stringItems as $stringItem) {
             $this->removeStringItem($stringItem, $section);
         }
 

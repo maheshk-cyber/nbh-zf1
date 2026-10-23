@@ -59,7 +59,7 @@ class Zend_XmlRpc_Client_ServerIntrospection
         require_once 'Zend/XmlRpc/Client/FaultException.php';
         try {
             $signatures = $this->getSignatureForEachMethodByMulticall($methods);
-        } catch (Zend_XmlRpc_Client_FaultException $e) {
+        } catch (Zend_XmlRpc_Client_FaultException) {
             // degrade to looping
         }
 
@@ -80,14 +80,12 @@ class Zend_XmlRpc_Client_ServerIntrospection
      */
     public function getSignatureForEachMethodByMulticall($methods = null)
     {
-        if ($methods === null) {
-            $methods = $this->listMethods();
-        }
+        $methods ??= $this->listMethods();
 
-        $multicallParams = array();
+        $multicallParams = [];
         foreach ($methods as $method) {
-            $multicallParams[] = array('methodName' => 'system.methodSignature',
-                                       'params'     => array($method));
+            $multicallParams[] = ['methodName' => 'system.methodSignature',
+                                       'params'     => [$method]];
         }
 
         $serverSignatures = $this->_system->multicall($multicallParams);
@@ -106,7 +104,7 @@ class Zend_XmlRpc_Client_ServerIntrospection
         }
 
         // Create a new signatures array with the methods name as keys and the signature as value
-        $signatures = array();
+        $signatures = [];
         foreach ($serverSignatures as $i => $signature) {
             $signatures[$methods[$i]] = $signature;
         }
@@ -123,11 +121,9 @@ class Zend_XmlRpc_Client_ServerIntrospection
      */
     public function getSignatureForEachMethodByLooping($methods = null)
     {
-        if ($methods === null) {
-            $methods = $this->listMethods();
-        }
+        $methods ??= $this->listMethods();
 
-        $signatures = array();
+        $signatures = [];
         foreach ($methods as $method) {
             $signatures[$method] = $this->getMethodSignature($method);
         }

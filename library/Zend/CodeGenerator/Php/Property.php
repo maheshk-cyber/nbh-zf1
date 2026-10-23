@@ -124,7 +124,7 @@ class Zend_CodeGenerator_Php_Property extends Zend_CodeGenerator_Php_Member_Abst
         }
 
         if (!($defaultValue instanceof Zend_CodeGenerator_Php_Property_DefaultValue)) {
-            $defaultValue = new Zend_CodeGenerator_Php_Property_DefaultValue(array('value' => $defaultValue));
+            $defaultValue = new Zend_CodeGenerator_Php_Property_DefaultValue(['value' => $defaultValue]);
         }
 
         $this->_defaultValue = $defaultValue;
@@ -165,13 +165,13 @@ class Zend_CodeGenerator_Php_Property extends Zend_CodeGenerator_Php_Member_Abst
                     . 'constant but does not have a valid constant value.');
             }
             $output .= $this->_indentation . 'const ' . $name . ' = '
-                . (($defaultValue !== null) ? $defaultValue->generate() : 'null;');
+                . ($defaultValue?->generate() ?? 'null;');
         } else {
             $output .= $this->_indentation
                 . $this->getVisibility()
                 . (($this->isStatic()) ? ' static' : '')
                 . ' $' . $name . ' = '
-                . (($defaultValue !== null) ? $defaultValue->generate() : 'null;');
+                . ($defaultValue?->generate() ?? 'null;');
         }
         return $output;
     }
