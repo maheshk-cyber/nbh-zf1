@@ -197,7 +197,47 @@ class Zend_Stdlib_PriorityQueue implements Countable, IteratorAggregate, Seriali
      */
     public function unserialize($data)
     {
-        foreach (unserialize($data) as $item) {
+        $this->_restoreItems(unserialize($data));
+    }
+
+    /**
+     * Serialized state, in the modern engine form.
+     *
+     * `Serializable` is deprecated as of PHP 8.1; the engine stops warning
+     * about it once __serialize() exists alongside it. The legacy pair stays
+     * because the interface is published API and is what reads payloads
+     * written before this change.
+     *
+     * @return array
+     */
+    public function __serialize(): array
+    {
+        return $this->items;
+    }
+
+    /**
+     * Restore from the engine form produced by __serialize().
+     *
+     * @param  array $data
+     * @return void
+     */
+    public function __unserialize(array $data): void
+    {
+        $this->_restoreItems($data);
+    }
+
+    /**
+     * Rebuild the queue from a decoded item list.
+     *
+     * Shared by unserialize() (legacy payloads) and __unserialize() (engine
+     * payloads) so the two forms cannot drift apart.
+     *
+     * @param  array $items
+     * @return void
+     */
+    protected function _restoreItems($items)
+    {
+        foreach ($items as $item) {
             $this->insert($item['data'], $item['priority']);
         }
     }

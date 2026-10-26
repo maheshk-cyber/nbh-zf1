@@ -12,7 +12,6 @@ This file records *what changed and why*; that file records *where we are*.
 ---
 
 ## [Unreleased]
-
 Baseline: Zend Framework 1.12.20 (upstream EOL), retargeted at PHP 8.1+ and
 verified syntax-clean through PHP 8.5.
 
@@ -114,6 +113,29 @@ verified syntax-clean through PHP 8.5.
 
 ### Fixed — deprecations reported on every class load
 
+- The four static accessors on `Zend_Search_Lucene_MultiSearcher`
+  (`set`/`getDefaultSearchField()`, `set`/`getResultSetLimit()`) read
+  `$this->_indices` from a `static` method. PHP 8 makes that a fatal
+  ("Using `$this` when not in object context"); PHP 5/7 only noticed it and
+  evaluated it to null, so `getDefaultSearchField()` and `getResultSetLimit()`
+  always threw "Indices list is empty" and the two setters silently wrote to
+  nothing. The methods must stay static — `Zend_Search_Lucene_Interface`
+  declares them that way, and PHP refuses to widen a static method to an
+  instance method — so the index list is now mirrored into a static property
+  when `__construct()`/`addIndex()` receives it. **This is a deliberate
+  behaviour change:** those four methods went from always-broken to working.
+- Five classes implementing `Serializable` (deprecated 8.1) now also implement
+  `__serialize()` and `__unserialize()`: `Zend_Http_UserAgent`,
+  `Zend_Http_UserAgent_AbstractDevice`, `Zend_Stdlib_PriorityQueue`,
+  `Zend_Stdlib_SplPriorityQueue` and `Zend_Paginator_SerializableLimitIterator`.
+  The interface and the legacy `serialize()`/`unserialize()` pair are kept —
+  dropping the interface would turn "this object no longer serializes" into a
+  *successful* empty `O:` payload, and it is published API. Once the magic
+  methods exist the engine stops emitting the deprecation and stops routing new
+  payloads through `unserialize()`, which is the security-relevant half. Both
+  files that had duplicate literal logic (spec array, drain loop, item restore)
+  now share one private helper between the two forms so they cannot drift;
+  payloads written by the previous release still unserialize correctly.
 - 138 `case`/`default` statements across 38 files were terminated with a
   semicolon instead of a colon, deprecated in PHP 8.5. Fixed with
   `tools/fix_case_semicolons.py`, which only rewrites a label whose semicolon

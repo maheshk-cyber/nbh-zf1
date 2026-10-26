@@ -191,8 +191,61 @@ class Zend_Http_UserAgent implements Serializable
      */
     public function unserialize($serialized)
     {
-        $spec = unserialize($serialized);
+        $this->_restoreFromSpec(unserialize($serialized));
+    }
 
+    /**
+     * Serialized representation of the object, in the modern engine form.
+     *
+     * The `Serializable` interface this class implements is deprecated as of
+     * PHP 8.1, and the engine only stops warning about it when __serialize()
+     * is also present. The legacy serialize()/unserialize() pair is kept
+     * because the interface is part of the published API and because it is
+     * what reads payloads written before this change; the engine ignores it
+     * for new payloads once __serialize() exists.
+     *
+     * Serializing the raw spec array rather than the string serialize()
+     * returns is the whole point: the engine marshals the array itself, so a
+     * session written by this build does not need unserialize() to reconstruct
+     * it and never runs the blocklisted-unserialize path.
+     *
+     * @return array
+     */
+    public function __serialize(): array
+    {
+        $device = $this->getDevice();
+        return array(
+            'browser_type' => $this->_browserType,
+            'config'       => $this->_config,
+            'device_class' => get_class($device),
+            'device'       => $device->serialize(),
+            'user_agent'   => $this->getServerValue('http_user_agent'),
+            'http_accept'  => $this->getServerValue('http_accept'),
+        );
+    }
+
+    /**
+     * Restore from the engine form produced by __serialize().
+     *
+     * @param  array $spec
+     * @return void
+     */
+    public function __unserialize(array $spec): void
+    {
+        $this->_restoreFromSpec($spec);
+    }
+
+    /**
+     * Apply a decoded specification to this instance.
+     *
+     * Shared by unserialize() (legacy payloads) and __unserialize() (engine
+     * payloads) so the two forms cannot drift apart.
+     *
+     * @param  array $spec
+     * @return void
+     */
+    protected function _restoreFromSpec(array $spec)
+    {
         $this->setOptions($spec);
 
         // Determine device class and ensure the class is loaded

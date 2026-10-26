@@ -468,20 +468,7 @@ class Zend_Stdlib_SplPriorityQueue extends SplPriorityQueue implements Serializa
      */
     public function serialize()
     {
-        $data = array();
-        $this->setExtractFlags(self::EXTR_BOTH);
-        while ($this->valid()) {
-            $data[] = $this->current();
-            $this->next();
-        }
-        $this->setExtractFlags(self::EXTR_DATA);
-
-        // Iterating through a priority queue removes items
-        foreach ($data as $item) {
-            $this->insert($item['data'], $item['priority']);
-        }
-
-        return serialize($data);
+        return serialize($this->_drainForSerialization());
     }
 
     /**
@@ -492,7 +479,76 @@ class Zend_Stdlib_SplPriorityQueue extends SplPriorityQueue implements Serializa
      */
     public function unserialize($data)
     {
-        foreach (unserialize($data) as $item) {
+        $this->_restoreItems(unserialize($data));
+    }
+
+    /**
+     * Serialized state, in the modern engine form.
+     *
+     * `Serializable` is deprecated as of PHP 8.1; the engine stops warning
+     * about it once __serialize() exists alongside it. The legacy pair stays
+     * because the interface is published API and is what reads payloads
+     * written before this change.
+     *
+     * Draining the queue to collect its contents is destructive, so both
+     * paths go through _drainForSerialization(), which reinserts everything
+     * it removed.
+     *
+     * @return array
+     */
+    public function __serialize(): array
+    {
+        return $this->_drainForSerialization();
+    }
+
+    /**
+     * Restore from the engine form produced by __serialize().
+     *
+     * @param  array $data
+     * @return void
+     */
+    public function __unserialize(array $data): void
+    {
+        $this->_restoreItems($data);
+    }
+
+    /**
+     * Collect every item, leaving the queue as it was found.
+     *
+     * Iterating a priority queue extracts its items, so they are reinserted
+     * before returning.
+     *
+     * @return array
+     */
+    protected function _drainForSerialization()
+    {
+        $data = array();
+        $this->setExtractFlags(self::EXTR_BOTH);
+        while ($this->valid()) {
+            $data[] = $this->current();
+            $this->next();
+        }
+        $this->setExtractFlags(self::EXTR_DATA);
+
+        foreach ($data as $item) {
+            $this->insert($item['data'], $item['priority']);
+        }
+
+        return $data;
+    }
+
+    /**
+     * Rebuild the queue from a decoded item list.
+     *
+     * Shared by unserialize() (legacy payloads) and __unserialize() (engine
+     * payloads) so the two forms cannot drift apart.
+     *
+     * @param  array $items
+     * @return void
+     */
+    protected function _restoreItems($items)
+    {
+        foreach ($items as $item) {
             $this->insert($item['data'], $item['priority']);
         }
     }
