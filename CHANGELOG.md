@@ -113,6 +113,29 @@ verified syntax-clean through PHP 8.5.
 
 ### Changed — components documented as unavailable
 
+- `Zend_Test_PHPUnit_*` (26 classes) target PHPUnit 3.x, whose class names do
+  not exist in the PHPUnit 10 this package ships. They are recorded as
+  documented-unavailable rather than ported: PHPUnit 4 removed `evaluate()`,
+  the `setNegate()` convention and `PHPUnit_Framework_ComparisonFailure`, so a
+  port is a rewrite of all eleven versioned constraint classes plus
+  `Exception.php`, not a shim. Two classes of genuine PHP 8 bug inside them
+  *were* fixed, since they bite on PHPUnit 3 too:
+  - Seven constraint classes read their extra assertion arguments out of
+    `func_get_args()`. Since PHP 7 that function reports the *current* value of
+    each parameter rather than the value as passed, so a two-argument call
+    yields a four-element array with nulls in the tail — and `$argv[2]`, which
+    every one of these switches relied on, silently picked up null instead of
+    the caller's argument. They now take `$variable` and `$extra` as named
+    parameters, which is what the caller always meant and does not depend on
+    argument-inspection semantics at all. The `$argc` guards become
+    `null === $variable` / `null === $extra`.
+  - Six `fail($other, $description, Foo $cannot_be_used = NULL)` signatures are
+    explicitly nullable for PHP 8.4.
+
+  The guard behaviour was verified directly: a three-argument
+  `ASSERT_HEADER_CONTAINS` call still raises its "both a header name and
+  content to match are required" exception, and the single-argument assertion
+  types are unaffected.
 - The three mcrypt-dependent components now fail with an explicit exception
   instead of an undefined-function or undefined-constant fatal. mcrypt was
   removed from PHP in 7.2 and porting to openssl would change ciphertext, so
