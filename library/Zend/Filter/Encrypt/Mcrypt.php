@@ -30,6 +30,12 @@ require_once 'Zend/Crypt/Math.php';
 /**
  * Encryption adapter for mcrypt
  *
+ * @deprecated The mcrypt extension was removed from PHP in 7.2, so this adapter
+ *             cannot work on any supported PHP. It is kept in the tree because
+ *             it is published API, and it fails with an explicit
+ *             Zend_Filter_Exception rather than an undefined-function fatal.
+ *             Use Zend_Filter_Encrypt_Openssl instead.
+ *
  * @category   Zend
  * @package    Zend_Filter
  * @copyright  Copyright (c) 2005-2015 Zend Technologies USA Inc. (http://www.zend.com)
@@ -37,6 +43,15 @@ require_once 'Zend/Crypt/Math.php';
  */
 class Zend_Filter_Encrypt_Mcrypt implements Zend_Filter_Encrypt_Interface
 {
+    /**
+     * Raised whenever this adapter is instantiated without the mcrypt
+     * extension. Mcrypt left PHP in 7.2, so on every supported version this is
+     * the only outcome — the alternative is an undefined-function fatal buried
+     * deep in the first encrypt() call, which tells the caller nothing.
+     */
+    const MCRYPT_MISSING_MESSAGE = 'The mcrypt extension is required by Zend_Filter_Encrypt_Mcrypt but is not loaded. '
+        . 'It was removed from PHP in 7.2 and is not coming back; use Zend_Filter_Encrypt_Openssl instead.';
+
     /**
      * Definitions for encryption
      * array(
@@ -75,7 +90,7 @@ class Zend_Filter_Encrypt_Mcrypt implements Zend_Filter_Encrypt_Interface
     {
         if (!extension_loaded('mcrypt')) {
             require_once 'Zend/Filter/Exception.php';
-            throw new Zend_Filter_Exception('This filter needs the mcrypt extension');
+            throw new Zend_Filter_Exception(self::MCRYPT_MISSING_MESSAGE);
         }
 
         if ($options instanceof Zend_Config) {
@@ -113,6 +128,11 @@ class Zend_Filter_Encrypt_Mcrypt implements Zend_Filter_Encrypt_Interface
      */
     public function setEncryption($options)
     {
+        if (!extension_loaded('mcrypt')) {
+            require_once 'Zend/Filter/Exception.php';
+            throw new Zend_Filter_Exception(self::MCRYPT_MISSING_MESSAGE);
+        }
+
         if (is_string($options)) {
             $options = array('key' => $options);
         }

@@ -111,6 +111,25 @@ verified syntax-clean through PHP 8.5.
   rendered end to end afterwards to confirm the reflection model still builds
   and orders all thirteen parameters correctly.
 
+### Changed — components documented as unavailable
+
+- The three mcrypt-dependent components now fail with an explicit exception
+  instead of an undefined-function or undefined-constant fatal. mcrypt was
+  removed from PHP in 7.2 and porting to openssl would change ciphertext, so
+  the documented-unavailable stance is kept:
+  - `Zend_Crypt_Math::randBytes()`'s `mcrypt_create_iv()` fallback was
+    unreachable — it sat behind `function_exists('random_bytes')`, which every
+    PHP 7+ build satisfies — and is deleted rather than ported.
+  - `Zend_Service_ReCaptcha_MailHide`'s `ENCRYPTION_MODE` and
+    `ENCRYPTION_CIPHER` constants were `MCRYPT_MODE_CBC` /
+    `MCRYPT_RIJNDAEL_128`. Reading either on a build without mcrypt throws
+    `Undefined constant`, so the class could not even be instantiated to reach
+    its own `_requireMcrypt()` guard. They are now the literals `'cbc'` and
+    `'rijndael-128'` — the values mcrypt used — so the guard is what fires.
+  - `Zend_Filter_Encrypt_Mcrypt::setEncryption()` is public and had no extension
+    check of its own; it now raises the same message as the constructor, naming
+    `Zend_Filter_Encrypt_Openssl` as the alternative.
+
 ### Fixed — deprecations reported on every class load
 
 - The four static accessors on `Zend_Search_Lucene_MultiSearcher`

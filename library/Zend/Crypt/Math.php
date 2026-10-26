@@ -80,12 +80,9 @@ class Zend_Crypt_Math extends Zend_Crypt_Math_BigInteger
         if (function_exists('random_bytes')) { // available in PHP 7
             return random_bytes($length);
         }
-        if (function_exists('mcrypt_create_iv')) {
-            $bytes = mcrypt_create_iv($length, MCRYPT_DEV_URANDOM);
-            if ($bytes !== false && strlen($bytes) === $length) {
-                return $bytes;
-            }
-        }
+        // The mcrypt_create_iv() fallback that used to sit here was unreachable:
+        // it lived behind the random_bytes() branch, which PHP 7+ always takes,
+        // and mcrypt itself left PHP in 7.2. Removed rather than ported.
         if (file_exists('/dev/urandom') && is_readable('/dev/urandom')) {
             $frandom = fopen('/dev/urandom', 'r');
             if ($frandom !== false) {
