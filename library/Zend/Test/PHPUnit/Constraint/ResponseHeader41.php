@@ -138,17 +138,15 @@ class Zend_Test_PHPUnit_Constraint_ResponseHeader41 extends PHPUnit_Framework_Co
 
         $this->_assertType = $assertType;
 
-        // The extra assertion arguments used to be read out of func_get_args().
-        // Since PHP 7 that function reports the *current* value of each
-        // parameter, not the value as passed, so a two-argument call now
-        // yields a four-element array with nulls in the tail and the old
-        // $argv[2] lookups silently picked up null. They are named parameters
-        // now, which is the same thing the caller always meant and does not
-        // depend on argument-inspection semantics at all.
+        // The extra assertion arguments are named parameters now instead of
+        // $argv[2]/$argv[3]. The guard stays an arity check rather than a
+        // null check because an explicitly-passed null is still an argument:
+        // func_num_args() counts only arguments actually supplied and is
+        // unaffected by the PHP 7 change to argument inspection.
 
         switch ($assertType) {
             case self::ASSERT_RESPONSE_CODE:
-                if (null === $variable) {
+                if (3 > func_num_args()) {
                     require_once 'Zend/Test/PHPUnit/Constraint/Exception.php';
                     throw new Zend_Test_PHPUnit_Constraint_Exception('No response code provided against which to match');
                 }
@@ -157,7 +155,7 @@ class Zend_Test_PHPUnit_Constraint_ResponseHeader41 extends PHPUnit_Framework_Co
                     ? $this->_notCode($response, $code)
                     : $this->_code($response, $code);
             case self::ASSERT_HEADER:
-                if (null === $variable) {
+                if (3 > func_num_args()) {
                     require_once 'Zend/Test/PHPUnit/Constraint/Exception.php';
                     throw new Zend_Test_PHPUnit_Constraint_Exception('No header provided against which to match');
                 }
@@ -166,7 +164,7 @@ class Zend_Test_PHPUnit_Constraint_ResponseHeader41 extends PHPUnit_Framework_Co
                     ? $this->_notHeader($response, $header)
                     : $this->_header($response, $header);
             case self::ASSERT_HEADER_CONTAINS:
-                if (null === $extra) {
+                if (4 > func_num_args()) {
                     require_once 'Zend/Test/PHPUnit/Constraint/Exception.php';
                     throw new Zend_Test_PHPUnit_Constraint_Exception('Both a header name and content to match are required for ' . $assertType);
                 }
@@ -176,7 +174,7 @@ class Zend_Test_PHPUnit_Constraint_ResponseHeader41 extends PHPUnit_Framework_Co
                     ? $this->_notHeaderContains($response, $header, $match)
                     : $this->_headerContains($response, $header, $match);
             case self::ASSERT_HEADER_REGEX:
-                if (null === $extra) {
+                if (4 > func_num_args()) {
                     require_once 'Zend/Test/PHPUnit/Constraint/Exception.php';
                     throw new Zend_Test_PHPUnit_Constraint_Exception('Both a header name and content to match are required for ' . $assertType);
                 }

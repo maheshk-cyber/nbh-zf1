@@ -111,6 +111,31 @@ verified syntax-clean through PHP 8.5.
   rendered end to end afterwards to confirm the reflection model still builds
   and orders all thirteen parameters correctly.
 
+### Fixed — argument-inspection semantics changed in PHP 7
+
+- `Zend_Validate_File_Count::__construct()` was broken on any PHP 7+ runtime
+  for its documented two-argument form. The constructor normalises `$options`
+  to `array('max' => $options)` and *then* read `func_get_arg(0)`/`(1)`. Since
+  PHP 7 those functions report the **current** value of a parameter rather than
+  the value as passed, so `min` was set to `array('max' => '5')` instead of
+  `'5'` and `setMin()` threw `Invalid options to validator provided`. The
+  positional arguments are now snapshotted before the normalisation.
+  `new Zend_Validate_File_Count('5', '10')` reports min/max `5`/`10` again.
+- The other 41 `func_get_args()`/`func_get_arg()` sites were audited
+  individually and needed no change. PHPCompatibility's
+  `ArgumentFunctionsReportCurrentValue` rule flags any assignment to a
+  parameter, so in this codebase it latches onto the `Zend_Config`
+  normalisation or the `$options = func_get_args()` branch itself — neither of
+  which can run before the call it is paired with. The genuinely safe shapes
+  are: reassign `$options` to `func_get_args()` and `array_shift()` from index
+  0 (index 0 is the same argument PHP 5/7 gave); read `func_get_arg(1)` on a
+  parameter that is never reassigned; and the deliberate variadic
+  passthroughs in the Soap/Json/XmlRpc servers, `Mail_Protocol_Imap`,
+  `Search_Lucene`, `Session_Namespace`, `Ldap_Filter*`, `View_Abstract`,
+  `View_Helper_*` and `Stdlib_CallbackHandler`. Note that
+  `func_get_args()` returns only the arguments actually passed — it does not
+  synthesise nulls for omitted defaults.
+
 ### Changed — components documented as unavailable
 
 - `Zend_Test_PHPUnit_*` (26 classes) target PHPUnit 3.x, whose class names do
@@ -121,14 +146,13 @@ verified syntax-clean through PHP 8.5.
   `Exception.php`, not a shim. Two classes of genuine PHP 8 bug inside them
   *were* fixed, since they bite on PHPUnit 3 too:
   - Seven constraint classes read their extra assertion arguments out of
-    `func_get_args()`. Since PHP 7 that function reports the *current* value of
-    each parameter rather than the value as passed, so a two-argument call
-    yields a four-element array with nulls in the tail — and `$argv[2]`, which
-    every one of these switches relied on, silently picked up null instead of
-    the caller's argument. They now take `$variable` and `$extra` as named
+    `func_get_args()`. They now take `$variable` and `$extra` as named
     parameters, which is what the caller always meant and does not depend on
-    argument-inspection semantics at all. The `$argc` guards become
-    `null === $variable` / `null === $extra`.
+    argument-inspection semantics at all. This is a readability fix rather than
+    a bug fix: every one of those switches read index 2 or 3, i.e. a parameter
+    that was never reassigned, so the PHP 7 change to argument inspection could
+    not reach them. The guards stay arity tests (`func_num_args()`), not null
+    checks, because an explicitly-passed null is still an argument.
   - Six `fail($other, $description, Foo $cannot_be_used = NULL)` signatures are
     explicitly nullable for PHP 8.4.
 

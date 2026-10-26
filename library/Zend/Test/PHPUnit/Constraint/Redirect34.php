@@ -120,17 +120,15 @@ class Zend_Test_PHPUnit_Constraint_Redirect34 extends PHPUnit_Framework_Constrai
         $this->_assertType = $assertType;
 
         $response = $other;
-        // The extra assertion arguments used to be read out of func_get_args().
-        // Since PHP 7 that function reports the *current* value of each
-        // parameter, not the value as passed, so a two-argument call now
-        // yields a four-element array with nulls in the tail and the old
-        // $argv[2] lookups silently picked up null. They are named parameters
-        // now, which is the same thing the caller always meant and does not
-        // depend on argument-inspection semantics at all.
+        // The extra assertion arguments are named parameters now instead of
+        // $argv[2]/$argv[3]. The guard stays an arity check rather than a
+        // null check because an explicitly-passed null is still an argument:
+        // func_num_args() counts only arguments actually supplied and is
+        // unaffected by the PHP 7 change to argument inspection.
 
         switch ($assertType) {
             case self::ASSERT_REDIRECT_TO:
-                if (null === $variable) {
+                if (3 > func_num_args()) {
                     require_once 'Zend/Test/PHPUnit/Constraint/Exception.php';
                     throw new Zend_Test_PHPUnit_Constraint_Exception('No redirect URL provided against which to match');
                 }
@@ -139,7 +137,7 @@ class Zend_Test_PHPUnit_Constraint_Redirect34 extends PHPUnit_Framework_Constrai
                     ? $this->_notMatch($response, $match)
                     : $this->_match($response, $match);
             case self::ASSERT_REDIRECT_REGEX:
-                if (null === $variable) {
+                if (3 > func_num_args()) {
                     require_once 'Zend/Test/PHPUnit/Constraint/Exception.php';
                     throw new Zend_Test_PHPUnit_Constraint_Exception('No pattern provided against which to match redirect');
                 }
