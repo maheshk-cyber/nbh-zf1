@@ -33,6 +33,13 @@ verified syntax-clean through PHP 8.5.
 - `Zend_Soap_Client_Common::__doRequest()` now matches
   `SoapClient::__doRequest()`'s signature (`$oneWay = false`,
   `$uriParserClass = null`), which PHP 8 validates against the SPL class.
+- `Zend_Service_Console_Command` appended its collected argument vector to the
+  outgoing argument list under a *string* key (`$parameterValues['argv']`).
+  PHP 7 ignored the key and passed the value positionally, so handlers that
+  declared an extra trailing parameter received it. PHP 8 reads a string key as
+  a **named** argument and refuses unknown names outright — every command that
+  reached this path died with `Error: Unknown named parameter $argv`. The value
+  is now appended positionally, restoring the PHP 7 behaviour exactly.
 - `Zend_Service_WindowsAzure_Log_Writer_WindowsAzure` referenced three classes
   that do not exist in the tree — `Zend_Service_Log_Exception`,
   `Zend_Service_Log_Formatter_Interface` and
@@ -87,6 +94,23 @@ verified syntax-clean through PHP 8.5.
   `?Type $x = null` form required from PHP 8.4. Applied with
   `tools/fix_nullable_params.py`, which only touches already-typed parameters
   and is idempotent.
+- Eight optional parameters that preceded a required one (deprecated 8.0) were
+  fixed in 5 files, in two different ways because the textbook fix is not
+  always behaviour-preserving. Deleting the `= null` default makes the
+  parameter genuinely required, which converts a clean catchable exception
+  into a fatal `ArgumentCountError` on exactly the error path the default
+  existed to report — so where the method already validates and throws, only
+  the default was removed (`Zend_Pdf_Element_Reference::__construct()`,
+  `Zend_Service_WindowsAzure_Storage_Queue::deleteMessage()`,
+  `Zend_Service_WindowsAzure_Diagnostics_Manager::setConfigurationForRoleInstance()`).
+  Where the signature is reflected over by `Zend_Service_Console_Command` and
+  bound positionally from `@command-parameter-for` annotations, the optional
+  parameters were reordered to the end instead, so every CLI parameter stays
+  optional and every flag keeps working
+  (`Deployment::createFromStorageCommand()`, `createFromLocalCommand()`,
+  `Certificate::getCertificatePropertyCommand()`). Both help screens were
+  rendered end to end afterwards to confirm the reflection model still builds
+  and orders all thirteen parameters correctly.
 
 ### Fixed — deprecations reported on every class load
 

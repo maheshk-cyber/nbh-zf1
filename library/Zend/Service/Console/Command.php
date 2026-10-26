@@ -181,8 +181,12 @@ class Zend_Service_Console_Command
 			die();
 		}
 
-		// Supply argv in a nice way
-		$parameterValues['argv'] = $parameterInputs;
+		// Supply argv in a nice way. This has always been appended after the
+		// declared parameters; PHP 7 simply ignored the string key and passed
+		// it positionally. PHP 8 treats a string key as a named argument and
+		// fatals with "Unknown named parameter $argv" because no handler
+		// declares one. Append it positionally to keep the PHP 7 semantics.
+		$parameterValues[] = $parameterInputs;
 
 		// Run the command
 		$className = $handler->class;
