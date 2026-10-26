@@ -103,6 +103,19 @@ verified syntax-clean through PHP 8.5.
   PHP 8.2 requires. Two of them build a property name for `property_exists()`,
   so the output was confirmed byte-identical.
 
+### Fixed — functions deprecated in PHP 8.2
+
+- `utf8_encode()` and `utf8_decode()` are deprecated from PHP 8.2. All 11 sites
+  across 7 files now use `mb_convert_encoding()` — `ext-mbstring` is already a
+  hard requirement in `composer.json`, so this adds no new dependency.
+  `utf8_encode()` is an exact replacement (verified against 3,262 fuzzed
+  samples, zero differences). `utf8_decode()` is exact on well-formed UTF-8
+  (20,000 samples, zero differences) but produces a different number of
+  substitute characters on malformed input; the five such sites read an Azure
+  configuration file that declares `encoding="utf-8"`, so malformed input is
+  out of contract. The two S3 signing paths were re-run end to end and produce
+  byte-identical HMAC signatures.
+
 ### Added
 
 - `tools/smoke.php` — class-load harness. Autoloads every class in `library/`
