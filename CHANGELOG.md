@@ -116,6 +116,14 @@ verified syntax-clean through PHP 8.5.
   out of contract. The two S3 signing paths were re-run end to end and produce
   byte-identical HMAC signatures.
 
+- `iconv_set_encoding()` with the `internal_encoding` / `input_encoding` /
+  `output_encoding` type arguments is deprecated from PHP 5.6. All 11 sites
+  across 5 files were already guarded by `PHP_VERSION_ID < 50600` with the
+  `ini_set('default_charset', ...)` form in the `else` branch — so on PHP 8
+  none of them had executed for years. The guard and the iconv branch are
+  deleted, leaving the `ini_set` path that was already running. Pure dead-code
+  removal, no behaviour change.
+
 ### Added
 
 - `tools/smoke.php` — class-load harness. Autoloads every class in `library/`
