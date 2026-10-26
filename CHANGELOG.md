@@ -16,6 +16,15 @@ This file records *what changed and why*; that file records *where we are*.
 Baseline: Zend Framework 1.12.20 (upstream EOL), retargeted at PHP 8.1+ and
 verified syntax-clean through PHP 8.5.
 
+### Changed — repository history
+
+- The porting commits carried a `Co-Authored-By: Claude Code` trailer. The
+  maintainer is the sole author, so the trailer was removed from all five
+  commits by rewriting local history. Trees are byte-identical before and after
+  (`git diff` between the pre-rewrite branch and the result is empty), so no
+  file content changed. The branch had never been pushed, so no remote history
+  was affected.
+
 ### Fixed — fatal errors under PHP 8
 
 - `Zend_Rest_Route::assemble()` gained the `$partial` parameter its parent
@@ -46,6 +55,25 @@ verified syntax-clean through PHP 8.5.
   `Zend_Feed_Element::__get()`.
 - `get_magic_quotes_gpc()` (removed PHP 5.4, but still called) — the guarded
   branch in `Zend_Tool_Project_Provider_DbAdapter` was dead code and is removed.
+- `$php_errormsg` and the `track_errors` ini setting are gone from PHP 8, so 31
+  sites across 11 files were silently reporting the *empty* error text. They now
+  call `error_get_last()`, each guarded by `error_clear_last()` so a stale error
+  from an earlier call is never mistaken for this one. This bites harder than it
+  sounds: `error_get_last()` *does* capture `@`-suppressed errors on PHP 8 (the
+  PHP 7 behaviour, where `@` cleared the buffer, was reversed), so the
+  replacement preserves the original intent. Affected: `Zend_Feed`,
+  `Zend_Feed_Abstract`, `Zend_Feed_Reader`, `Zend_Feed_Entry_Atom`,
+  `Zend_Feed_Entry_Abstract`, `Zend_Gdata_App`, `Zend_Gdata_App_Base`,
+  `Zend_Gdata_Gapps_ServiceException`, `Zend_Pdf_Filter_Compression_Flate`,
+  `Zend_Search_Lucene_Storage_Directory_Filesystem`,
+  `Zend_Search_Lucene_Storage_File_Filesystem`. The `track_errors`
+  save/restore pairs around them are removed rather than ported, since the
+  setting no longer exists.
+- `version_compare(PHP_VERSION, '5.6', 'gte')` in `Zend_Xml_Security::isPhpFpm()`
+  — `gte` is not a comparison operator PHP recognises, and PHP 8 turns the
+  silently-wrong result into a `ValueError`. This one is **fatal on every XML
+  parse** and the class-load smoke could never have caught it, because it only
+  fires when the method runs. Now `'ge'`.
 
 ### Fixed — behaviour the engine no longer tolerates
 
@@ -84,6 +112,9 @@ verified syntax-clean through PHP 8.5.
 - `tools/port-status.sh` — regenerates the measured block in `PORTING.md`.
 - `tools/fix_nullable_params.py` — the implicitly-nullable codemod.
 - `tools/fix_case_semicolons.py` — the `case`-terminator codemod.
+- `tools/fix_track_errors.py` — rewrites the `@ini_set('track_errors', 1)` /
+  `@ini_restore('track_errors')` brackets in `Zend_Feed` and `Zend_Gdata_App` to
+  `error_clear_last()` plus a hoisted `error_get_last()`. Idempotent.
 - `PORTING.md` — resumable ledger: work queue, open decisions, known-benign
   smoke results, and the generated status block.
 

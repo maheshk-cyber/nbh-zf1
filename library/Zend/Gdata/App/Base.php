@@ -302,13 +302,14 @@ abstract class Zend_Gdata_App_Base
     {
         if ($xml) {
             // Load the feed as an XML DOMDocument object
-            @ini_set('track_errors', 1);
+            error_clear_last();
             $doc = new DOMDocument();
             $doc = @Zend_Xml_Security::scan($xml, $doc);
-            @ini_restore('track_errors');
             if (!$doc) {
+                $error = error_get_last();
+                $errorMessage = $error === null ? '(error message not available)' : $error['message'];
                 require_once 'Zend/Gdata/App/Exception.php';
-                throw new Zend_Gdata_App_Exception("DOMDocument cannot parse XML: $php_errormsg");
+                throw new Zend_Gdata_App_Exception("DOMDocument cannot parse XML: $errorMessage");
             }
             $element = $doc->getElementsByTagName($this->_rootElement)->item(0);
             if (!$element) {

@@ -823,15 +823,16 @@ class Zend_Gdata_App
         }
 
         // Load the feed as an XML DOMDocument object
-        @ini_set('track_errors', 1);
+        error_clear_last();
         $doc = new DOMDocument();
         $doc = @Zend_Xml_Security::scan($string, $doc);
-        @ini_restore('track_errors');
 
         if (!$doc) {
             require_once 'Zend/Gdata/App/Exception.php';
+            $error = error_get_last();
+            $errorMessage = $error === null ? '(error message not available)' : $error['message'];
             throw new Zend_Gdata_App_Exception(
-                "DOMDocument cannot parse XML: $php_errormsg");
+                "DOMDocument cannot parse XML: $errorMessage");
         }
 
         $feed = new $className();
@@ -855,13 +856,14 @@ class Zend_Gdata_App
     public static function importFile($filename,
             $className='Zend_Gdata_App_Feed', $useIncludePath = false)
     {
-        @ini_set('track_errors', 1);
+        error_clear_last();
         $feed = @file_get_contents($filename, $useIncludePath);
-        @ini_restore('track_errors');
         if ($feed === false) {
             require_once 'Zend/Gdata/App/Exception.php';
+            $error = error_get_last();
+            $errorMessage = $error === null ? '(error message not available)' : $error['message'];
             throw new Zend_Gdata_App_Exception(
-                "File could not be loaded: $php_errormsg");
+                "File could not be loaded: $errorMessage");
         }
         return self::importString($feed, $className);
     }
