@@ -578,8 +578,7 @@ class Zend_Captcha_Image extends Zend_Captcha_Word
         }
 
         imagepng($img2, $img_file);
-        imagedestroy($img);
-        imagedestroy($img2);
+        unset($img, $img2);
     }
 
     /**

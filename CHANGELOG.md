@@ -124,6 +124,34 @@ verified syntax-clean through PHP 8.5.
   deleted, leaving the `ini_set` path that was already running. Pure dead-code
   removal, no behaviour change.
 
+- `libxml_disable_entity_loader()` (deprecated 8.0) removed from
+  `Zend_Xml_Security::scan()` and `Zend_Feed_Reader::getLinks()`. On PHP 8
+  external entities are not resolved unless `LIBXML_NOENT` is passed, and
+  `scan()` separately rejects any DOCTYPE that declares an entity — both were
+  verified before the call was dropped, and both were re-verified after. The
+  `libxml_use_internal_errors()` save/restore around it stays.
+- `xml_set_object()` (deprecated 8.4) removed from the five XML translation
+  adapters (Tmx, Xliff, Tbx, Qt, XmlTm). It existed only to tell the expat
+  parser which `$this` the bare method-name handler strings referred to, so the
+  handler registration now passes fully formed `array($this, '_handler')`
+  callables and the call is unnecessary. All five adapters were re-run against
+  the repository's own fixtures and parse the same message counts as before.
+- `imagedestroy()` (deprecated 8.5) replaced with `unset()` in
+  `Zend_Captcha_Image` and `Zend_Barcode_Renderer_Image`. Since PHP 8 GD images
+  are `GdImage` objects freed by refcounting, so the call was already a no-op.
+
+### Fixed — misleading XML error messages
+
+- `Zend_Xml_Security::scan()` now reports the actual libxml parse error to
+  callers that read `error_get_last()`. Previously the deprecated
+  `libxml_disable_entity_loader()` call fired *after* the caller's
+  `error_clear_last()` and its deprecation text became the "cause"; with that
+  call gone the message went empty, because `scan()` parses into libxml's
+  internal error buffer and never touched PHP's last-error slot. `scan()` now
+  reads `libxml_get_last_error()` and re-raises it via
+  `@trigger_error(..., E_USER_WARNING)` — recorded without being printed, so
+  callers that raise their own exception do not also emit a stray warning.
+
 ### Added
 
 - `tools/smoke.php` — class-load harness. Autoloads every class in `library/`
