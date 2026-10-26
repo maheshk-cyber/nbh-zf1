@@ -486,13 +486,15 @@ abstract class Zend_XmlRpc_Value
      */
     protected static function _extractTypeAndValue(SimpleXMLElement $xml, &$type, &$value)
     {
-        list($type, $value) = each($xml);
+        list($type, $value) = self::_firstChild($xml);
 
         if (!$type and $value === null) {
             $namespaces = array('ex' => 'http://ws.apache.org/xmlrpc/namespaces/extensions');
             foreach ($namespaces as $namespaceName => $namespaceUri) {
                 $namespaceXml = $xml->children($namespaceUri);
-                list($type, $value) = each($namespaceXml);
+                $type = null;
+                $value = null;
+                list($type, $value) = self::_firstChild($namespaceXml);
                 if ($type !== null) {
                     $type = $namespaceName . ':' . $type;
                     break;
@@ -512,6 +514,23 @@ abstract class Zend_XmlRpc_Value
                 $value = str_replace(array('<value>', '</value>'), '', $xml->asXML());
             }
         }
+    }
+
+    /**
+     * Return the first child of a SimpleXMLElement as a (name, value) pair
+     *
+     * Replaces each($xml), which was removed in PHP 8. An element with no
+     * children yields (null, null), matching each() on an empty set.
+     *
+     * @param SimpleXMLElement $xml
+     * @return array
+     */
+    protected static function _firstChild(SimpleXMLElement $xml)
+    {
+        foreach ($xml as $name => $child) {
+            return array($name, $child);
+        }
+        return array(null, null);
     }
 
     /**
