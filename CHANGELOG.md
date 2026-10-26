@@ -60,6 +60,21 @@ verified syntax-clean through PHP 8.5.
   `tools/fix_nullable_params.py`, which only touches already-typed parameters
   and is idempotent.
 
+### Fixed — deprecations reported on every class load
+
+- 138 `case`/`default` statements across 38 files were terminated with a
+  semicolon instead of a colon, deprecated in PHP 8.5. Fixed with
+  `tools/fix_case_semicolons.py`, which only rewrites a label whose semicolon
+  is the terminator — a `case 1: foo();` has its semicolon in the body and is
+  left alone.
+- 122 non-canonical casts across 53 files: `(integer)` → `(int)`,
+  `(boolean)` → `(bool)`, `(double)` → `(float)`, `(binary)` → `(string)`.
+  These are pure aliases — verified identical results across every PHP type
+  and value combination before swapping.
+- 8 `${var}` string interpolations in `Zend_Gdata` now use `{$var}`, the form
+  PHP 8.2 requires. Two of them build a property name for `property_exists()`,
+  so the output was confirmed byte-identical.
+
 ### Added
 
 - `tools/smoke.php` — class-load harness. Autoloads every class in `library/`
@@ -68,6 +83,7 @@ verified syntax-clean through PHP 8.5.
   upstream PHPUnit 3.x suite in `tests/` cannot run on PHP 8.
 - `tools/port-status.sh` — regenerates the measured block in `PORTING.md`.
 - `tools/fix_nullable_params.py` — the implicitly-nullable codemod.
+- `tools/fix_case_semicolons.py` — the `case`-terminator codemod.
 - `PORTING.md` — resumable ledger: work queue, open decisions, known-benign
   smoke results, and the generated status block.
 
