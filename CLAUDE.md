@@ -34,7 +34,8 @@ to resurrect it; `tools/smoke.php` is the regression check instead.
 2. Update the work queue and open decisions in `PORTING.md`.
 3. Add an entry to `CHANGELOG.md` under `[Unreleased]`.
 4. Commit. The commit message carries the same summary — see `git log` for the
-   established shape (what changed, why, what was verified).
+   established shape (what changed, why, what was verified). The user is the
+   sole author: **never add a `Co-Authored-By:` trailer.**
 
 ## Conventions
 

@@ -125,7 +125,7 @@ _Refreshed 2026-10-26 12:20 UTC_
 
 | | |
 |---|---|
-| Branch | `star-php85` @ `83b3b229` — Clear case terminators, non-canonical casts and ${var} embeds |
+| Branch | `star-php85` @ `f3a96524` — Clear case terminators, non-canonical casts and ${var} embeds |
 | Uncommitted files | 0 |
 | Library files | 2264 |
 | Syntax failures | 0 |
