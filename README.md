@@ -1,183 +1,115 @@
-![Logo](http://framework.zend.com/images/logos/ZendFramework-logo.png)
+# nbh-zf1 — Zend Framework 1 for modern PHP
 
-> ## End-of-Life occurred 28 Sep 2016
->
-> This project is no longer maintained, and reached its end of life on 28 Sep
-> 2016; the last public release was 1.12.20.
->
-> At this time, the repository has been archived, and is read-only.
+A maintained port of Zend Framework 1, packaged for Composer and updated to run
+on current PHP versions while preserving the original `Zend_*` class names and
+public API.
 
----
+- **Package:** `maheshk-cyber/nbh-zf1`
+- **Supported PHP:** 8.1 – 8.5
+- **Autoloading:** PSR-0 for the `Zend_` prefix, plus Composer `include-path`
+- **License:** BSD-3-Clause (unchanged from upstream ZF1)
 
-Welcome to the Zend Framework 1.12 Release! 
+## Why this package exists
 
-Master: [![Build Status](https://api.travis-ci.org/zendframework/zf1.png?branch=master)](https://travis-ci.org/zendframework/zf1)
+Upstream Zend Framework 1 reached end of life in September 2016 and was archived
+at version 1.12.20. It does not run on PHP 8. This package keeps the framework
+usable as a dependency for applications that have not yet migrated away from ZF1.
 
-RELEASE INFORMATION
-===================
+## Requirements
 
-Zend Framework 1.12.21dev Release.
-Released on MMM DD, YYYY.
+| Requirement | Version |
+|---|---|
+| PHP | 8.1 or later (tested through 8.5) |
+| `ext-mbstring` | required |
+| `ext-ctype` | required |
 
-IMPORTANT FIXES FOR 1.12.21
----------------------------
+Optional components require their own extensions — for example `pdo_mysql` for
+`Zend_Db_Adapter_Pdo_Mysql`, `openssl` for the crypt filters, and `dom`/`simplexml`
+for the feed and XML components.
 
-See http://framework.zend.com/changelog for full details.
+## Installation
 
-NEW FEATURES
-============
+```bash
+composer require maheshk-cyber/nbh-zf1
+```
 
-Zend_Loader changes
--------------------
+Then load Composer's autoloader as usual:
 
-A number of autoloaders and autoloader facilities were back ported from
-ZF2 to provide performant alternatives to those already available in the
-1.X releases.  These include: Zend_Loader_StandardAutoloader, which
-improves on Zend_Loader_Autoloader by allowing the ability to specify a
-specific path to associate with a vendor prefix or namespace;
-Zend_Loader_ClassMapAutoloader, which provides the ability to use lookup
-tables for autoloading (which are typically the fastest possible way to
-autoload); and Zend_Loader_AutoloaderFactory, which can both create and
-update autoloaders for you, as well as register them with
-spl_autoload_register().
+```php
+require __DIR__ . '/vendor/autoload.php';
 
-The Zend_Loader changes were back ported from ZF2 by Matthew Weier
-O’Phinney
+$acl = new Zend_Acl();
+```
 
-Zend_EventManager
------------------
+ZF1 resolves many dependencies through `require_once 'Zend/....php'` relative to
+`include_path`. This package declares `include-path` in its `composer.json`, so
+Composer adds the library directory to `include_path` automatically — no manual
+`set_include_path()` call is needed. This behaviour is verified by installing the
+package into a clean project and autoloading without any additional bootstrap.
 
-Zend_EventManager is a component that allows you to attach and detach
-listeners to named events, both on a per-instance basis as well as via
-shared collections; trigger events; and interrupt execution of
-listeners.
+If you vendor this package into a non-Composer context, you must set the include
+path yourself:
 
-Zend_EventManager was back ported from ZF2 by Matthew Weier O’Phinney
+```php
+set_include_path('/path/to/nbh-zf1/library' . PATH_SEPARATOR . get_include_path());
+```
 
-Zend_Http_UserAgent_Features_Adapter_Browscap
----------------------------------------------
+## Compatibility status
 
-This class provides a features adapter that calls get_browser() in order
-to discover mobile device capabilities to inject into UserAgent device
-instances.
+| PHP version | Status |
+|---|---|
+| 8.1 | target floor |
+| 8.2 | supported |
+| 8.3 | supported |
+| 8.4 | supported — emits deprecation notices, see below |
+| 8.5 | **primary target**, fully syntax-clean |
 
-Browscap (http://browsers.garykeith.com/) is an open project dedicated
-to collecting an disseminating a “database” of browser capabilities. PHP
-has built-in support for using these files via the get_browser()
-function. This function requires that your php.ini provides a browscap
-entry pointing to the PHP-specific php_browscap.ini file which is
-available at http://browsers.garykeith.com/stream.asp?PHP_BrowsCapINI.
+All 2,264 library files parse cleanly under PHP 8.5.
 
-Zend_Http_UserAgent_Features_Adapter_Browscap was created by Matthew
-Weier O’Phinney
+### Known limitations
 
-Zend_Mobile_Push
-----------------
+- **Deprecation notices on PHP 8.4+.** Some methods do not declare return types
+  compatible with their SPL parents (e.g. `Zend_Registry::offsetExists()` against
+  `ArrayObject`), and some legacy casts such as `(integer)` and `(boolean)` are
+  deprecated. These are notices, not errors, and are being addressed.
+- **Removed extensions.** Components built on `mcrypt`, `wddx`, SQLite 2, the
+  original `mysql_*` API, and `track_errors` cannot work on PHP 8, as those
+  extensions were removed from PHP itself. Affected classes remain in the tree
+  but should be considered unavailable:
+  - `Zend_Filter_Encrypt_Mcrypt`
+  - `Zend_Serializer_Adapter_Wddx`
+  - `Zend_Cache_Backend_Sqlite`
+  - `Zend_Db_Adapter_Mysqli`'s legacy `mysql_*` helpers
+- **`func_get_args()` semantics.** Since PHP 7, functions that inspect their
+  arguments observe the current value rather than the value as passed. A number of
+  legacy validators rely on the old behaviour and may misreport argument details.
+- **No automated test suite yet.** The upstream PHPUnit 3.x tests are still in
+  `tests/` for reference but do not run on PHP 8.1+. Characterization tests for
+  the components in active use are in progress.
 
-Zend_Mobile_Push is a component for implementing push notifications for
-the 3 major push notification platforms (Apple (Apns), Google (C2dm) and
-Microsoft (Mpns).
+## Development
 
-Zend_Mobile_Push was contributed by Mike Willbanks.
+```bash
+composer install
 
-Zend_Gdata_Analytics
---------------------
+# Syntax check all files
+find library -type f -name '*.php' -print0 | xargs -0 -n1 php -l
 
-Zend_Gdata_Analytics is an extension to Zend_Gdata to allow interaction
-with Google’s Analytics Data Export API. This extension does not
-encompass any major changes in the overall operation of Zend_Gdata
-components.
+# Compatibility scan (adjust the range as needed)
+vendor/bin/phpcs library \
+  --standard=PHPCompatibility \
+  --runtime-set testVersion 8.1-8.5 \
+  --report=summary
+```
 
-Zend_Gdata_Analytics was contributed by Daniel Hartmann.
+PHP versions 8.1 through 8.5 are exercised in CI.
 
-Removed features
-================
+## Reporting issues
 
-Zend_Http_UserAgent_Features_Adapter_WurflApi
----------------------------------------------
+Please include the PHP version, the component involved, and a minimal reproduction.
 
-Due to the changes in licensing of WURFL, we have removed the WurflApi
-adapter. We will be providing the WurflApi adapter to ScientiaMobile so
-that users of WURFL will still have that option.
+## Credits
 
-Bug Fixes
-=========
-
-In addition,  over 200 reported issues in the tracker have been fixed.
-We’d like to particularly thank Adam Lundrigan, Frank Brückner and
-Martin Hujer for their efforts in making this happen. Thanks also to the
-many people who ran the ZF1 unit tests and reported their results!
-
-For a complete list of closed issues beginning with 1.12.3, visit:
-
- * https://github.com/zendframework/zf1/issues?labels=&milestone=&page=1&state=closed
- * http://framework.zend.com/changelog/
-
-MIGRATION NOTES
-===============
-
-A detailed list of migration notes may be found at:
-
-http://framework.zend.com/manual/en/migration.html
-
-SYSTEM REQUIREMENTS
-===================
-
-Zend Framework requires PHP 5.2.11 or later. Please see our reference
-guide for more detailed system requirements:
-
-http://framework.zend.com/manual/en/requirements.html
-
-INSTALLATION
-============
-
-Please see [INSTALL.md](INSTALL.md).
-
-REPOSITORY HISTORY
-==================
-
-This repository was created based on the release-1.12 branch of a Subversion
-repository, http://framework.zend.com/svn/framework/standard/. It contains a
-subset of the project history, dating from between the 1.5.0 and 1.6.0 releases,
-and only contains the tags for the 1.12 series. If you would like an older
-version, you may access the subversion repository linked above, or download an
-older version from http://framework.zend.com/downloads/archives.
-
-CONTRIBUTING
-============
-
-Please see [README-GIT.md](README-GIT.md) and
-[DEVELOPMENT_README.md](DEVELOPMENT_README.md).
-
-QUESTIONS AND FEEDBACK
-======================
-
-Online documentation can be found at http://framework.zend.com/manual.
-Questions that are not addressed in the manual should be directed to the
-appropriate mailing list:
-
-- http://framework.zend.com/wiki/display/ZFDEV/Mailing+Lists
-
-If you find code in this release behaving in an unexpected manner or
-contrary to its documented behavior, please create an issue in the Zend
-Framework issue tracker at:
-
-- https://github.com/zendframework/zf1/issues
-
-If you would like to be notified of new releases, you can subscribe to
-the fw-announce mailing list by sending a blank message to:
-
-- fw-announce-subscribe@lists.zend.com.
-
-LICENSE
-=======
-
-The files in this archive are released under the Zend Framework license.
-You can find a copy of this license in [LICENSE.txt](LICENSE.txt).
-
-ACKNOWLEDGEMENTS
-================
-
-The Zend Framework team would like to thank all the contributors to the Zend
-Framework project, our corporate sponsor, and you, the Zend Framework user.
-Please visit us sometime soon at http://framework.zend.com.
+Zend Framework 1 was created by Zend Technologies and contributed to by many
+people. This port builds directly on that work. See `LICENSE.txt` for the original
+license.
