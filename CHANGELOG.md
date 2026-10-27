@@ -13,6 +13,33 @@ This file records *what changed and why*; that file records *where we are*.
 
 ## [Unreleased]
 
+### Fixed — fatal errors found by exercising the port against a real application
+
+These four surfaced not from the static audit but from loading the ERP that
+consumes this package. Each is a PHP 8 fatal on a code path the smoke test
+cannot reach, because reaching it means actually installing an error handler or
+reading a registry key.
+
+- `Zend_Registry::offsetExists()` called `array_key_exists($index, $this)`.
+  PHP 8 requires an array for the second argument; a `Zend_Registry` is an
+  `ArrayObject`, so the call threw a `TypeError`. This is the one method behind
+  every `isset($registry['x'])`, so on PHP 8 the registry was **unreadable** —
+  the workaround for upstream bug 40442 had itself become the bug. It now tests
+  `$this->getArrayCopy()`, which is the same key set the old array-cast gave
+  under PHP 5/7. The method also gained `#[\ReturnTypeWillChange]`, the same
+  shim already applied to the other `ArrayObject` overrides here.
+- Four error handlers declared five required parameters —
+  `Zend_Log::errorHandler()`, `Zend_Service_Audioscrobbler::_errorHandler()`,
+  `Zend_Session_Exception::handleSessionStartError()` and
+  `Zend_Session_Exception::handleSilentWriteClose()`. PHP 8 removed the 5th
+  `$errcontext` argument from `set_error_handler()` callbacks, so each raised an
+  `ArgumentCountError` **from inside the handler** the first time any notice
+  fired. The `$errcontext` parameter is now optional in all four, which keeps
+  the published signature compatible with callers that still pass it explicitly
+  while accepting the engine's four-argument call. On `Zend_Log` and
+  `Zend_Service_Audioscrobbler` the docblock's `@param array` no longer matched
+  a default of `null`, so it was corrected to say the argument is unused.
+
 ## [1.12.21] - 2026-10-26
 Baseline: Zend Framework 1.12.20 (upstream EOL), retargeted at PHP 8.1+ and
 verified syntax-clean through PHP 8.5.

@@ -616,10 +616,11 @@ class Zend_Log
      * @param string $errstr
      * @param string $errfile
      * @param int $errline
-     * @param array $errcontext
+     * @param array|null $errcontext Unused; optional because PHP 8 no longer
+     *                               passes this argument to error handlers.
      * @return boolean
      */
-    public function errorHandler($errno, $errstr, $errfile, $errline, $errcontext)
+    public function errorHandler($errno, $errstr, $errfile, $errline, $errcontext = null)
     {
         $errorLevel = error_reporting();
 

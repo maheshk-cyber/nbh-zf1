@@ -201,9 +201,13 @@ class Zend_Registry extends ArrayObject
      *
      * Workaround for http://bugs.php.net/bug.php?id=40442 (ZF-960).
      */
+    #[\ReturnTypeWillChange]
     public function offsetExists($index)
     {
-        return array_key_exists($index, $this);
+        // PHP 8: array_key_exists() requires an array; $this is a Zend_Registry
+        // (ArrayObject). getArrayCopy() returns the same key set the old
+        // array-cast gave us under PHP 5/7.
+        return array_key_exists($index, $this->getArrayCopy());
     }
 
 }

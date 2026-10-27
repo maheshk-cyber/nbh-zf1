@@ -639,10 +639,11 @@ class Zend_Service_Audioscrobbler
      * @param  string  $errstr
      * @param  string  $errfile
      * @param  integer $errline
-     * @param  array   $errcontext
+     * @param  array   $errcontext Unused; optional because PHP 8 no longer
+     *                             passes this argument to error handlers.
      * @return void
      */
-    public function _errorHandler($errno, $errstr, $errfile, $errline, array $errcontext)
+    public function _errorHandler($errno, $errstr, $errfile, $errline, array $errcontext = [])
     {
         $this->_error = array(
             'errno'      => $errno,
