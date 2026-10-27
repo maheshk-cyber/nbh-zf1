@@ -37,7 +37,7 @@ final class Zend_Version
      * heading for. Versioning is a package-contract decision — see "Open
      * decisions" in PORTING.md.
      */
-    const VERSION = '1.12.21';
+    const VERSION = '1.12.22';
 
     /**
      * The latest stable version Zend Framework available

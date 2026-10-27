@@ -13,6 +13,8 @@ This file records *what changed and why*; that file records *where we are*.
 
 ## [Unreleased]
 
+## [1.12.22] - 2026-10-27
+
 ### Fixed — fatal errors found by exercising the port against a real application
 
 These four surfaced not from the static audit but from loading the ERP that
