@@ -275,7 +275,8 @@ class Zend_Config_Yaml extends Zend_Config
     {
         $lines = explode("\n", $yaml);
         reset($lines);
-        return self::_decodeYaml(0, $lines);
+        $offset = 0;
+        return self::_decodeYaml(0, $lines, $offset);
     }
 
     /**
@@ -283,13 +284,17 @@ class Zend_Config_Yaml extends Zend_Config
      *
      * @param  int $currentIndent Current indent level
      * @param  array $lines  YAML lines
+     * @param  int $offset Index of the next line to read
      * @return array|string
      */
-    protected static function _decodeYaml($currentIndent, &$lines)
+    protected static function _decodeYaml($currentIndent, &$lines, &$offset = 0)
     {
         $config   = array();
         $inIndent = false;
-        while (list($n, $line) = each($lines)) {
+        $count    = count($lines);
+        while ($offset < $count) {
+            $n    = $offset++;
+            $line = $lines[$n];
             $lineno = $n + 1;
 
             $line = rtrim(preg_replace("/#.*$/", "", $line));
@@ -307,7 +312,7 @@ class Zend_Config_Yaml extends Zend_Config
 
             if ($indent < $currentIndent) {
                 // this level is done
-                prev($lines);
+                $offset--;
                 return $config;
             }
 
@@ -324,7 +329,7 @@ class Zend_Config_Yaml extends Zend_Config
                     $value = self::_parseValue($value);
                 } else {
                     // key: and then values on new lines
-                    $value = self::_decodeYaml($currentIndent + 1, $lines);
+                    $value = self::_decodeYaml($currentIndent + 1, $lines, $offset);
                     if (is_array($value) && !count($value)) {
                         $value = "";
                     }
@@ -338,7 +343,7 @@ class Zend_Config_Yaml extends Zend_Config
 
                     $config[] = self::_parseValue($value);
                 } else {
-                    $config[] = self::_decodeYaml($currentIndent + 1, $lines);
+                    $config[] = self::_decodeYaml($currentIndent + 1, $lines, $offset);
                 }
             } else {
                 require_once 'Zend/Config/Exception.php';
@@ -362,11 +367,13 @@ class Zend_Config_Yaml extends Zend_Config
         $value = trim($value);
 
         // remove quotes from string.
+        // count() cannot be used on a string since PHP 8, so index the last
+        // character directly instead.
         if ('"' == $value['0']) {
-            if ('"' == $value[count($value) -1]) {
+            if ('"' == $value[strlen($value) - 1]) {
                 $value = substr($value, 1, -1);
             }
-        } elseif ('\'' == $value['0'] && '\'' == $value[count($value) -1]) {
+        } elseif ('\'' == $value['0'] && '\'' == $value[strlen($value) - 1]) {
             $value = strtr($value, array("''" => "'", "'" => ''));
         }
 

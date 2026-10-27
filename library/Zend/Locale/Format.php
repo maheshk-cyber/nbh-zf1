@@ -1311,32 +1311,25 @@ class Zend_Locale_Format
 
     /**
      * Internal method to retrieve the current encoding via the ini setting
-     * default_charset for PHP >= 5.6 or iconv_get_encoding otherwise.
+     * default_charset.
      *
      * @return string
      */
     protected static function _getEncoding()
     {
-        $oenc = PHP_VERSION_ID < 50600
-            ? iconv_get_encoding('internal_encoding')
-            : ini_get('default_charset');
+        $oenc = ini_get('default_charset');
 
         return $oenc;
     }
 
     /**
-     * Internal method to set the encoding via the ini setting
-     * default_charset for PHP >= 5.6 or iconv_set_encoding otherwise.
+     * Internal method to set the encoding via the ini setting default_charset.
      *
      * @param string $encoding
      * @return void
      */
     protected static function _setEncoding($encoding)
     {
-        if (PHP_VERSION_ID < 50600) {
-            iconv_set_encoding('internal_encoding', $encoding);
-        } else {
-            ini_set('default_charset', $encoding);
-        }
+        ini_set('default_charset', $encoding);
     }
 }

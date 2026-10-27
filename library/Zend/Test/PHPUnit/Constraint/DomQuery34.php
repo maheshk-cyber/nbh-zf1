@@ -136,7 +136,7 @@ class Zend_Test_PHPUnit_Constraint_DomQuery34 extends PHPUnit_Framework_Constrai
      * @param  null|string Assertion type
      * @return bool
      */
-    public function evaluate($other, $assertType = null)
+    public function evaluate($other, $assertType = null, $variable = null, $extra = null)
     {
         if (strstr($assertType, 'Not')) {
             $this->setNegate(true);
@@ -159,36 +159,39 @@ class Zend_Test_PHPUnit_Constraint_DomQuery34 extends PHPUnit_Framework_Constrai
         $domQuery = new Zend_Dom_Query($other);
         $domQuery->registerXpathNamespaces($this->_xpathNamespaces);
         $result   = $domQuery->$method($this->_path);
-        $argv     = func_get_args();
-        $argc     = func_num_args();
+        // The extra assertion arguments are named parameters now instead of
+        // $argv[2]/$argv[3]. The guard stays an arity check rather than a
+        // null check because an explicitly-passed null is still an argument:
+        // func_num_args() counts only arguments actually supplied and is
+        // unaffected by the PHP 7 change to argument inspection.
 
         switch ($assertType) {
             case self::ASSERT_CONTENT_CONTAINS:
-                if (3 > $argc) {
+                if (3 > func_num_args()) {
                     require_once 'Zend/Test/PHPUnit/Constraint/Exception.php';
                     throw new Zend_Test_PHPUnit_Constraint_Exception('No content provided against which to match');
                 }
-                $this->_content = $content = $argv[2];
+                $this->_content = $content = $variable;
                 return ($this->_negate)
                     ? $this->_notMatchContent($result, $content)
                     : $this->_matchContent($result, $content);
             case self::ASSERT_CONTENT_REGEX:
-                if (3 > $argc) {
+                if (3 > func_num_args()) {
                     require_once 'Zend/Test/PHPUnit/Constraint/Exception.php';
                     throw new Zend_Test_PHPUnit_Constraint_Exception('No pattern provided against which to match');
                 }
-                $this->_content = $content = $argv[2];
+                $this->_content = $content = $variable;
                 return ($this->_negate)
                     ? $this->_notRegexContent($result, $content)
                     : $this->_regexContent($result, $content);
             case self::ASSERT_CONTENT_COUNT:
             case self::ASSERT_CONTENT_COUNT_MIN:
             case self::ASSERT_CONTENT_COUNT_MAX:
-                if (3 > $argc) {
+                if (3 > func_num_args()) {
                     require_once 'Zend/Test/PHPUnit/Constraint/Exception.php';
                     throw new Zend_Test_PHPUnit_Constraint_Exception('No count provided against which to compare');
                 }
-                $this->_content = $content = $argv[2];
+                $this->_content = $content = $variable;
                 return $this->_countContent($result, $content, $assertType);
             case self::ASSERT_QUERY:
             default:

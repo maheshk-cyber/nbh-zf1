@@ -62,12 +62,7 @@ class Zend_Paginator_SerializableLimitIterator extends LimitIterator implements 
      */
     public function serialize()
     {
-        return serialize(array(
-            'it'     => $this->getInnerIterator(),
-            'offset' => $this->_offset,
-            'count'  => $this->_count,
-            'pos'    => $this->getPosition(),
-        ));
+        return serialize($this->_specForSerialization());
     }
 
     /**
@@ -75,7 +70,61 @@ class Zend_Paginator_SerializableLimitIterator extends LimitIterator implements 
      */
     public function unserialize($data)
     {
-        $dataArr = unserialize($data);
+        $this->_restoreFromArray(unserialize($data));
+    }
+
+    /**
+     * Serialized state, in the modern engine form.
+     *
+     * `Serializable` is deprecated as of PHP 8.1; the engine stops warning
+     * about it once __serialize() exists alongside it. The legacy pair stays
+     * because the interface is published API and is what reads payloads
+     * written before this change.
+     *
+     * @return array
+     */
+    public function __serialize(): array
+    {
+        return $this->_specForSerialization();
+    }
+
+    /**
+     * Restore from the engine form produced by __serialize().
+     *
+     * @param array $data
+     * @return void
+     */
+    public function __unserialize(array $data): void
+    {
+        $this->_restoreFromArray($data);
+    }
+
+    /**
+     * The state array both serialization forms marshal.
+     *
+     * @return array
+     */
+    protected function _specForSerialization()
+    {
+        return array(
+            'it'     => $this->getInnerIterator(),
+            'offset' => $this->_offset,
+            'count'  => $this->_count,
+            'pos'    => $this->getPosition(),
+        );
+    }
+
+    /**
+     * Apply a decoded state array.
+     *
+     * Shared by unserialize() (legacy payloads) and __unserialize() (engine
+     * payloads) so the two forms cannot drift apart.
+     *
+     * @param array $dataArr
+     * @return void
+     */
+    protected function _restoreFromArray($dataArr)
+    {
         $this->__construct($dataArr['it'], $dataArr['offset'], $dataArr['count']);
         $this->seek($dataArr['pos']+$dataArr['offset']);
     }

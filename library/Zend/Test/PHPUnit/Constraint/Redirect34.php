@@ -100,7 +100,7 @@ class Zend_Test_PHPUnit_Constraint_Redirect34 extends PHPUnit_Framework_Constrai
      * @param  null|string Assertion type
      * @return bool
      */
-    public function evaluate($other, $assertType = null)
+    public function evaluate($other, $assertType = null, $variable = null, $extra = null)
     {
         if (!$other instanceof Zend_Controller_Response_Abstract) {
             require_once 'Zend/Test/PHPUnit/Constraint/Exception.php';
@@ -120,25 +120,28 @@ class Zend_Test_PHPUnit_Constraint_Redirect34 extends PHPUnit_Framework_Constrai
         $this->_assertType = $assertType;
 
         $response = $other;
-        $argv     = func_get_args();
-        $argc     = func_num_args();
+        // The extra assertion arguments are named parameters now instead of
+        // $argv[2]/$argv[3]. The guard stays an arity check rather than a
+        // null check because an explicitly-passed null is still an argument:
+        // func_num_args() counts only arguments actually supplied and is
+        // unaffected by the PHP 7 change to argument inspection.
 
         switch ($assertType) {
             case self::ASSERT_REDIRECT_TO:
-                if (3 > $argc) {
+                if (3 > func_num_args()) {
                     require_once 'Zend/Test/PHPUnit/Constraint/Exception.php';
                     throw new Zend_Test_PHPUnit_Constraint_Exception('No redirect URL provided against which to match');
                 }
-                $this->_match = $match = $argv[2];
+                $this->_match = $match = $variable;
                 return ($this->_negate)
                     ? $this->_notMatch($response, $match)
                     : $this->_match($response, $match);
             case self::ASSERT_REDIRECT_REGEX:
-                if (3 > $argc) {
+                if (3 > func_num_args()) {
                     require_once 'Zend/Test/PHPUnit/Constraint/Exception.php';
                     throw new Zend_Test_PHPUnit_Constraint_Exception('No pattern provided against which to match redirect');
                 }
-                $this->_match = $match = $argv[2];
+                $this->_match = $match = $variable;
                 return ($this->_negate)
                     ? $this->_notRegex($response, $match)
                     : $this->_regex($response, $match);

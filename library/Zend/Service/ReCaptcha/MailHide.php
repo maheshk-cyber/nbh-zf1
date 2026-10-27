@@ -36,9 +36,18 @@ class Zend_Service_ReCaptcha_MailHide extends Zend_Service_ReCaptcha
 {
     /**#@+
      * Encryption constants
+     *
+     * These were `MCRYPT_MODE_CBC` and `MCRYPT_RIJNDAEL_128`, which are
+     * constants the mcrypt extension defines — so on any PHP that has lost the
+     * extension, *reading* either constant throws Undefined constant and the
+     * class cannot be used at all, not even to reach a clean error. They are
+     * spelled out as literals here: 'cbc' and 'rijndael-128' are the values
+     * mcrypt used for them, so the encryption parameters are unchanged, and the
+     * class now fails at the mcrypt_encrypt() call in _getUrl() instead of at
+     * constant-read time.
      */
-    const ENCRYPTION_MODE = MCRYPT_MODE_CBC;
-    const ENCRYPTION_CIPHER = MCRYPT_RIJNDAEL_128;
+    const ENCRYPTION_MODE = 'cbc';
+    const ENCRYPTION_CIPHER = 'rijndael-128';
     const ENCRYPTION_BLOCK_SIZE = 16;
     const ENCRYPTION_IV = "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
     /**#@-*/

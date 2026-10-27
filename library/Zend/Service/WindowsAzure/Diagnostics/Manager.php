@@ -54,7 +54,7 @@ class Zend_Service_WindowsAzure_Diagnostics_Manager
 	 * @param Zend_Service_WindowsAzure_Storage_Blob $blobStorageClient Blob storage client
 	 * @param string $controlContainer Control container name
 	 */
-	public function __construct(Zend_Service_WindowsAzure_Storage_Blob $blobStorageClient = null, $controlContainer = 'wad-control-container')
+	public function __construct(?Zend_Service_WindowsAzure_Storage_Blob $blobStorageClient = null, $controlContainer = 'wad-control-container')
 	{
 		$this->_blobStorageClient = $blobStorageClient;
 		$this->_controlContainer = $controlContainer;
@@ -209,7 +209,7 @@ class Zend_Service_WindowsAzure_Diagnostics_Manager
 	 * @param Zend_Service_WindowsAzure_Diagnostics_ConfigurationInstance $configuration Configuration to apply
 	 * @throws Zend_Service_WindowsAzure_Diagnostics_Exception
 	 */
-	public function setConfigurationForRoleInstance($roleInstance = null, Zend_Service_WindowsAzure_Diagnostics_ConfigurationInstance $configuration)
+	public function setConfigurationForRoleInstance($roleInstance, Zend_Service_WindowsAzure_Diagnostics_ConfigurationInstance $configuration)
 	{
 		if (is_null($roleInstance)) {
 			require_once 'Zend/Service/WindowsAzure/Diagnostics/Exception.php';

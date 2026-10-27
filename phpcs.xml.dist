@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<ruleset name="nbh-zf1">
+  <description>
+    PHPCompatibility ruleset for the ZF1 port.
+
+    The compat target is PHP 8.1-8.5, not "oldest PHP we can imagine", which is
+    the part that needs configuring: PHPCompatibility is deliberately
+    conservative and cannot know which interfaces in *this* codebase extend
+    Serializable, nor whether a redundant-looking implementation is deliberate.
+
+    Both answers are "yes, and deliberately" here:
+
+      - Zend_Http_UserAgent_Device extends Serializable, so every device class
+        implements it transitively and the sniff has to be told to follow it.
+      - The Serializable implementations stay. Dropping the interface would
+        make a no-longer-serializing object silently serialize as an empty
+        O: payload instead of failing loudly, and it is published API besides.
+        __serialize()/__unserialize() are added *alongside* it so the engine
+        stops emitting the deprecation and stops routing through the
+        blocklisted-unserialize path.
+
+    tools/port-status.sh passes --standard=PHPCompatibility explicitly, so this
+    file is not picked up automatically; pass --standard=phpcs.xml.dist to use
+    it. The ledger counts therefore stay comparable across batches.
+  </description>
+
+  <rule ref="PHPCompatibility"/>
+
+  <config name="testVersion" value="8.1-8.5"/>
+
+  <rule ref="PHPCompatibility.Interfaces.RemovedSerializable">
+    <properties>
+      <property name="serializableInterfaces" type="array">
+        <element value="Zend_Http_UserAgent_Device"/>
+      </property>
+    </properties>
+  </rule>
+
+  <rule ref="PHPCompatibility.Interfaces.RemovedSerializable.RedundantSerializableImplementation">
+    <severity>0</severity>
+  </rule>
+</ruleset>

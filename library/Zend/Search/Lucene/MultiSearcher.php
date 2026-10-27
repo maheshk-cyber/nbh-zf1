@@ -48,6 +48,22 @@ class Zend_Search_Lucene_MultiSearcher implements Zend_Search_Lucene_Interface
     protected $_indices;
 
     /**
+     * Storage for the search-field and result-set-limit options.
+     *
+     * `Zend_Search_Lucene_Interface` declares the four accessors for these as
+     * *static*, so a multisearcher has to answer them without an instance.
+     * They used to read `$this->_indices`, which is a fatal error from PHP 8
+     * ("Using $this when not in object context") — it was only ever a notice
+     * before, evaluating to null, so every call threw "Indices list is empty"
+     * or silently wrote to nothing. The last indices set through
+     * addIndex()/__construct() are recorded here instead, which gives the
+     * static accessors something real to read.
+     *
+     * @var array
+     */
+    protected static $_staticIndices = array();
+
+    /**
      * Object constructor.
      *
      * @param array $indices   Arrays of indices for search
@@ -63,6 +79,8 @@ class Zend_Search_Lucene_MultiSearcher implements Zend_Search_Lucene_Interface
                 throw new Zend_Search_Lucene_Exception('sub-index objects have to implement Zend_Search_Lucene_Interface.');
             }
         }
+
+        self::$_staticIndices = $this->_indices;
     }
 
     /**
@@ -73,6 +91,7 @@ class Zend_Search_Lucene_MultiSearcher implements Zend_Search_Lucene_Interface
     public function addIndex(Zend_Search_Lucene_Interface $index)
     {
         $this->_indices[] = $index;
+        self::$_staticIndices = $this->_indices;
     }
 
 
@@ -218,7 +237,7 @@ class Zend_Search_Lucene_MultiSearcher implements Zend_Search_Lucene_Interface
      */
     public static function setDefaultSearchField($fieldName)
     {
-        foreach ($this->_indices as $index) {
+        foreach (self::$_staticIndices as $index) {
             $index->setDefaultSearchField($fieldName);
         }
     }
@@ -234,14 +253,14 @@ class Zend_Search_Lucene_MultiSearcher implements Zend_Search_Lucene_Interface
      */
     public static function getDefaultSearchField()
     {
-        if (count($this->_indices) == 0) {
+        if (count(self::$_staticIndices) == 0) {
             require_once 'Zend/Search/Lucene/Exception.php';
             throw new Zend_Search_Lucene_Exception('Indices list is empty');
         }
 
-        $defaultSearchField = reset($this->_indices)->getDefaultSearchField();
+        $defaultSearchField = reset(self::$_staticIndices)->getDefaultSearchField();
 
-        foreach ($this->_indices as $index) {
+        foreach (self::$_staticIndices as $index) {
             if ($index->getDefaultSearchField() !== $defaultSearchField) {
                 require_once 'Zend/Search/Lucene/Exception.php';
                 throw new Zend_Search_Lucene_Exception('Indices have different default search field.');
@@ -260,7 +279,7 @@ class Zend_Search_Lucene_MultiSearcher implements Zend_Search_Lucene_Interface
      */
     public static function setResultSetLimit($limit)
     {
-        foreach ($this->_indices as $index) {
+        foreach (self::$_staticIndices as $index) {
             $index->setResultSetLimit($limit);
         }
     }
@@ -275,14 +294,14 @@ class Zend_Search_Lucene_MultiSearcher implements Zend_Search_Lucene_Interface
      */
     public static function getResultSetLimit()
     {
-        if (count($this->_indices) == 0) {
+        if (count(self::$_staticIndices) == 0) {
             require_once 'Zend/Search/Lucene/Exception.php';
             throw new Zend_Search_Lucene_Exception('Indices list is empty');
         }
 
-        $defaultResultSetLimit = reset($this->_indices)->getResultSetLimit();
+        $defaultResultSetLimit = reset(self::$_staticIndices)->getResultSetLimit();
 
-        foreach ($this->_indices as $index) {
+        foreach (self::$_staticIndices as $index) {
             if ($index->getResultSetLimit() !== $defaultResultSetLimit) {
                 require_once 'Zend/Search/Lucene/Exception.php';
                 throw new Zend_Search_Lucene_Exception('Indices have different default search field.');

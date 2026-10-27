@@ -71,7 +71,7 @@ abstract class Zend_Feed_Abstract extends Zend_Feed_Element implements Iterator,
      * @return void
      * @throws Zend_Feed_Exception If loading the feed failed.
      */
-    public function __construct($uri = null, $string = null, Zend_Feed_Builder_Interface $builder = null)
+    public function __construct($uri = null, $string = null, ?Zend_Feed_Builder_Interface $builder = null)
     {
         if ($uri !== null) {
             // Retrieve the feed via HTTP
@@ -111,26 +111,20 @@ abstract class Zend_Feed_Abstract extends Zend_Feed_Element implements Iterator,
      */
     public function __wakeup()
     {
-        @ini_set('track_errors', 1);
+        error_clear_last();
         $doc = new DOMDocument;
         $doc = @Zend_Xml_Security::scan($this->_element, $doc);
-        @ini_restore('track_errors');
 
         if (!$doc) {
             // prevent the class to generate an undefined variable notice (ZF-2590)
-            if (!isset($php_errormsg)) {
-                if (function_exists('xdebug_is_enabled')) {
-                    $php_errormsg = '(error message not available, when XDebug is running)';
-                } else {
-                    $php_errormsg = '(error message not available)';
-                }
-            }
+            $error = error_get_last();
+            $errorMessage = $error === null ? '(error message not available)' : $error['message'];
 
             /**
              * @see Zend_Feed_Exception
              */
             require_once 'Zend/Feed/Exception.php';
-            throw new Zend_Feed_Exception("DOMDocument cannot parse XML: $php_errormsg");
+            throw new Zend_Feed_Exception("DOMDocument cannot parse XML: $errorMessage");
         }
 
         $this->_element = $doc;

@@ -105,6 +105,15 @@ class Zend_Validate_File_Count extends Zend_Validate_Abstract
      */
     public function __construct($options)
     {
+        // Snapshot the positional form before $options is normalised below.
+        // Since PHP 7 func_get_arg() reports the *current* value of a
+        // parameter, not the value as passed, and this constructor rewrites
+        // $options on the two lines that follow — so the old
+        // func_get_arg(0) returned array('max' => $min) instead of $min and
+        // handed setMin() an array. Taking the snapshot first is the value the
+        // caller actually passed.
+        $args = func_get_args();
+
         if ($options instanceof Zend_Config) {
             $options = $options->toArray();
         } elseif (is_string($options) || is_numeric($options)) {
@@ -114,9 +123,9 @@ class Zend_Validate_File_Count extends Zend_Validate_Abstract
             throw new Zend_Validate_Exception ('Invalid options to validator provided');
         }
 
-        if (1 < func_num_args()) {
-            $options['min'] = func_get_arg(0);
-            $options['max'] = func_get_arg(1);
+        if (1 < count($args)) {
+            $options['min'] = $args[0];
+            $options['max'] = $args[1];
         }
 
         if (isset($options['min'])) {
@@ -156,7 +165,7 @@ class Zend_Validate_File_Count extends Zend_Validate_Abstract
             throw new Zend_Validate_Exception ('Invalid options to validator provided');
         }
 
-        $min = (integer) $min;
+        $min = (int) $min;
         if (($this->_max !== null) && ($min > $this->_max)) {
             require_once 'Zend/Validate/Exception.php';
             throw new Zend_Validate_Exception("The minimum must be less than or equal to the maximum file count, but $min >"
@@ -195,7 +204,7 @@ class Zend_Validate_File_Count extends Zend_Validate_Abstract
             throw new Zend_Validate_Exception ('Invalid options to validator provided');
         }
 
-        $max = (integer) $max;
+        $max = (int) $max;
         if (($this->_min !== null) && ($max < $this->_min)) {
             require_once 'Zend/Validate/Exception.php';
             throw new Zend_Validate_Exception("The maximum must be greater than or equal to the minimum file count, but "

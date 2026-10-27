@@ -96,10 +96,8 @@ class Zend_Tool_Project_Provider_DbAdapter
 
         parse_str($dsn, $dsnVars);
 
-        // parse_str suffers when magic_quotes is enabled
-        if (get_magic_quotes_gpc()) {
-            array_walk_recursive($dsnVars, array($this, '_cleanMagicQuotesInValues'));
-        }
+        // magic_quotes_gpc was removed in PHP 5.4, so parse_str no longer
+        // needs the post-processing this branch used to perform.
 
         $dbConfigValues = array('resources' => array('db' => null));
 

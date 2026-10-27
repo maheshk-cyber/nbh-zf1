@@ -347,7 +347,9 @@ class Zend_Barcode_Renderer_Image extends Zend_Barcode_Renderer_RendererAbstract
         header("Content-Type: image/" . $this->_imageType);
         $functionName = 'image' . $this->_imageType;
         call_user_func($functionName, $this->_resource);
-        @imagedestroy($this->_resource);
+        // imagedestroy() is a no-op for GDobject images and deprecated in PHP
+        // 8.5; releasing the reference lets the object be freed.
+        unset($this->_resource);
     }
 
     /**

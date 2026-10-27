@@ -68,11 +68,12 @@ class Zend_Xml_Security
      * @throws  Zend_Xml_Exception
      * @return  SimpleXMLElement|DomDocument|boolean
      */
-    public static function scan($xml, DOMDocument $dom = null)
+    public static function scan($xml, ?DOMDocument $dom = null)
     {
-        // If running with PHP-FPM we perform an heuristic scan
-        // We cannot use libxml_disable_entity_loader because of this bug
-        // @see https://bugs.php.net/bug.php?id=64938
+        // If running with PHP-FPM we perform an heuristic scan.
+        // The libxml entity-loader workaround that used to be noted here is no
+        // longer needed: PHP 8 defaults to not resolving external entities,
+        // and this method rejects any DOCTYPE carrying entities below.
         if (self::isPhpFpm()) {
             self::heuristicScan($xml);
         }
@@ -83,7 +84,6 @@ class Zend_Xml_Security
         }
 
         if (!self::isPhpFpm()) {
-            $loadEntities = libxml_disable_entity_loader(true);
             $useInternalXmlErrors = libxml_use_internal_errors(true);
         }
 
@@ -95,9 +95,22 @@ class Zend_Xml_Security
         restore_error_handler();
 
         if (!$result) {
+            // The parse error is recorded in libxml's own buffer, not in PHP's
+            // last-error slot, so callers that report error_get_last() see
+            // nothing useful. Surface it through the PHP error channel here so
+            // every caller gets the real cause without changing its own code.
+            // The @ keeps it in the last-error slot without printing: callers
+            // already raise their own exception for this failure, and emitting
+            // a warning as well would be noise the caller did not ask for.
+            $libxmlError = libxml_get_last_error();
+            if ($libxmlError !== false && $libxmlError->message !== '') {
+                @trigger_error(
+                    'DOMDocument::loadXML(): ' . trim($libxmlError->message),
+                    E_USER_WARNING
+                );
+            }
             // Entity load to previous setting
             if (!self::isPhpFpm()) {
-                libxml_disable_entity_loader($loadEntities);
                 libxml_use_internal_errors($useInternalXmlErrors);
             }
             return false;
@@ -117,7 +130,6 @@ class Zend_Xml_Security
 
         // Entity load to previous setting
         if (!self::isPhpFpm()) {
-            libxml_disable_entity_loader($loadEntities);
             libxml_use_internal_errors($useInternalXmlErrors);
         }
 
@@ -139,7 +151,7 @@ class Zend_Xml_Security
      * @throws Zend_Xml_Exception
      * @return SimpleXMLElement|DomDocument
      */
-    public static function scanFile($file, DOMDocument $dom = null)
+    public static function scanFile($file, ?DOMDocument $dom = null)
     {
         if (!file_exists($file)) {
             require_once 'Exception.php';
@@ -169,7 +181,7 @@ class Zend_Xml_Security
         $isVulnerableVersion = (
             version_compare(PHP_VERSION, '5.5.22', 'lt')
             || (
-                version_compare(PHP_VERSION, '5.6', 'gte')
+                version_compare(PHP_VERSION, '5.6', 'ge')
                 && version_compare(PHP_VERSION, '5.6.6', 'lt')
             )
         );

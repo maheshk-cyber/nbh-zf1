@@ -126,15 +126,7 @@ abstract class Zend_Http_UserAgent_AbstractDevice
      */
     public function serialize()
     {
-        $spec = array(
-            '_aFeatures'      => $this->_aFeatures,
-            '_aGroup'         => $this->_aGroup,
-            '_browser'        => $this->_browser,
-            '_browserVersion' => $this->_browserVersion,
-            '_userAgent'      => $this->_userAgent,
-            '_images'         => $this->_images,
-        );
-        return serialize($spec);
+        return serialize($this->_specForSerialization());
     }
 
     /**
@@ -147,6 +139,49 @@ abstract class Zend_Http_UserAgent_AbstractDevice
     {
         $spec = unserialize($serialized);
         $this->_restoreFromArray($spec);
+    }
+
+    /**
+     * Serialized state, in the modern engine form.
+     *
+     * `Serializable` is deprecated as of PHP 8.1 and the engine stops warning
+     * about it only once __serialize() exists alongside it. The legacy pair
+     * stays because the interface is published API and is what reads payloads
+     * written before this change.
+     *
+     * @return array
+     */
+    public function __serialize(): array
+    {
+        return $this->_specForSerialization();
+    }
+
+    /**
+     * Restore from the engine form produced by __serialize().
+     *
+     * @param  array $spec
+     * @return void
+     */
+    public function __unserialize(array $spec): void
+    {
+        $this->_restoreFromArray($spec);
+    }
+
+    /**
+     * The state array both serialization forms marshal.
+     *
+     * @return array
+     */
+    protected function _specForSerialization()
+    {
+        return array(
+            '_aFeatures'      => $this->_aFeatures,
+            '_aGroup'         => $this->_aGroup,
+            '_browser'        => $this->_browser,
+            '_browserVersion' => $this->_browserVersion,
+            '_userAgent'      => $this->_userAgent,
+            '_images'         => $this->_images,
+        );
     }
 
     /**
