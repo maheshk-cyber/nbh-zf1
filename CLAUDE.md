@@ -37,6 +37,17 @@ to resurrect it; `tools/smoke.php` is the regression check instead.
    established shape (what changed, why, what was verified). The user is the
    sole author: **never add a `Co-Authored-By:` trailer.**
 
+## Cutting a release
+
+Follow `RELEASING.md`. The parts that are easy to get wrong: the git tag
+carries a `v` prefix (`v1.12.22`) and `Zend_Version::VERSION` does not
+(`1.12.22`), because `compareVersion()` feeds that constant to
+`version_compare()`. `composer.json` deliberately has **no** `"version"` key —
+Composer derives the version from the tag.
+
+`1.12.x` is the only active branch while the port is unstable; there are no
+development branches yet. See *Open decisions* in `PORTING.md`.
+
 ## Conventions
 
 - Preserve the public `Zend_*` API. These fixes are compatibility shims, not

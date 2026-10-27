@@ -22,6 +22,9 @@ Then pick the first **not-started** item from *Work queue* below and go.
 When a batch is finished: run `tools/port-status.sh`, update *Work queue* and
 *Decision log*, and commit — the commit message carries the same summary.
 
+To cut a tagged release, follow [`RELEASING.md`](RELEASING.md) — it covers the
+tag/constant/composer version split, which is easy to get wrong.
+
 ---
 
 ## Verification
