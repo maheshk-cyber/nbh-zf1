@@ -12,8 +12,19 @@ This file records *what changed and why*; that file records *where we are*.
 ---
 
 ## [Unreleased]
+
+## [1.12.21] - 2026-10-26
 Baseline: Zend Framework 1.12.20 (upstream EOL), retargeted at PHP 8.1+ and
 verified syntax-clean through PHP 8.5.
+
+First tagged release of the port. `Zend_Version::VERSION` moves from the
+upstream `1.12.21dev` to `1.12.21`, and the package is now installable from
+Composer as `maheshk-cyber/nbh-zf1` at `^1.12`.
+
+Versioning follows upstream's 1.12 line rather than starting a new major: the
+public `Zend_*` API is preserved, nothing was removed, and the components that
+cannot work on PHP 8 are documented-unavailable rather than deleted. That is a
+patch-level contract, so it gets a patch-level number.
 
 ### Changed — repository history
 

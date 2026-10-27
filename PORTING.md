@@ -286,6 +286,32 @@ These change the package's contract or scope, so they are not fixed unilaterally
    `Zend_Serializer_Adapter_Wddx`, the `oci8`/`mysql_*` helpers cannot work
    regardless of syntax. Current stance: leave in tree, document, do not chase
    phpcs errors in them.
+4. **Version scheme — RESOLVED (`1.12.x` line, first tag `v1.12.21`).**
+   The port continues upstream's 1.12 line rather than starting a new major.
+   Reason: the public `Zend_*` API is preserved, no classes are removed, and
+   the components that cannot work on PHP 8 are documented-unavailable rather
+   than deleted. Under semver that is a patch-level contract change, so it gets
+   a patch-level number, and `library/Zend/Version.php` already carried upstream's
+   `1.12.21dev` — 1.12.21 is where that line was heading.
+
+   Consequences for future work:
+
+   - `master` stays the untouched archived upstream at `136735e7`. It is not
+     Composer-installable (upstream shipped via `include_path`; `composer.json`
+     arrives in the port's first commit, `83220807`).
+   - `1.12.x` is the release line; `star-php85` is the active dev branch and
+     merges into it at release time.
+   - The tag is `v1.12.21` with the `v` prefix; `Zend_Version::VERSION` carries
+     the bare `1.12.21`, because `compareVersion()` feeds that constant to
+     `version_compare()` and a `v` prefix would change its result.
+   - `composer.json` deliberately has **no** `"version"` key — Composer derives
+     the version from the tag, and a hardcoded copy drifts.
+   - The package name is `maheshk-cyber/nbh-zf1`, not
+     `zendframework/zendframework1`, so a `1.12.21` that upstream never cut
+     cannot be confused with an upstream release.
+
+   If the fork is later deliberately broken away from the ZF1 API, that is a
+   new major under a new branch, not a continuation of `1.12.x`.
 
 ---
 

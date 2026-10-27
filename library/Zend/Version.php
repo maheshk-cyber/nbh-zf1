@@ -31,8 +31,13 @@ final class Zend_Version
 {
     /**
      * Zend Framework version identification - see compareVersion()
+     *
+     * This port packages archived upstream 1.12.20 and carries the upstream
+     * 1.12.21dev tree forward, so 1.12.21 is the number this line was already
+     * heading for. Versioning is a package-contract decision — see "Open
+     * decisions" in PORTING.md.
      */
-    const VERSION = '1.12.21dev';
+    const VERSION = '1.12.21';
 
     /**
      * The latest stable version Zend Framework available
