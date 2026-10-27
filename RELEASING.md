@@ -87,12 +87,40 @@ git push origin 1.12.x
 git push origin v1.12.23
 ```
 
-**8. Confirm they agree.** Cheap, and catches a tag made on the wrong commit:
+**8. Confirm the tag points at the release commit** — the one carrying the
+version bump, which is what `git rev-parse HEAD` returns at this moment:
 
 ```bash
 git rev-list -n1 v1.12.23      # must equal:
-git rev-parse origin/1.12.x
+git rev-parse HEAD             # ...at the moment you tag
 ```
+
+## The tag does not track the branch head
+
+After a release, `1.12.x` keeps moving and the tag does not. Expect this:
+
+```
+v1.12.22 -> e23e3fb9   the release: version bump + shipped code
+1.12.x   -> 8bfc47c7   head, N commits later — docs, ledger refreshes
+```
+
+That is correct, not drift. **The tag marks the commit that carries the version
+bump**; anything committed afterwards — `RELEASING.md`, `PORTING.md` refreshes,
+`CLAUDE.md` edits — is untagged by design, because none of it ships. ZF1
+consumers load `library/`, and documentation is not in it.
+
+Two things not to do in response to this gap:
+
+- **Do not move the tag forward.** Retagging a published release rewrites what
+  Composer resolves for anyone pinned to it, and buys nothing: the next commit
+  reopens the same gap, so it never converges.
+- **Do not cut a release for docs.** A release needs its own version bump, which
+  is itself a commit, which puts the head ahead again. The numbers inflate and
+  every tag ends up matching no meaningful change.
+
+The gap closes on its own at the next real release, when a new tag is cut from
+whatever the head has become.
+
 
 ## Consuming the release
 
